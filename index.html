@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="or" class="h-full bg-slate-50">
+<html lang="or" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,6 +7,18 @@
   
   <!-- Tailwind CSS & Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#eef2ff', 500: '#6366f1', 900: '#1e1b4b', 950: '#0f172a' }
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -19,15 +31,16 @@
   <style>
     body { font-family: 'Inter', 'Noto Sans Oriya', sans-serif; -webkit-tap-highlight-color: transparent; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="h-full flex flex-col text-slate-800 antialiased custom-scrollbar selection:bg-amber-200">
+<body class="h-full flex flex-col bg-white text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased custom-scrollbar transition-colors duration-200">
 
-  <!-- Toast Notification System -->
+  <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed top-3 right-3 left-3 sm:left-auto z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Global Header -->
@@ -44,20 +57,26 @@
         </div>
       </div>
 
-      <!-- Navigation & Auth Actions -->
+      <!-- Actions, Dark/Light Mode & Auth Controls -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold animate-pulse">
+        
+        <!-- Dark/Light Mode Toggle Button -->
+        <button onclick="toggleTheme()" id="themeToggleBtn" class="p-1.5 sm:p-2 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-700 text-amber-400 transition" title="Toggle Dark/Light Mode">
+          <i id="themeIcon" class="fa-solid fa-moon text-xs sm:text-sm"></i>
+        </button>
+
+        <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2 py-1 rounded-lg text-[11px] font-mono font-bold animate-pulse">
           <i class="fa-solid fa-stopwatch"></i>
           <span id="navTimerVal">00:00</span>
         </div>
 
         <div id="navUserBadge" class="hidden flex items-center gap-1.5 bg-indigo-900 border border-indigo-700 px-2.5 py-1 rounded-lg text-xs">
           <i class="fa-solid fa-user-graduate text-amber-400 text-xs"></i>
-          <span id="navUserName" class="font-bold text-white text-xs truncate max-w-[100px] sm:max-w-[150px]"></span>
+          <span id="navUserName" class="font-bold text-white text-xs truncate max-w-[90px] sm:max-w-[140px]"></span>
           <span id="navUserType" class="px-1.5 py-0.5 rounded text-[9px] font-extrabold hidden sm:inline-block"></span>
         </div>
 
-        <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs bg-indigo-800 hover:bg-indigo-700 border border-indigo-600 px-2.5 sm:px-3.5 py-1.5 rounded-lg font-bold text-white transition">
+        <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs bg-indigo-800 hover:bg-indigo-700 border border-indigo-600 px-2.5 sm:px-3 py-1.5 rounded-lg font-bold text-white transition">
           Login
         </button>
         <button id="navRegBtn" onclick="router.navigate('register-free')" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition">
@@ -66,7 +85,7 @@
         <button id="navAdmBtn" onclick="router.navigate('admission')" class="text-xs bg-amber-500 hover:bg-amber-400 text-indigo-950 px-2.5 sm:px-3 py-1.5 rounded-lg font-extrabold transition">
           Admission
         </button>
-        <button id="navLogoutBtn" onclick="auth.logout()" class="hidden text-xs bg-slate-800 hover:bg-rose-900 border border-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg font-bold transition">
+        <button id="navLogoutBtn" onclick="auth.logout()" class="hidden text-xs bg-slate-800 hover:bg-rose-900 border border-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg font-bold transition" title="Log Out">
           <i class="fa-solid fa-power-off"></i>
         </button>
         <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2 py-1.5 rounded-lg transition" title="Admin Control Room">
@@ -81,27 +100,27 @@
 
   <!-- Confirmation Modal -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white max-w-sm w-full rounded-2xl shadow-2xl border border-slate-100 p-5 text-center">
-      <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-lg">
+    <div class="bg-white dark:bg-slate-900 max-w-sm w-full rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-5 text-center">
+      <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3 text-lg">
         <i class="fa-solid fa-triangle-exclamation"></i>
       </div>
-      <h3 id="confirmTitle" class="text-base font-bold text-slate-900 mb-1">Confirm Action</h3>
-      <p id="confirmMsg" class="text-xs text-slate-600 mb-5 leading-relaxed"></p>
+      <h3 id="confirmTitle" class="text-base font-bold text-slate-900 dark:text-white mb-1">Confirm Action</h3>
+      <p id="confirmMsg" class="text-xs text-slate-600 dark:text-slate-400 mb-5 leading-relaxed"></p>
       <div class="flex gap-2">
-        <button id="confirmCancelBtn" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Cancel</button>
+        <button id="confirmCancelBtn" class="flex-1 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs transition">Cancel</button>
         <button id="confirmOkBtn" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">Confirm</button>
       </div>
     </div>
   </div>
 
   <!-- Footer with Social Links -->
-  <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-xs text-center">
+  <footer class="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 py-6 border-t border-slate-200 dark:border-slate-800 text-xs text-center">
     <div class="max-w-7xl mx-auto px-4 space-y-3">
       <div class="flex justify-center gap-5 text-sm">
-        <a href="https://youtube.com/@satyapeethofficial?si=CYEuHtru53hpw9HP" target="_blank" rel="noopener noreferrer" class="text-rose-400 hover:text-rose-300 transition flex items-center gap-1.5 font-bold">
+        <a href="https://youtube.com/@satyapeethofficial?si=CYEuHtru53hpw9HP" target="_blank" rel="noopener noreferrer" class="text-rose-600 dark:text-rose-400 hover:opacity-80 transition flex items-center gap-1.5 font-bold">
           <i class="fa-brands fa-youtube text-base"></i> YouTube Channel
         </a>
-        <a href="https://www.instagram.com/satyapeeth_?igsi=eHh5d3pia2RwNnVo" target="_blank" rel="noopener noreferrer" class="text-pink-400 hover:text-pink-300 transition flex items-center gap-1.5 font-bold">
+        <a href="https://www.instagram.com/satyapeeth_?igsi=eHh5d3pia2RwNnVo" target="_blank" rel="noopener noreferrer" class="text-pink-600 dark:text-pink-400 hover:opacity-80 transition flex items-center gap-1.5 font-bold">
           <i class="fa-brands fa-instagram text-base"></i> Instagram Page
         </a>
       </div>
@@ -111,7 +130,7 @@
 
   <script>
     /**
-     * FIREBASE CONFIGURATION & REALTIME CLOUD DB
+     * FIREBASE CONFIGURATION
      */
     const firebaseConfig = {
       apiKey: "AIzaSyClZPVVbeaz43l-SRYSRE0O504Lc4vEMLE",
@@ -127,12 +146,29 @@
     const firestore = firebase.firestore();
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_cloud_student',
-      AUTH_ADMIN: 'sp_cloud_admin',
-      CLASSES: 'sp_classes_cache'
+      AUTH_STUDENT: 'sp_persistent_student_v2',
+      AUTH_ADMIN: 'sp_persistent_admin_v2',
+      CLASSES: 'sp_classes_cache',
+      THEME: 'sp_theme_pref'
     };
 
-    const SEED_CLASSES = ["10", "9", "8", "7", "6"];
+    // Dark/Light Theme Manager (Default is Light)
+    function initTheme() {
+      const savedTheme = localStorage.getItem(DB_KEYS.THEME) || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon').className = 'fa-solid fa-sun text-amber-400 text-xs sm:text-sm';
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('themeIcon').className = 'fa-solid fa-moon text-amber-400 text-xs sm:text-sm';
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem(DB_KEYS.THEME, isDark ? 'dark' : 'light');
+      document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400 text-xs sm:text-sm' : 'fa-solid fa-moon text-amber-400 text-xs sm:text-sm';
+    }
 
     // In-memory Realtime Cloud Cache
     let cloudState = {
@@ -156,7 +192,7 @@
       notes: []
     };
 
-    // Initialize Realtime Listeners with Cloud Firestore
+    // Initialize Realtime Listeners
     function initRealtimeSync() {
       firestore.collection("students").onSnapshot(snapshot => {
         cloudState.students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -183,6 +219,10 @@
 
       firestore.collection("questions").onSnapshot(snapshot => {
         cloudState.questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      });
+
+      firestore.collection("notes").onSnapshot(snapshot => {
+        cloudState.notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       });
     }
 
@@ -222,10 +262,14 @@
       cancelBtn.onclick = cleanup;
     }
 
-    // Authentication Controller
+    // Persistent Auth Controller (Never logs out unless clicked)
     const auth = {
-      getStudent: () => JSON.parse(localStorage.getItem(DB_KEYS.AUTH_STUDENT)),
-      getAdmin: () => JSON.parse(localStorage.getItem(DB_KEYS.AUTH_ADMIN)),
+      getStudent: () => {
+        try { return JSON.parse(localStorage.getItem(DB_KEYS.AUTH_STUDENT)); } catch (e) { return null; }
+      },
+      getAdmin: () => {
+        try { return JSON.parse(localStorage.getItem(DB_KEYS.AUTH_ADMIN)); } catch (e) { return null; }
+      },
       isGuest: () => localStorage.getItem('sp_guest_flag') === 'true',
       setStudent: (data) => {
         localStorage.removeItem('sp_guest_flag');
@@ -233,12 +277,14 @@
       },
       setAdmin: (data) => localStorage.setItem(DB_KEYS.AUTH_ADMIN, JSON.stringify(data)),
       logout: () => {
-        localStorage.removeItem(DB_KEYS.AUTH_STUDENT);
-        localStorage.removeItem(DB_KEYS.AUTH_ADMIN);
-        localStorage.removeItem('sp_guest_flag');
-        router.updateHeader();
-        toast('Logged Out', 'Session closed successfully.', 'info');
-        router.navigate('home');
+        confirmDialog('Log Out', 'Are you sure you want to log out from Satyapeeth?', () => {
+          localStorage.removeItem(DB_KEYS.AUTH_STUDENT);
+          localStorage.removeItem(DB_KEYS.AUTH_ADMIN);
+          localStorage.removeItem('sp_guest_flag');
+          router.updateHeader();
+          toast('Logged Out', 'Session closed successfully.', 'info');
+          router.navigate('home');
+        });
       }
     };
 
@@ -313,7 +359,7 @@
           return router.navigate('admin-auth');
         }
         if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'notes-view'].includes(viewName) && !auth.getStudent()) {
-          toast('Login Required', 'Please login to continue.', 'warning');
+          toast('Login Required', 'Please sign in to continue.', 'warning');
           return router.navigate('login');
         }
 
@@ -334,6 +380,8 @@
             app.innerHTML = views.adminDashboard(params.tab || 'html-upload');
             if ((params.tab || 'html-upload') === 'html-upload') {
               setTimeout(updateImporterSubjects, 50);
+            } else if ((params.tab || 'html-upload') === 'notes-admin') {
+              setTimeout(updateNotesSubjects, 50);
             }
             break;
           default: app.innerHTML = views.home();
@@ -350,10 +398,10 @@
               BSE Odisha Board Curriculum (Class 6 - 10)
             </span>
             <h1 class="text-2xl sm:text-4xl font-black mt-3 leading-tight">
-              Satyapeeth Online CBT & Smart Mock Portal
+              Satyapeeth Online CBT & Smart Learning Portal
             </h1>
             <p class="text-indigo-200 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed">
-              Official chapter-wise practice tests with instant Odia & English explanations. Register for free mock access or apply for full admission.
+              Official chapter-wise practice tests with instant Odia & English explanations, interactive mock exams, and complete revision notes.
             </p>
             <div class="mt-5 flex flex-wrap gap-2.5 justify-center sm:justify-start">
               <button onclick="router.navigate('admission')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black px-4 py-2.5 rounded-xl shadow text-xs">
@@ -362,40 +410,40 @@
               <button onclick="router.navigate('register-free')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl shadow text-xs">
                 Free Mock Register
               </button>
-              <button onclick="guestLogin()" class="bg-indigo-900 border border-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs">
+              <button onclick="guestLogin()" class="bg-indigo-900/80 border border-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs">
                 Guest Demo
               </button>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-              <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg font-bold">
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+              <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-stopwatch"></i>
               </div>
-              <h3 class="font-bold text-slate-900 text-sm">Real CBT Mock Engine</h3>
-              <p class="text-xs text-slate-500 leading-relaxed">Timed mock exams without answers revealed during the test. Detailed scorecards provided at the end.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Real CBT Mock Engine</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Timed mock exams without answers revealed during the test. Detailed scorecards provided at the end.</p>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg font-bold">
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-bolt-lightning"></i>
               </div>
-              <h3 class="font-bold text-slate-900 text-sm">Interactive Practice Mode</h3>
-              <p class="text-xs text-slate-500 leading-relaxed">Instant correct/incorrect feedback with bilingual Odia & English concept clarification.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Interactive Practice Mode</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Instant correct/incorrect feedback with bilingual Odia & English concept clarification.</p>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-              <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg font-bold">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+              <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold">
+                <i class="fa-solid fa-book-bookmark"></i>
               </div>
-              <h3 class="font-bold text-slate-900 text-sm">Cloud Realtime Sync</h3>
-              <p class="text-xs text-slate-500 leading-relaxed">Powered by Firebase Firestore. Mobile admissions and registrations sync directly with Admin.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Chapter Revision Notes</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Complete syllabus notes curated by expert educators, uploaded directly from the Admin suite.</p>
             </div>
           </div>
 
           <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-5 sm:p-6 rounded-3xl border border-indigo-900/60 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="text-center sm:text-left space-y-1">
               <h4 class="font-black text-base text-amber-400">Join Official Satyapeeth Channels</h4>
-              <p class="text-xs text-slate-300">Watch daily lessons and get study material on our YouTube & Instagram.</p>
+              <p class="text-xs text-slate-300">Watch video lessons and join live doubt clearing sessions.</p>
             </div>
             <div class="flex gap-2.5">
               <a href="https://youtube.com/@satyapeethofficial?si=CYEuHtru53hpw9HP" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
@@ -410,21 +458,21 @@
       `,
 
       registerFree: () => `
-        <div class="max-w-md mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-4">
+        <div class="max-w-md mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
           <div class="text-center">
-            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">Free Registration</span>
-            <h2 class="text-xl font-black text-slate-900 mt-1">Student Mock Registration</h2>
-            <p class="text-[11px] text-slate-500">Apply for your verified mock credentials.</p>
+            <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full uppercase">Free Mock Pass</span>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Registration</h2>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Apply for your verified mock test credentials.</p>
           </div>
           <form onsubmit="handleRegistrationSubmit(event)" class="space-y-3">
             <div>
-              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Student Full Name *</label>
-              <input type="text" id="regName" required placeholder="e.g. Subham Dash" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none focus:border-emerald-600">
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Student Full Name *</label>
+              <input type="text" id="regName" required placeholder="e.g. Subham Dash" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-emerald-600 text-slate-900 dark:text-white">
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Class *</label>
-                <select id="regClass" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold outline-none">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class *</label>
+                <select id="regClass" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none text-slate-900 dark:text-white">
                   <option value="10">Class 10</option>
                   <option value="9">Class 9</option>
                   <option value="8">Class 8</option>
@@ -433,13 +481,13 @@
                 </select>
               </div>
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Mobile / WhatsApp *</label>
-                <input type="tel" id="regPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Mobile / WhatsApp *</label>
+                <input type="tel" id="regPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Email Address *</label>
-              <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Email Address *</label>
+              <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
             </div>
             <button type="submit" id="regSubmitBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
               Submit to Cloud Server
@@ -449,25 +497,25 @@
       `,
 
       admission: () => `
-        <div class="max-w-md mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-4">
+        <div class="max-w-md mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
           <div class="text-center">
-            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full uppercase">Full Access</span>
-            <h2 class="text-xl font-black text-slate-900 mt-1">Student Admission Form</h2>
-            <p class="text-[11px] text-slate-500">Access complete notes and mock exams.</p>
+            <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full uppercase">All Access Pass</span>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Admission Form</h2>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Unlock full chapter revision notes & unlimited mock tests.</p>
           </div>
           <form onsubmit="handleAdmissionSubmit(event)" class="space-y-3">
             <div>
-              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Student Full Name *</label>
-              <input type="text" id="admName" required placeholder="e.g. Priyaranjan Mohapatra" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none focus:border-amber-500">
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Student Full Name *</label>
+              <input type="text" id="admName" required placeholder="e.g. Priyaranjan Mohapatra" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-amber-500 text-slate-900 dark:text-white">
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Guardian Name *</label>
-                <input type="text" id="admGuardian" required placeholder="Father/Mother" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Guardian Name *</label>
+                <input type="text" id="admGuardian" required placeholder="Father/Mother" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
               </div>
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Class *</label>
-                <select id="admClass" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold outline-none">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class *</label>
+                <select id="admClass" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none text-slate-900 dark:text-white">
                   <option value="10">Class 10</option>
                   <option value="9">Class 9</option>
                   <option value="8">Class 8</option>
@@ -478,17 +526,17 @@
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Mobile / WhatsApp *</label>
-                <input type="tel" id="admPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Mobile / WhatsApp *</label>
+                <input type="tel" id="admPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
               </div>
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Email *</label>
-                <input type="email" id="admEmail" required placeholder="email@gmail.com" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Email *</label>
+                <input type="email" id="admEmail" required placeholder="email@gmail.com" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
               </div>
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">School Name *</label>
-              <input type="text" id="admSchool" required placeholder="School Name" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">School Name *</label>
+              <input type="text" id="admSchool" required placeholder="School Name" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
             </div>
             <button type="submit" id="admSubmitBtn" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
               Submit Cloud Admission
@@ -498,27 +546,27 @@
       `,
 
       login: () => `
-        <div class="max-w-sm mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-5">
+        <div class="max-w-sm mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-5">
           <div class="text-center">
-            <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full uppercase">Student Portal</span>
-            <h2 class="text-xl font-black text-slate-900 mt-1">Student Sign In</h2>
-            <p class="text-[11px] text-slate-500">Sign in with credentials approved by Satyapeeth Admin.</p>
+            <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 rounded-full uppercase">Student Portal</span>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Sign In</h2>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Sign in with credentials approved by Satyapeeth Admin.</p>
           </div>
           <form onsubmit="handleStudentLogin(event)" class="space-y-3">
             <div>
-              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Mobile / Student ID</label>
-              <input type="text" id="loginUser" required placeholder="Enter Mobile Number" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none focus:border-indigo-600">
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Mobile / Student ID</label>
+              <input type="text" id="loginUser" required placeholder="Enter Mobile Number or ID" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-600 text-slate-900 dark:text-white">
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Password</label>
-              <input type="password" id="loginPass" required placeholder="Enter Password" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none focus:border-indigo-600">
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Password</label>
+              <input type="password" id="loginPass" required placeholder="Enter Password" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-600 text-slate-900 dark:text-white">
             </div>
             <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition shadow">
-              Authenticate & Open
+              Authenticate & Stay Logged In
             </button>
           </form>
-          <div class="pt-3 border-t text-center">
-            <button onclick="guestLogin()" class="text-amber-600 font-bold text-xs hover:underline">Use Free Guest Demo</button>
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+            <button onclick="guestLogin()" class="text-amber-600 dark:text-amber-400 font-bold text-xs hover:underline">Use Free Guest Demo</button>
           </div>
         </div>
       `,
@@ -540,24 +588,24 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+              <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl font-bold">
                   <i class="fa-solid fa-book-open"></i>
                 </div>
-                <h3 class="text-base font-bold text-slate-900">Class ${student.class} Mock Tests</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">Attempt chapter-wise objective exams in CBT or Practice mode.</p>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Class ${student.class} Mock Tests</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Attempt chapter-wise objective exams in CBT or Practice mode.</p>
                 <button onclick="router.navigate('subject-select')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">
                   Start Mock Tests &rarr;
                 </button>
               </div>
 
-              <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div class="w-10 h-10 rounded-xl ${hasNotesAccess ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-400'} flex items-center justify-center text-xl font-bold">
+              <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                <div class="w-10 h-10 rounded-xl ${hasNotesAccess ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} flex items-center justify-center text-xl font-bold">
                   <i class="fa-solid fa-file-lines"></i>
                 </div>
-                <h3 class="text-base font-bold text-slate-900">Revision Notes</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">Full theory revision notes and summaries prepared for BSE curriculum.</p>
-                <button onclick="${hasNotesAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-2.5 ${hasNotesAccess ? 'bg-amber-500 text-indigo-950 font-black' : 'bg-slate-100 text-slate-600 font-bold'} rounded-xl text-xs transition">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Revision Notes</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Full theory revision notes and summaries prepared for BSE curriculum.</p>
+                <button onclick="${hasNotesAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-2.5 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold'} rounded-xl text-xs transition">
                   ${hasNotesAccess ? 'View Notes' : 'Unlock Notes 🔒'} &rarr;
                 </button>
               </div>
@@ -572,24 +620,24 @@
 
         return `
           <div class="space-y-4">
-            <button onclick="router.navigate('student-dashboard')" class="text-xs text-indigo-600 font-bold hover:underline">
+            <button onclick="router.navigate('student-dashboard')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
               &larr; Back to Dashboard
             </button>
-            <h2 class="text-xl font-black text-slate-900">Class ${student.class} Subjects</h2>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white">Class ${student.class} Subjects</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               ${subjects.map(sub => `
-                <div onclick="router.navigate('topic-select', { subjectId: '${sub.id}' })" class="bg-white p-4 rounded-2xl border border-slate-200 hover:border-indigo-600 hover:shadow cursor-pointer transition flex items-center justify-between">
+                <div onclick="router.navigate('topic-select', { subjectId: '${sub.id}' })" class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-600 dark:hover:border-indigo-500 hover:shadow cursor-pointer transition flex items-center justify-between">
                   <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
                       <i class="fa-solid fa-book"></i>
                     </div>
                     <div>
-                      <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${sub.name}</h4>
+                      <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">${sub.name}</h4>
                       <span class="text-[10px] text-slate-400">Odisha Board</span>
                     </div>
                   </div>
-                  <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+                  <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-600 text-xs"></i>
                 </div>
               `).join('')}
             </div>
@@ -606,43 +654,47 @@
 
         return `
           <div class="space-y-4">
-            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 font-bold hover:underline">
+            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
               &larr; Back to Subjects
             </button>
-            <h2 class="text-lg sm:text-xl font-black text-slate-900">${subject ? subject.name : 'Chapters'}</h2>
+            <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">${subject ? subject.name : 'Chapters'}</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               ${topics.length > 0 ? topics.map((top, idx) => {
                 const qCount = cloudState.questions.filter(q => q.topicId === top.id).length;
+                const hasNote = cloudState.notes.some(n => n.topicId === top.id);
                 const isLocked = isGuest && idx > 0;
 
                 return `
-                  <div class="bg-white p-4 rounded-2xl border ${isLocked ? 'border-slate-200 opacity-70 bg-slate-50' : 'border-slate-200'} shadow-sm space-y-3">
+                  <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border ${isLocked ? 'border-slate-200 dark:border-slate-800 opacity-70 bg-slate-50 dark:bg-slate-950' : 'border-slate-200 dark:border-slate-800'} shadow-sm space-y-3">
                     <div class="flex items-start justify-between gap-2">
                       <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-xs">
+                        <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center font-bold text-xs">
                           ${idx + 1}
                         </div>
                         <div>
-                          <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${top.name}</h4>
-                          <span class="text-[10px] text-indigo-600 font-semibold">${qCount} Questions Loaded</span>
+                          <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">${top.name}</h4>
+                          <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">${qCount} Questions</span>
+                            ${hasNote ? '<span class="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded font-bold">Notes Ready</span>' : ''}
+                          </div>
                         </div>
                       </div>
-                      ${isLocked ? `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 rounded"><i class="fa-solid fa-lock"></i> Locked</span>` : ''}
+                      ${isLocked ? `<span class="bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 text-[9px] font-bold px-1.5 py-0.2 rounded"><i class="fa-solid fa-lock"></i> Locked</span>` : ''}
                     </div>
 
-                    <div class="flex gap-2 pt-2 border-t border-slate-100">
-                      <button onclick="${isLocked ? `showGuestLockPrompt()` : `router.navigate('mode-select', { subjectId: '${subjectId}', topicId: '${top.id}' })`}" class="flex-1 py-1.5 bg-indigo-600 text-white font-bold text-xs rounded-xl transition">
+                    <div class="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <button onclick="${isLocked ? `showGuestLockPrompt()` : `router.navigate('mode-select', { subjectId: '${subjectId}', topicId: '${top.id}' })`}" class="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">
                         Mock Test
                       </button>
-                      <button onclick="${hasNotesAccess ? `router.navigate('notes-view', { topicId: '${top.id}' })` : `showNotesLockPrompt()`}" class="flex-1 py-1.5 ${hasNotesAccess ? 'bg-amber-500 text-indigo-950 font-bold' : 'bg-slate-100 text-slate-500'} text-xs rounded-xl transition">
+                      <button onclick="${hasNotesAccess ? `router.navigate('notes-view', { topicId: '${top.id}' })` : `showNotesLockPrompt()`}" class="flex-1 py-1.5 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'} text-xs rounded-xl transition">
                         Notes ${!hasNotesAccess ? '🔒' : ''}
                       </button>
                     </div>
                   </div>
                 `;
               }).join('') : `
-                <div class="col-span-full bg-white p-6 rounded-2xl text-center text-slate-400 text-xs">
+                <div class="col-span-full bg-white dark:bg-slate-900 p-6 rounded-2xl text-center text-slate-400 text-xs border border-slate-200 dark:border-slate-800">
                   No chapters uploaded under this subject yet.
                 </div>
               `}
@@ -655,20 +707,20 @@
         const topic = cloudState.topics.find(t => t.id === topicId);
         return `
           <div class="max-w-md mx-auto space-y-4">
-            <button onclick="router.navigate('topic-select', { subjectId: '${subjectId}' })" class="text-xs text-indigo-600 font-bold hover:underline">
+            <button onclick="router.navigate('topic-select', { subjectId: '${subjectId}' })" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
               &larr; Back to Chapters
             </button>
-            <div class="bg-white p-4 rounded-2xl border text-center">
-              <h2 class="text-base font-black text-slate-900">${topic ? topic.name : 'Assessment'}</h2>
-              <p class="text-[11px] text-slate-500">Both modes contain identical updated questions.</p>
+            <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
+              <h2 class="text-base font-black text-slate-900 dark:text-white">${topic ? topic.name : 'Assessment'}</h2>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Choose your preferred mode to start.</p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-indigo-950 text-white p-5 rounded-2xl cursor-pointer hover:bg-indigo-900 transition text-center space-y-2">
+              <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-indigo-950 text-white p-5 rounded-2xl cursor-pointer hover:bg-indigo-900 transition text-center space-y-2 border border-indigo-900 shadow">
                 <i class="fa-solid fa-stopwatch text-2xl text-amber-400"></i>
                 <h3 class="font-bold text-sm">Exam CBT Mode</h3>
                 <p class="text-[10px] text-indigo-200">Timed Exam Without Answers Shown</p>
               </div>
-              <div onclick="startTestEngine('${subjectId}', '${topicId}', 'practice')" class="bg-emerald-700 text-white p-5 rounded-2xl cursor-pointer hover:bg-emerald-600 transition text-center space-y-2">
+              <div onclick="startTestEngine('${subjectId}', '${topicId}', 'practice')" class="bg-emerald-700 text-white p-5 rounded-2xl cursor-pointer hover:bg-emerald-600 transition text-center space-y-2 border border-emerald-800 shadow">
                 <i class="fa-solid fa-bolt text-2xl text-amber-300"></i>
                 <h3 class="font-bold text-sm">Practice Mode</h3>
                 <p class="text-[10px] text-emerald-100">Instant Answers & Explanations</p>
@@ -680,30 +732,30 @@
 
       testScreen: () => `
         <div class="max-w-2xl mx-auto space-y-4">
-          <div class="bg-white p-3 rounded-xl border flex justify-between items-center text-xs">
+          <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
             <span id="testMetaMode" class="font-bold uppercase px-2 py-0.5 rounded text-[10px]"></span>
-            <span class="font-mono font-bold text-slate-500">Q: <span id="testMetaProgress" class="text-indigo-600 font-bold">1 / 1</span></span>
+            <span class="font-mono font-bold text-slate-500 dark:text-slate-400">Q: <span id="testMetaProgress" class="text-indigo-600 dark:text-indigo-400 font-bold">1 / 1</span></span>
           </div>
-          <div class="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
+          <div class="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
             <div>
-              <h3 id="testQEn" class="text-sm sm:text-base font-bold text-slate-900 leading-snug"></h3>
-              <h4 id="testQOr" class="text-xs sm:text-sm font-semibold text-indigo-950 mt-1 leading-snug"></h4>
+              <h3 id="testQEn" class="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug"></h3>
+              <h4 id="testQOr" class="text-xs sm:text-sm font-semibold text-indigo-950 dark:text-indigo-300 mt-1 leading-snug"></h4>
             </div>
             <div id="testOptionsBox" class="space-y-2"></div>
             <div id="testPracticeBox" class="hidden p-3 rounded-xl text-xs space-y-1 border"></div>
-            <div class="flex justify-between items-center pt-3 border-t">
-              <button onclick="navigateQuestion(-1)" id="testPrevBtn" class="px-3 py-1.5 bg-slate-100 text-slate-700 font-bold rounded-lg text-xs">Previous</button>
-              <button onclick="navigateQuestion(1)" id="testNextBtn" class="px-4 py-1.5 bg-indigo-600 text-white font-bold rounded-lg text-xs">Next</button>
-              <button onclick="confirmSubmitTest()" id="testSubmitBtn" class="px-4 py-1.5 bg-emerald-600 text-white font-bold rounded-lg text-xs hidden">Submit</button>
+            <div class="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button onclick="navigateQuestion(-1)" id="testPrevBtn" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg text-xs">Previous</button>
+              <button onclick="navigateQuestion(1)" id="testNextBtn" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs">Next</button>
+              <button onclick="confirmSubmitTest()" id="testSubmitBtn" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs hidden">Submit Exam</button>
             </div>
           </div>
         </div>
       `,
 
       resultScreen: (res) => `
-        <div class="max-w-2xl mx-auto bg-white p-5 rounded-2xl border text-center space-y-4">
-          <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-black">✓</div>
-          <h2 class="text-lg font-black text-slate-900">Scorecard: ${res.obtainedMarks} / ${res.totalMarks} (${res.percentage}%)</h2>
+        <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4">
+          <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl font-black">✓</div>
+          <h2 class="text-lg font-black text-slate-900 dark:text-white">Scorecard: ${res.obtainedMarks} / ${res.totalMarks} (${res.percentage}%)</h2>
           <button onclick="router.navigate('student-dashboard')" class="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl">Return to Dashboard</button>
         </div>
       `,
@@ -712,12 +764,15 @@
         const topic = cloudState.topics.find(t => t.id === topicId);
         const note = cloudState.notes.find(n => n.topicId === topicId);
         return `
-          <div class="max-w-2xl mx-auto space-y-4">
-            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 font-bold hover:underline">&larr; Back</button>
-            <div class="bg-white p-5 rounded-2xl border space-y-3">
-              <h2 class="text-base font-black text-slate-900">${topic ? topic.name : 'Notes'}</h2>
-              <div class="text-xs text-slate-800 leading-relaxed whitespace-pre-line bg-slate-50 p-4 rounded-xl border font-sans">
-                ${note ? note.content : 'Revision notes are being finalized.'}
+          <div class="max-w-3xl mx-auto space-y-4">
+            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">&larr; Back to Subjects</button>
+            <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+              <div class="border-b border-slate-200 dark:border-slate-800 pb-3">
+                <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 px-2 py-0.5 rounded uppercase">Verified Revision Notes</span>
+                <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">${topic ? topic.name : 'Chapter Notes'}</h2>
+              </div>
+              <div class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-950/60 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 font-sans">
+                ${note ? note.content : 'Notes for this chapter will be uploaded soon by Admin.'}
               </div>
             </div>
           </div>
@@ -735,11 +790,11 @@
           <form onsubmit="handleAdminLogin(event)" class="space-y-3">
             <div>
               <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">User ID</label>
-              <input type="text" id="adminUserId" required placeholder="Enter Admin User ID" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white">
+              <input type="text" id="adminUserId" required placeholder="Enter Admin User ID" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-amber-400">
             </div>
             <div>
               <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Password</label>
-              <input type="password" id="adminPassword" required placeholder="••••••••" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white">
+              <input type="password" id="adminPassword" required placeholder="••••••••" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-amber-400">
             </div>
             <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
               Unlock Master Suite
@@ -753,6 +808,7 @@
         const registrations = cloudState.registrations;
         const students = cloudState.students;
         const questions = cloudState.questions;
+        const notes = cloudState.notes;
 
         return `
           <div class="space-y-4">
@@ -765,13 +821,14 @@
               </div>
               <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                 <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code mr-1"></i> HTML Parser</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pen mr-1"></i> Upload Notes (${notes.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Mocks (${registrations.filter(r => r.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Students (${students.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'questions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'questions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Questions (${questions.length})</button>
               </div>
             </div>
-            ${views.adminTabs[activeTab]({ admissions, registrations, students, questions })}
+            ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes })}
           </div>
         `;
       },
@@ -780,47 +837,47 @@
         'html-upload': () => {
           const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
           return `
-            <div class="bg-white rounded-2xl border p-4 sm:p-6 space-y-4">
-              <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Smart HTML Question Parser</h3>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Smart HTML Question Parser</h3>
               <form onsubmit="handleHtmlImport(event)" class="space-y-3">
-                <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">1. Select Target Class</label>
-                    <select id="impClassSelect" onchange="updateImporterSubjects()" class="w-full p-2 bg-white border rounded-lg text-xs font-bold">
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">1. Select Target Class</label>
+                    <select id="impClassSelect" onchange="updateImporterSubjects()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white">
                       ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
                     </select>
                   </div>
                   <div class="flex gap-2">
-                    <input type="text" id="impNewClass" placeholder="Or New Class (e.g. 11)" class="w-full p-1.5 bg-white border rounded-lg text-xs">
+                    <input type="text" id="impNewClass" placeholder="Or New Class (e.g. 11)" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white">
                     <button type="button" onclick="addNewClass()" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">Add</button>
                   </div>
                 </div>
 
-                <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">2. Select Subject</label>
-                    <select id="impSubjectSelect" onchange="updateImporterTopics()" class="w-full p-2 bg-white border rounded-lg text-xs font-bold"></select>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">2. Select Subject</label>
+                    <select id="impSubjectSelect" onchange="updateImporterTopics()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
                   </div>
                   <div class="flex gap-2">
-                    <input type="text" id="impNewSubject" placeholder="Or New Subject Name" class="w-full p-1.5 bg-white border rounded-lg text-xs">
+                    <input type="text" id="impNewSubject" placeholder="Or New Subject Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white">
                     <button type="button" onclick="addNewSubject()" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">Add</button>
                   </div>
                 </div>
 
-                <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">3. Select Chapter / Topic</label>
-                    <select id="impTopicSelect" class="w-full p-2 bg-white border rounded-lg text-xs font-bold"></select>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">3. Select Chapter / Topic</label>
+                    <select id="impTopicSelect" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
                   </div>
                   <div class="flex gap-2">
-                    <input type="text" id="impNewTopic" placeholder="Or New Chapter/Topic Name" class="w-full p-1.5 bg-white border rounded-lg text-xs">
+                    <input type="text" id="impNewTopic" placeholder="Or New Chapter/Topic Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white">
                     <button type="button" onclick="addNewTopic()" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">Add</button>
                   </div>
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">4. Paste Your HTML Code</label>
-                  <textarea id="impHtmlCode" required rows="8" placeholder="Paste full HTML code with questionsData here..." class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border"></textarea>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">4. Paste Your HTML Code</label>
+                  <textarea id="impHtmlCode" required rows="7" placeholder="Paste full HTML code with questionsData here..." class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border border-slate-800"></textarea>
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
@@ -831,19 +888,56 @@
           `;
         },
 
+        'notes-admin': ({ notes }) => {
+          const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Cloud Revision Notes Manager</h3>
+              
+              <form onsubmit="handleNoteSave(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class</label>
+                    <select id="noteClassSelect" onchange="updateNotesSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Subject</label>
+                    <select id="noteSubjectSelect" onchange="updateNotesTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter / Topic</label>
+                    <select id="noteTopicSelect" onchange="loadExistingNote()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter Notes Content (Odia / English / Points)</label>
+                  <textarea id="noteContentInput" required rows="10" placeholder="Type or paste complete chapter summary, key points, formulas, and concepts here..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+                  Publish Notes to Cloud Server
+                </button>
+              </form>
+            </div>
+          `;
+        },
+
         admissions: ({ admissions }) => `
-          <div class="bg-white rounded-2xl border p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900">Cloud Admission Requests (${admissions.length})</h3>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Admission Requests (${admissions.length})</h3>
             <div class="space-y-2">
               ${admissions.length > 0 ? admissions.map(a => `
-                <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-center gap-2">
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center gap-2">
                   <div>
-                    <h4 class="font-bold text-slate-900">${a.name} (Class ${a.class})</h4>
-                    <p class="text-[10px] text-slate-500">Phone: ${a.phone} | Guardian: ${a.guardian}</p>
-                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${a.status}</span>
+                    <h4 class="font-bold text-slate-900 dark:text-white">${a.name} (Class ${a.class})</h4>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Phone: ${a.phone} | Guardian: ${a.guardian}</p>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${a.status === 'Approved' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'}">${a.status}</span>
                   </div>
                   ${a.status === 'Pending' ? `
-                    <button onclick="approveStudent('adm', '${a.id}')" class="px-3 py-1.5 bg-amber-500 text-indigo-950 font-black rounded-lg text-xs">Approve</button>
+                    <button onclick="approveStudent('adm', '${a.id}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-lg text-xs">Approve</button>
                   ` : `<span class="text-[10px] text-slate-400">ID: ${a.assignedStudentId}</span>`}
                 </div>
               `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No admissions in cloud yet.</p>'}
@@ -852,18 +946,18 @@
         `,
 
         registrations: ({ registrations }) => `
-          <div class="bg-white rounded-2xl border p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900">Cloud Free Mock Registrations (${registrations.length})</h3>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Free Mock Registrations (${registrations.length})</h3>
             <div class="space-y-2">
               ${registrations.length > 0 ? registrations.map(r => `
-                <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-center gap-2">
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center gap-2">
                   <div>
-                    <h4 class="font-bold text-slate-900">${r.name} (Class ${r.class})</h4>
-                    <p class="text-[10px] text-slate-500">Phone: ${r.phone}</p>
-                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${r.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${r.status}</span>
+                    <h4 class="font-bold text-slate-900 dark:text-white">${r.name} (Class ${r.class})</h4>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Phone: ${r.phone}</p>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${r.status === 'Approved' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'}">${r.status}</span>
                   </div>
                   ${r.status === 'Pending' ? `
-                    <button onclick="approveStudent('reg', '${r.id}')" class="px-3 py-1.5 bg-emerald-600 text-white font-bold rounded-lg text-xs">Approve</button>
+                    <button onclick="approveStudent('reg', '${r.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs">Approve</button>
                   ` : `<span class="text-[10px] text-slate-400">ID: ${r.assignedStudentId}</span>`}
                 </div>
               `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No registrations in cloud yet.</p>'}
@@ -872,16 +966,16 @@
         `,
 
         students: ({ students }) => `
-          <div class="bg-white rounded-2xl border p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900">Cloud Approved Student Logins (${students.length})</h3>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Approved Student Logins (${students.length})</h3>
             <div class="space-y-2">
               ${students.length > 0 ? students.map(s => `
-                <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-center">
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center">
                   <div>
-                    <h4 class="font-bold text-slate-900">${s.name} (Class ${s.class})</h4>
-                    <p class="text-[10px] text-indigo-700 font-mono">ID: ${s.studentId} | Pass: <span class="bg-amber-100 px-1 py-0.5 rounded font-bold">${s.password}</span></p>
+                    <h4 class="font-bold text-slate-900 dark:text-white">${s.name} (Class ${s.class})</h4>
+                    <p class="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono">ID: ${s.studentId} | Pass: <span class="bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 px-1 py-0.5 rounded font-bold">${s.password}</span></p>
                   </div>
-                  <button onclick="deleteStudent('${s.id}')" class="text-rose-600 text-xs font-bold">Delete</button>
+                  <button onclick="deleteStudent('${s.id}')" class="text-rose-600 text-xs font-bold hover:underline">Delete</button>
                 </div>
               `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No students enrolled yet.</p>'}
             </div>
@@ -889,17 +983,17 @@
         `,
 
         questions: ({ questions }) => `
-          <div class="bg-white rounded-2xl border p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900">Cloud Questions (${questions.length})</h3>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Questions (${questions.length})</h3>
             <div class="space-y-2">
               ${questions.map((q, idx) => `
-                <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-start gap-2">
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-start gap-2">
                   <div>
-                    <span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.2 rounded text-[9px]">Class ${q.class}</span>
-                    <h4 class="font-bold text-slate-900 mt-1">${idx + 1}. ${q.question}</h4>
-                    <p class="text-emerald-700 font-bold mt-0.5">Key: Option ${q.correctAnswer}</p>
+                    <span class="bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 font-bold px-1.5 py-0.2 rounded text-[9px]">Class ${q.class}</span>
+                    <h4 class="font-bold text-slate-900 dark:text-white mt-1">${idx + 1}. ${q.question}</h4>
+                    <p class="text-emerald-700 dark:text-emerald-400 font-bold mt-0.5">Key: Option ${q.correctAnswer}</p>
                   </div>
-                  <button onclick="deleteQuestion('${q.id}')" class="text-rose-600 font-bold text-[10px]">Delete</button>
+                  <button onclick="deleteQuestion('${q.id}')" class="text-rose-600 text-xs font-bold hover:underline">Delete</button>
                 </div>
               `).join('')}
             </div>
@@ -932,6 +1026,60 @@
       topSelect.innerHTML = topics.length > 0 
         ? topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('') 
         : '<option value="">-- No Topic Found (Add New Below) --</option>';
+    }
+
+    // Notes Admin Form Selectors
+    function updateNotesSubjects() {
+      const clsSelect = document.getElementById('noteClassSelect');
+      if (!clsSelect) return;
+      const cls = clsSelect.value;
+      const subSelect = document.getElementById('noteSubjectSelect');
+      const subjects = cloudState.subjects.filter(s => String(s.class) === String(cls));
+
+      subSelect.innerHTML = subjects.length > 0 
+        ? subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('') 
+        : '<option value="">-- No Subject Found --</option>';
+
+      updateNotesTopics();
+    }
+
+    function updateNotesTopics() {
+      const subSelect = document.getElementById('noteSubjectSelect');
+      const topSelect = document.getElementById('noteTopicSelect');
+      if (!subSelect || !topSelect) return;
+      const subId = subSelect.value;
+      const topics = cloudState.topics.filter(t => t.subjectId === subId);
+
+      topSelect.innerHTML = topics.length > 0 
+        ? topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('') 
+        : '<option value="">-- No Topic Found --</option>';
+
+      loadExistingNote();
+    }
+
+    function loadExistingNote() {
+      const topSelect = document.getElementById('noteTopicSelect');
+      const contentInput = document.getElementById('noteContentInput');
+      if (!topSelect || !contentInput) return;
+      const topId = topSelect.value;
+      const existing = cloudState.notes.find(n => n.topicId === topId);
+      contentInput.value = existing ? existing.content : '';
+    }
+
+    function handleNoteSave(e) {
+      e.preventDefault();
+      const topId = document.getElementById('noteTopicSelect').value;
+      const content = document.getElementById('noteContentInput').value.trim();
+
+      if (!topId) return alert("Please select a Chapter / Topic!");
+
+      firestore.collection("notes").doc(topId).set({
+        topicId: topId,
+        content: content,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        toast("Notes Published!", "Chapter notes successfully saved on cloud server.", "success");
+      });
     }
 
     function addNewClass() {
@@ -1025,7 +1173,6 @@
       }
     }
 
-    // CLOUD DISPATCH: Free Registration
     function handleRegistrationSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('regSubmitBtn');
@@ -1052,7 +1199,6 @@
         });
     }
 
-    // CLOUD DISPATCH: Full Admission
     function handleAdmissionSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('admSubmitBtn');
@@ -1081,7 +1227,6 @@
         });
     }
 
-    // STUDENT LOGIN: Authenticates directly against Cloud Firestore
     function handleStudentLogin(e) {
       e.preventDefault();
       const userInput = document.getElementById('loginUser').value.trim();
@@ -1093,7 +1238,7 @@
 
       if (student) {
         auth.setStudent(student);
-        toast('Welcome!', `Logged in as ${student.name}`, 'success');
+        toast('Welcome Back!', `Logged in as ${student.name}`, 'success');
         router.navigate('student-dashboard');
       } else {
         toast('Login Failed', 'Account not found or not yet approved by Admin.', 'error');
@@ -1103,7 +1248,7 @@
     function guestLogin() {
       localStorage.setItem('sp_guest_flag', 'true');
       localStorage.setItem(DB_KEYS.AUTH_STUDENT, JSON.stringify({ name: "Guest Learner", class: "10", studentId: "GST-DEMO", type: "Guest" }));
-      toast('Guest Mode', 'Demo enabled for Class 10.', 'info');
+      toast('Guest Mode', 'Demo session enabled for Class 10.', 'info');
       router.navigate('student-dashboard');
     }
 
@@ -1142,13 +1287,11 @@
       const studentId = "SP" + record.class + "-" + Math.floor(1000 + Math.random() * 9000);
       const password = "PASS" + Math.floor(1000 + Math.random() * 9000);
 
-      // 1. Update Application Status in Cloud
       firestore.collection(collection).doc(docId).update({
         status: "Approved",
         assignedStudentId: studentId
       });
 
-      // 2. Create Enrolled Student in Cloud
       firestore.collection("students").add({
         studentId,
         name: record.name,
@@ -1159,7 +1302,7 @@
         type: type === 'adm' ? "Admission" : "Registration",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-        toast('Approved!', `Student ID: ${studentId} & Password: ${password} generated.`, 'success');
+        toast('Approved!', `Generated Student ID: ${studentId} & Password: ${password}`, 'success');
       });
     }
 
@@ -1239,7 +1382,7 @@
       const isFirst = activeExam.currentIndex === 0;
 
       document.getElementById('testMetaMode').innerText = activeExam.mode === 'exam' ? 'CBT Exam' : 'Practice';
-      document.getElementById('testMetaMode').className = `font-bold uppercase px-2 py-0.5 rounded text-[10px] ${activeExam.mode === 'exam' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`;
+      document.getElementById('testMetaMode').className = `font-bold uppercase px-2 py-0.5 rounded text-[10px] ${activeExam.mode === 'exam' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'}`;
       document.getElementById('testMetaProgress').innerText = `${activeExam.currentIndex + 1} / ${activeExam.questions.length}`;
       document.getElementById('testQEn').innerText = `Q${activeExam.currentIndex + 1}. ${q.question}`;
       document.getElementById('testQOr').innerText = q.questionOdia || '';
@@ -1253,18 +1396,20 @@
         let btnClasses = "w-full p-3 rounded-xl border text-left font-medium text-xs flex items-center justify-between transition ";
 
         if (activeExam.mode === 'exam') {
-          btnClasses += userPick === key ? "border-indigo-600 bg-indigo-600 text-white font-bold" : "border-slate-200 bg-slate-50";
+          btnClasses += userPick === key 
+            ? "border-indigo-600 bg-indigo-600 text-white font-bold" 
+            : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200";
         } else {
           if (activeExam.practiceRevealed[q.id]) {
             if (key === q.correctAnswer) {
-              btnClasses += "border-emerald-600 bg-emerald-50 text-emerald-900 font-bold";
+              btnClasses += "border-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-bold";
             } else if (userPick === key) {
-              btnClasses += "border-rose-600 bg-rose-50 text-rose-900 font-bold";
+              btnClasses += "border-rose-600 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-300 font-bold";
             } else {
-              btnClasses += "border-slate-200 bg-slate-50 opacity-60";
+              btnClasses += "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 opacity-50 text-slate-700 dark:text-slate-300";
             }
           } else {
-            btnClasses += "border-slate-200 bg-slate-50";
+            btnClasses += "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200";
           }
         }
 
@@ -1277,7 +1422,9 @@
       const practiceBox = document.getElementById('testPracticeBox');
       if (activeExam.mode === 'practice' && activeExam.practiceRevealed[q.id]) {
         practiceBox.classList.remove('hidden');
-        practiceBox.className = userPick === q.correctAnswer ? 'p-3 rounded-xl text-xs border border-emerald-200 bg-emerald-50 text-emerald-900' : 'p-3 rounded-xl text-xs border border-rose-200 bg-rose-50 text-rose-900';
+        practiceBox.className = userPick === q.correctAnswer 
+          ? 'p-3 rounded-xl text-xs border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200' 
+          : 'p-3 rounded-xl text-xs border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200';
         practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct factual answer.'}</p>`;
       } else {
         practiceBox.classList.add('hidden');
@@ -1323,10 +1470,19 @@
       router.navigate('result-screen', { resultData: { obtainedMarks, totalMarks, percentage } });
     }
 
-    // Initialize App & Realtime Cloud Data
+    // App Bootstrapping
     window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
       initRealtimeSync();
-      router.navigate('home');
+      
+      // Keep user in their current view if already authenticated
+      if (auth.getStudent()) {
+        router.navigate('student-dashboard');
+      } else if (auth.getAdmin()) {
+        router.navigate('admin-dashboard');
+      } else {
+        router.navigate('home');
+      }
     });
   </script>
 </body>
