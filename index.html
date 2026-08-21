@@ -4,46 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SATYAPEETH — Odisha Board Online CBT & Learning Portal</title>
-  
-  <!-- Tailwind CSS & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Google Fonts: Inter & Noto Sans Oriya for Odia Unicode rendering -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" rel="stylesheet">
-
   <style>
-    body {
-      font-family: 'Inter', 'Noto Sans Oriya', sans-serif;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
+    body { font-family: 'Inter', 'Noto Sans Oriya', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   </style>
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased custom-scrollbar">
 
-  <!-- Toast Notification System -->
   <div id="toastContainer" class="fixed top-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Global Header -->
+  <!-- Header -->
   <header class="bg-indigo-950 text-white sticky top-0 z-40 border-b border-indigo-900 shadow-md">
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-      
-      <!-- Brand Logo -->
       <div class="flex items-center gap-3 cursor-pointer" onclick="router.navigate('home')">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-indigo-950 font-black text-xl shadow-inner">
           SP
@@ -54,22 +33,18 @@
         </div>
       </div>
 
-      <!-- Navigation Actions -->
       <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Live Exam Timer Badge -->
         <div id="navTimerBadge" class="hidden flex items-center gap-2 bg-rose-950/80 border border-rose-500 text-rose-300 px-3 py-1.5 rounded-lg text-xs font-mono font-bold tracking-widest animate-pulse">
           <i class="fa-solid fa-stopwatch"></i>
           <span id="navTimerVal">00:00</span>
         </div>
 
-        <!-- Dynamic User Status -->
         <div id="navUserBadge" class="hidden flex items-center gap-2 bg-indigo-900 border border-indigo-700 px-3 py-1.5 rounded-lg text-xs font-medium">
           <i class="fa-solid fa-user-graduate text-amber-400"></i>
           <span id="navUserName" class="font-bold text-white"></span>
           <span id="navUserType" class="px-1.5 py-0.5 rounded text-[10px] font-bold"></span>
         </div>
 
-        <!-- Student Action Buttons -->
         <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs bg-indigo-800 hover:bg-indigo-700 border border-indigo-600 px-3.5 py-2 rounded-lg font-bold text-white transition">
           <i class="fa-solid fa-right-to-bracket mr-1"></i> Login
         </button>
@@ -82,8 +57,6 @@
         <button id="navLogoutBtn" onclick="auth.logout()" class="hidden text-xs bg-slate-800 hover:bg-rose-900 border border-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-lg font-bold transition">
           <i class="fa-solid fa-power-off"></i>
         </button>
-
-        <!-- Admin Portal Trigger -->
         <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs bg-indigo-900/50 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2.5 py-2 rounded-lg transition" title="Admin Portal">
           <i class="fa-solid fa-shield-halved"></i>
         </button>
@@ -91,10 +64,8 @@
     </div>
   </header>
 
-  <!-- Main Dynamic View Container -->
   <main id="app" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8"></main>
 
-  <!-- Confirmation Modal Dialog -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white max-w-md w-full rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all p-6 text-center">
       <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-xl">
@@ -109,7 +80,6 @@
     </div>
   </div>
 
-  <!-- Global Footer -->
   <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-xs text-center">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
       <p>&copy; 2026 <strong>SATYAPEETH</strong> — State Level Odisha Board Assessment Network</p>
@@ -120,12 +90,13 @@
     </div>
   </footer>
 
-  <!-- Core JavaScript Engine -->
   <script>
+    const DB_VERSION = "v4_html_upload_engine";
     const DB_KEYS = {
       STUDENTS: 'sp_students',
       ADMISSIONS: 'sp_admissions',
       REGISTRATIONS: 'sp_registrations',
+      CLASSES: 'sp_classes',
       SUBJECTS: 'sp_subjects',
       TOPICS: 'sp_topics',
       NOTES: 'sp_notes',
@@ -135,102 +106,88 @@
       AUTH_ADMIN: 'sp_session_admin'
     };
 
+    const SEED_CLASSES = ["10", "9", "8", "7", "6"];
+
     const SEED_DATA = {
       subjects: [
+        { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
         { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)" },
         { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)" },
         { id: "sub_10_ls", class: "10", name: "Life Science (ଜୀବ ବିଜ୍ଞାନ)" },
         { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)" },
-        { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
         { id: "sub_10_eng", class: "10", name: "English" },
-
         { id: "sub_9_sci", class: "9", name: "Science (ବିଜ୍ଞାନ)" },
         { id: "sub_9_mth", class: "9", name: "Mathematics (ଗଣିତ)" },
-        { id: "sub_9_odia", class: "9", name: "Odia (ସାହିତ୍ୟ ଧାରା)" },
-
-        { id: "sub_8_sci", class: "8", name: "Science (ବିଜ୍ଞାନ)" },
-        { id: "sub_8_mth", class: "8", name: "Mathematics (ଗଣିତ)" },
-        { id: "sub_7_sci", class: "7", name: "Science (ବିଜ୍ଞାନ)" },
-        { id: "sub_6_sci", class: "6", name: "Science (ବିଜ୍ଞାନ)" }
+        { id: "sub_8_sci", class: "8", name: "Science (ବିଜ୍ଞାନ)" }
       ],
       topics: [
+        { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତୀୟ ଜାତୀୟ ଆନ୍ଦୋଳନରେ ଗାନ୍ଧିଜୀଙ୍କ ଆବିର୍ଭାବ", isDemo: true },
         { id: "top_10_ps_1", class: "10", subjectId: "sub_10_ps", name: "ରାସାୟନିକ ପ୍ରତିକ୍ରିୟା ଓ ସମୀକରଣ (Chemical Reactions)", isDemo: true },
-        { id: "top_10_ps_2", class: "10", subjectId: "sub_10_ps", name: "ଅମ୍ଳ, କ୍ଷାରକ ଓ ଲବଣ (Acids, Bases & Salts)", isDemo: false },
-        { id: "top_10_ps_3", class: "10", subjectId: "sub_10_ps", name: "ଧାତୁ ଓ ଅଧାତୁ (Metals & Non-metals)", isDemo: false },
         { id: "top_10_ls_1", class: "10", subjectId: "sub_10_ls", name: "ପୋଷଣ (Nutrition)", isDemo: true },
         { id: "top_10_odia_1", class: "10", subjectId: "sub_10_fl_odia", name: "ବନ୍ଦେ ଉତ୍କଳ ଜନନୀ (Bande Utkala Janani)", isDemo: true },
         { id: "top_10_mth_1", class: "10", subjectId: "sub_10_mth", name: "ସରଳ ସହସମୀକରଣ (Linear Equations)", isDemo: true }
       ],
       notes: [
         {
-          id: "note_1",
+          id: "note_soc_1",
           class: "10",
-          subjectId: "sub_10_ps",
-          topicId: "top_10_ps_1",
-          title: "ରାସାୟନିକ ପ୍ରତିକ୍ରିୟା ଓ ସମୀକରଣ ସମ୍ପୂର୍ଣ୍ଣ ନୋଟ୍ସ",
-          content: "୧. ସଂଶ୍ଳେଷଣ ପ୍ରତିକ୍ରିୟା: ଯେଉଁ ରାସାୟନିକ ପ୍ରତିକ୍ରିୟାରେ ଦୁଇ ବା ତତୋऴିକ ପ୍ରତିକାରକ ମିଳିତ ହୋଇ ଏକମାତ୍ର ଉତ୍ପାଦ ସୃଷ୍ଟି କରନ୍ତି, ତାହାକୁ ସଂଶ୍ଳେଷଣ ପ୍ରତିକ୍ରିୟା କୁହାଯାଏ (e.g. 2H2 + O2 -> 2H2O)।\n\n୨. ବିଘଟନ ପ୍ରତିକ୍ରିୟା: ଗୋଟିଏ ମାତ୍ର ପ୍ରତିକାରକ ବିଘଟିତ ହୋଇ ଏକାଧିକ ସରଳ ଉତ୍ପାଦ ସୃଷ୍ଟି କରେ।"
-        },
-        {
-          id: "note_2",
-          class: "10",
-          subjectId: "sub_10_ls",
-          topicId: "top_10_ls_1",
-          title: "ପୋଷଣ (Nutrition) Complete Revision Notes",
-          content: "୧. ସ୍ୱଭୋଜୀ ପୋଷଣ (Autotrophic): ସବୁଜ ଉଦ୍ଭିଦ ଆଲୋକଶ୍ଳେଷଣ ଦ୍ୱାରା ନିଜ ଖାଦ୍ୟ ପ୍ରସ୍ତୁତ କରନ୍ତି।\n୨. ପରଭୋଜୀ ପୋଷଣ (Heterotrophic): ପ୍ରାଣୀମାନେ ଅନ୍ୟ ଉଦ୍ଭିଦ ବା ପ୍ରାଣୀଙ୍କ ଉପରେ ନିର୍ଭରଶୀଳ।"
+          subjectId: "sub_10_soc",
+          topicId: "top_10_soc_1",
+          title: "ଭାରତୀୟ ଜାତୀୟ ଆନ୍ଦୋଳନରେ ଗାନ୍ଧିଜୀଙ୍କ ଆବିର୍ଭାବ (ସମ୍ପୂର୍ଣ୍ଣ ନୋଟ୍ସ)",
+          content: `🌟 ଜଣେ ମହାନାୟକଙ୍କ ଜନ୍ମ:
+ମହାତ୍ମା ଗାନ୍ଧୀ ୧୮୬୯ ମସିହା ଅକ୍ଟୋବର ୨ ତାରିଖରେ ଗୁଜରାଟର ପୋରବନ୍ଦରଠାରେ ଜନ୍ମଗ୍ରହଣ କରିଥିଲେ ।
+
+🎓 ଶିକ୍ଷା ଓ ବାରିଷ୍ଟର: ୧୮୮୮ ରେ ଇଂଲଣ୍ଡ ଯାଇ ୧୮୯୧ ରେ ବାରିଷ୍ଟର ପାସ୍ କରି ଭାରତ ଫେରିଲେ ।
+
+🌍 ଦକ୍ଷିଣ ଆଫ୍ରିକା ସଂଘର୍ଷ:
+ଦାଦା ଅବଦୁଲ୍ଲାଙ୍କ ମୋକଦ୍ଦମା ପାଇଁ ୧୮୯୩ ରେ ନାଟାଲ୍ ଯାଇଥିଲେ । ୧୮୯୪ ରେ 'ନାଟାଲ୍ ଭାରତୀୟ କଂଗ୍ରେସ' ଗଠନ ଓ 'ଇଣ୍ଡିଆନ୍ ଓପିନିଅନ୍' ପତ୍ରିକା ପ୍ରକାଶ କଲେ । 'ସତ୍ୟାଗ୍ରହ' ନୀତିର ପ୍ରଥମ ପ୍ରୟୋଗ ସେଠାରେ କରିଥିଲେ ।
+
+🇮🇳 ଭାରତ ପ୍ରତ୍ୟାବର୍ତ୍ତନ ଓ ଆନ୍ଦୋଳନ:
+• ୧୯୧୫ ଜାନୁୟାରୀ ୯: ଭାରତ ପ୍ରତ୍ୟାବର୍ତ୍ତନ (ପ୍ରବାସୀ ଭାରତୀୟ ଦିବସ) ।
+• ରାଜନୈତିକ ଗୁରୁ: ଗୋପାଳ କୃଷ୍ଣ ଗୋଖଲେ ।
+• ଚମ୍ପାରନ୍ ଆନ୍ଦୋଳନ (୧୯୧୭): ବିହାରର ନୀଳଚାଷୀଙ୍କ ତିନିକାଠିଆ (୩/୨୦) ବ୍ୟବସ୍ଥା ବିରୁଦ୍ଧରେ ପ୍ରଥମ ସଫଳ ଆନ୍ଦୋଳନ । ୨୫% ଅର୍ଥ ଫେରସ୍ତ ।
+• ଖେଡ଼ା ସତ୍ୟାଗ୍ରହ (୧୯୧୮): ଇନ୍ଦୁଲାଲ୍ ଯାଜ୍ଞିକ ଓ ସର୍ଦ୍ଦାର ପଟେଲ୍ ଙ୍କ ସହଯୋଗ ।
+• ଅହମ୍ମଦାବାଦ ଲୁଗାକଳ (୧୯୧୮): ୩୫% ମଜୁରୀ ବୃଦ୍ଧି ପାଇଁ ଅନଶନ ।
+• ରାଓଲାତ୍ ଆଇନ୍ (୧୯୧୯): ବିନା ବିଚାରରେ ଗିରଫ କଳା ଆଇନ୍ ବିରୁଦ୍ଧରେ ସର୍ବଭାରତୀୟ ହରତାଳ (୬ ଏପ୍ରିଲ୍ ୧୯୧୯) ।
+• ଜାଲିଆନାୱାଲାବାଗ୍ ହତ୍ୟାକାଣ୍ଡ (୧୩ ଏପ୍ରିଲ୍ ୧୯୧୯): ଜେନେରାଲ୍ ଡାୟାରଙ୍କ ନିର୍ଦ୍ଦେଶରେ ଗୁଳିକାଣ୍ଡ । ପ୍ରତିବାଦରେ ରବୀନ୍ଦ୍ରନାଥ ଠାକୁର 'ନାଇଟ୍' (Knight) ଓ ଗାନ୍ଧିଜୀ 'କାଇଜର-ଇ-ହିନ୍ଦ୍' ଉପାଧି ତ୍ୟାଗ କଲେ ।`
         }
       ],
       questions: [
         {
-          id: "q_1",
+          id: "q_soc_1",
           class: "10",
-          subjectId: "sub_10_ps",
-          topicId: "top_10_ps_1",
-          question: "Which of the following is a balanced combination reaction?",
-          questionOdia: "ନିମ୍ନଲିଖିତ ମଧ୍ୟରୁ କେଉଁଟି ଏକ ସନ୍ତୁଳିତ ସଂଶ୍ଳେଷଣ ପ୍ରତିକ୍ରିୟା?",
-          options: { A: "2H2 + O2 -> 2H2O", B: "CaCO3 -> CaO + CO2", C: "Zn + H2SO4 -> ZnSO4 + H2", D: "CH4 + 2O2 -> CO2 + 2H2O" },
+          subjectId: "sub_10_soc",
+          topicId: "top_10_soc_1",
+          question: "When and where was Mahatma Gandhi born?",
+          questionOdia: "ମହାତ୍ମା ଗାନ୍ଧୀ କେବେ ଏବଂ କେଉଁଠାରେ ଜନ୍ମଗ୍ରହଣ କରିଥିଲେ?",
+          options: { A: "2 October 1869, Porbandar", B: "2 October 1879, Rajkot", C: "15 August 1869, Ahmedabad", D: "2 October 1888, Porbandar" },
           correctAnswer: "A",
-          explanation: "Two elements combine to form a single compound in combination reaction (2H2 + O2 -> 2H2O).",
-          marks: 1,
-          difficulty: "Easy"
+          explanation: "ମହାତ୍ମା ଗାନ୍ଧୀ ୧୮୬୯ ମସିହା ଅକ୍ଟୋବର ୨ ତାରିଖରେ ଗୁଜରାଟର ପୋରବନ୍ଦରଠାରେ ଜନ୍ମଗ୍ରହଣ କରିଥିଲେ ।",
+          marks: 1
         },
         {
-          id: "q_2",
+          id: "q_soc_2",
           class: "10",
-          subjectId: "sub_10_ps",
-          topicId: "top_10_ps_2",
-          question: "Which of the following compounds turns blue litmus paper into red?",
-          questionOdia: "ନିମ୍ନଲିଖିତ ମଧ୍ୟରୁ କେଉଁ ଯୌଗିକ ନୀଳ ଲିଟମସ୍ କାଗଜକୁ ଲାଲ୍ କରେ?",
-          options: { A: "NaOH Solution", B: "Lemon Juice (Citric Acid)", C: "Distilled Water", D: "Sodium Chloride Solution" },
+          subjectId: "sub_10_soc",
+          topicId: "top_10_soc_1",
+          question: "For which merchant's case did Gandhiji travel to Natal, South Africa in 1893?",
+          questionOdia: "କେଉଁ ଭାରତୀୟ ମୁସଲମାନ ବ୍ୟବସାୟୀଙ୍କ ମୋକଦ୍ଦମା ଲଢ଼ିବା ପାଇଁ ଗାନ୍ଧିଜୀ ଦକ୍ଷିଣ ଆଫ୍ରିକାର ନାଟାଲ୍ ଯାଇଥିଲେ?",
+          options: { A: "Dada Bhai Naoroji", B: "Dada Abdulla (ଦାଦା ଅବଦୁଲ୍ଲା)", C: "Muhammad Ali Jinnah", D: "Gopal Krishna Gokhale" },
           correctAnswer: "B",
-          explanation: "Acids turn blue litmus red. Lemon juice contains Citric Acid.",
-          marks: 1,
-          difficulty: "Easy"
+          explanation: "ଦାଦା ଅବଦୁଲ୍ଲା ନାମକ ଜଣେ ଭାରତୀୟ ବ୍ୟବସାୟୀଙ୍କ ମୋକଦ୍ଦମା ଲଢ଼ିବା ପାଇଁ ଗାନ୍ଧିଜୀ ଦକ୍ଷିଣ ଆଫ୍ରିକା ଯାଇଥିଲେ ।",
+          marks: 1
         },
         {
-          id: "q_3",
+          id: "q_soc_3",
           class: "10",
-          subjectId: "sub_10_fl_odia",
-          topicId: "top_10_odia_1",
-          question: "Who is the creator/poet of Odisha's state anthem 'Bande Utkala Janani'?",
-          questionOdia: "ଓଡ଼ିଶାର ରାଜ୍ୟ ସଙ୍ଗୀତ 'ବନ୍ଦେ ଉତ୍କଳ ଜନନୀ'ର ରଚୟିତା କିଏ?",
-          options: { A: "Utkalmani Gopabandhu Das", B: "Kantakabi Laxmikanta Mohapatra", C: "Kabibara Radhanath Ray", D: "Bhaktakabi Madhusudan Rao" },
-          correctAnswer: "B",
-          explanation: "କାନ୍ତକବି ଲକ୍ଷ୍ମୀକାନ୍ତ ମହାପାତ୍ର ୧୯୧୨ ମସିହାରେ ବାଲେଶ୍ୱରଠାରେ ଅନୁଷ୍ଠିତ ଉତ୍କଳ ସମ୍ମିଳନୀ ପାଇଁ ଏହି କାଳଜୟୀ ଗୀତ ରଚନା କରିଥିଲେ।",
-          marks: 1,
-          difficulty: "Medium"
-        },
-        {
-          id: "q_4",
-          class: "10",
-          subjectId: "sub_10_ls",
-          topicId: "top_10_ls_1",
-          question: "What is the primary site of photosynthesis in green plants?",
-          questionOdia: "ସବୁଜ ଉଦ୍ଭିଦରେ ଆଲୋକଶ୍ଳେଷଣର ପ୍ରଧାନ ସ୍ଥାନ କେଉଁଟି?",
-          options: { A: "Mitochondria", B: "Chloroplast (ହରିତକଣିକା)", C: "Ribosome", D: "Golgi bodies" },
-          correctAnswer: "B",
-          explanation: "Chloroplast contains chlorophyll which traps sunlight to synthesize carbohydrates.",
-          marks: 1,
-          difficulty: "Easy"
+          subjectId: "sub_10_soc",
+          topicId: "top_10_soc_1",
+          question: "Which newspaper was published by Gandhiji in South Africa?",
+          questionOdia: "ଇଂରେଜଙ୍କ ଅତ୍ୟାଚାର ବିରୁଦ୍ଧରେ ଜନମତ ସୃଷ୍ଟି ପାଇଁ ଗାନ୍ଧିଜୀ ଦକ୍ଷିଣ ଆଫ୍ରିକାରେ କେଉଁ ସମ୍ବାଦପତ୍ର ପ୍ରକାଶ କଲେ?",
+          options: { A: "Young India", B: "Navajivan", C: "Indian Opinion (ଇଣ୍ଡିଆନ୍ ଓପିନିଅନ୍)", D: "Harijan" },
+          correctAnswer: "C",
+          explanation: "ଦକ୍ଷିଣ ଆଫ୍ରିକାରେ ଇଂରେଜଙ୍କ ନିର୍ଯାତନା ଜଣାଇବା ପାଇଁ ଗାନ୍ଧିଜୀ 'ଇଣ୍ଡିଆନ୍ ଓପିନିଅନ୍' ପତ୍ରିକା ପ୍ରକାଶ କରିଥିଲେ ।",
+          marks: 1
         }
       ]
     };
@@ -239,10 +196,14 @@
       get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
       set: (key, val) => localStorage.setItem(key, JSON.stringify(val)),
       init: () => {
-        if (!localStorage.getItem(DB_KEYS.SUBJECTS)) db.set(DB_KEYS.SUBJECTS, SEED_DATA.subjects);
-        if (!localStorage.getItem(DB_KEYS.TOPICS)) db.set(DB_KEYS.TOPICS, SEED_DATA.topics);
-        if (!localStorage.getItem(DB_KEYS.QUESTIONS)) db.set(DB_KEYS.QUESTIONS, SEED_DATA.questions);
-        if (!localStorage.getItem(DB_KEYS.NOTES)) db.set(DB_KEYS.NOTES, SEED_DATA.notes);
+        if (!localStorage.getItem(DB_KEYS.CLASSES)) db.set(DB_KEYS.CLASSES, SEED_CLASSES);
+        if (localStorage.getItem('sp_db_ver') !== DB_VERSION) {
+          localStorage.setItem(DB_KEYS.SUBJECTS, JSON.stringify(SEED_DATA.subjects));
+          localStorage.setItem(DB_KEYS.TOPICS, JSON.stringify(SEED_DATA.topics));
+          localStorage.setItem(DB_KEYS.QUESTIONS, JSON.stringify(SEED_DATA.questions));
+          localStorage.setItem(DB_KEYS.NOTES, JSON.stringify(SEED_DATA.notes));
+          localStorage.setItem('sp_db_ver', DB_VERSION);
+        }
       }
     };
     db.init();
@@ -309,7 +270,7 @@
         sessionStorage.removeItem(DB_KEYS.AUTH_ADMIN);
         sessionStorage.removeItem('sp_guest_mode');
         router.updateHeader();
-        toast('Logged Out', 'Session ended successfully.', 'info');
+        toast('Logged Out', 'Session ended.', 'info');
         router.navigate('home');
       }
     };
@@ -329,7 +290,6 @@
 
     const router = {
       currentRoute: 'home',
-      
       updateHeader: () => {
         const student = auth.getStudent();
         const admin = auth.getAdmin();
@@ -395,51 +355,21 @@
         }
 
         switch (viewName) {
-          case 'home':
-            app.innerHTML = views.home();
-            break;
-          case 'register-free':
-            app.innerHTML = views.registerFree();
-            break;
-          case 'admission':
-            app.innerHTML = views.admission();
-            break;
-          case 'login':
-            app.innerHTML = views.login();
-            break;
-          case 'student-dashboard':
-            app.innerHTML = views.studentDashboard();
-            break;
-          case 'subject-select':
-            app.innerHTML = views.subjectSelect();
-            break;
-          case 'topic-select':
-            app.innerHTML = views.topicSelect(params.subjectId);
-            break;
-          case 'mode-select':
-            app.innerHTML = views.modeSelect(params.subjectId, params.topicId);
-            break;
-          case 'test-screen':
-            app.innerHTML = views.testScreen();
-            renderQuestion();
-            break;
-          case 'result-screen':
-            app.innerHTML = views.resultScreen(params.resultData);
-            break;
-          case 'student-history':
-            app.innerHTML = views.studentHistory();
-            break;
-          case 'notes-view':
-            app.innerHTML = views.notesView(params.topicId);
-            break;
-          case 'admin-auth':
-            app.innerHTML = views.adminAuth();
-            break;
-          case 'admin-dashboard':
-            app.innerHTML = views.adminDashboard(params.tab || 'overview');
-            break;
-          default:
-            app.innerHTML = views.home();
+          case 'home': app.innerHTML = views.home(); break;
+          case 'register-free': app.innerHTML = views.registerFree(); break;
+          case 'admission': app.innerHTML = views.admission(); break;
+          case 'login': app.innerHTML = views.login(); break;
+          case 'student-dashboard': app.innerHTML = views.studentDashboard(); break;
+          case 'subject-select': app.innerHTML = views.subjectSelect(); break;
+          case 'topic-select': app.innerHTML = views.topicSelect(params.subjectId); break;
+          case 'mode-select': app.innerHTML = views.modeSelect(params.subjectId, params.topicId); break;
+          case 'test-screen': app.innerHTML = views.testScreen(); renderQuestion(); break;
+          case 'result-screen': app.innerHTML = views.resultScreen(params.resultData); break;
+          case 'student-history': app.innerHTML = views.studentHistory(); break;
+          case 'notes-view': app.innerHTML = views.notesView(params.topicId); break;
+          case 'admin-auth': app.innerHTML = views.adminAuth(); break;
+          case 'admin-dashboard': app.innerHTML = views.adminDashboard(params.tab || 'html-upload'); break;
+          default: app.innerHTML = views.home();
         }
         window.scrollTo(0, 0);
       }
@@ -472,40 +402,6 @@
               </div>
             </div>
           </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-6 sm:p-8 rounded-3xl border-2 border-emerald-500 shadow-sm space-y-4">
-              <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">Option 1</span>
-              <h3 class="text-xl font-bold text-slate-900">Student Registration (Mocks Only)</h3>
-              <p class="text-xs text-slate-500 leading-relaxed">
-                Free enrollment for Odisha Board Class 6-10 students to attempt Chapter-wise and Full-syllabus Online CBT Mock Exams.
-              </p>
-              <ul class="text-xs space-y-2 text-slate-700 font-medium">
-                <li><i class="fa-solid fa-check text-emerald-600 mr-2"></i> All Subject Online CBT Mock Tests</li>
-                <li><i class="fa-solid fa-check text-emerald-600 mr-2"></i> Instant Practice & Exam Mode</li>
-                <li class="text-slate-400"><i class="fa-solid fa-xmark mr-2 text-slate-400"></i> Chapter Revision Notes & E-Books (Locked)</li>
-              </ul>
-              <button onclick="router.navigate('register-free')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition">
-                Register for Free Mocks
-              </button>
-            </div>
-
-            <div class="bg-gradient-to-b from-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl space-y-4 border border-amber-500/50">
-              <span class="text-[10px] font-black uppercase tracking-wider bg-amber-400 text-indigo-950 px-3 py-1 rounded-full">Option 2 (Recommended)</span>
-              <h3 class="text-xl font-bold text-amber-300">Complete Admission (Notes + Mocks)</h3>
-              <p class="text-xs text-indigo-200 leading-relaxed">
-                Full institutional access with high-yield Odisha Board Chapter Notes, E-Books, Special Question Banks, and Unlimited CBT Tests.
-              </p>
-              <ul class="text-xs space-y-2 text-indigo-100 font-medium">
-                <li><i class="fa-solid fa-check text-amber-400 mr-2"></i> All Subject Online CBT Mock Tests</li>
-                <li><i class="fa-solid fa-check text-amber-400 mr-2"></i> <strong>Chapter-wise Full Revision Notes (ଓଡ଼ିଆ ଓ English)</strong></li>
-                <li><i class="fa-solid fa-check text-amber-400 mr-2"></i> Priority Verification & WhatsApp Support</li>
-              </ul>
-              <button onclick="router.navigate('admission')" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow-lg">
-                Apply for Full Admission
-              </button>
-            </div>
-          </div>
         </div>
       `,
 
@@ -516,13 +412,11 @@
             <h2 class="text-2xl font-black text-slate-900">Student Mock Test Registration</h2>
             <p class="text-xs text-slate-500">Register to get verified login credentials for Online Mock Exams.</p>
           </div>
-
           <form onsubmit="handleRegistrationSubmit(event)" class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Student Full Name *</label>
               <input type="text" id="regName" required placeholder="e.g. Subham Dash" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-600 text-sm">
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Class *</label>
@@ -539,18 +433,14 @@
                 <input type="tel" id="regPhone" required placeholder="10-digit number" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-600 text-sm">
               </div>
             </div>
-
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
               <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-600 text-sm">
             </div>
-
             <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-lg transition text-sm">
               Submit Mock Registration <i class="fa-solid fa-arrow-right ml-1"></i>
             </button>
           </form>
-
-          <p class="text-[11px] text-slate-400 text-center">Already approved? <button onclick="router.navigate('login')" class="text-indigo-600 font-bold underline">Login here</button></p>
         </div>
       `,
 
@@ -561,13 +451,11 @@
             <h2 class="text-2xl font-black text-slate-900">Student Admission Form</h2>
             <p class="text-xs text-slate-500">Apply for Full Access: Chapter Notes, E-Books & Online CBT Mock Series.</p>
           </div>
-
           <form onsubmit="handleAdmissionSubmit(event)" class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Student Full Name *</label>
               <input type="text" id="admName" required placeholder="e.g. Priyaranjan Mohapatra" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Guardian's Name *</label>
@@ -584,7 +472,6 @@
                 </select>
               </div>
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Mobile *</label>
@@ -595,18 +482,14 @@
                 <input type="email" id="admEmail" required placeholder="student@gmail.com" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
               </div>
             </div>
-
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">School Name *</label>
               <input type="text" id="admSchool" required placeholder="e.g. Ravenshaw Collegiate School, Cuttack" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
             </div>
-
             <button type="submit" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl shadow-lg transition text-sm">
               Submit Admission Application <i class="fa-solid fa-paper-plane ml-1"></i>
             </button>
           </form>
-
-          <p class="text-[11px] text-slate-400 text-center">Already approved? <button onclick="router.navigate('login')" class="text-indigo-600 font-bold underline">Login here</button></p>
         </div>
       `,
 
@@ -617,61 +500,35 @@
             <h2 class="text-2xl font-black text-slate-900">Student Sign In</h2>
             <p class="text-xs text-slate-500">Sign in using credentials assigned by Satyapeeth Admin.</p>
           </div>
-
           <form onsubmit="handleStudentLogin(event)" class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile Number or Email</label>
-              <div class="relative">
-                <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
-                <input type="text" id="loginUser" required placeholder="Enter Mobile or Email" class="w-full pl-10 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
-              </div>
+              <input type="text" id="loginUser" required placeholder="Enter Mobile or Email" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
             </div>
-
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
-              <div class="relative">
-                <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
-                <input type="password" id="loginPass" required placeholder="Enter Password" class="w-full pl-10 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
-              </div>
+              <input type="password" id="loginPass" required placeholder="Enter Password" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
             </div>
-
             <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-lg transition text-sm">
               Authenticate & Open Dashboard <i class="fa-solid fa-arrow-right ml-1"></i>
             </button>
           </form>
-
-          <div class="pt-4 border-t border-slate-100 flex justify-between items-center text-xs">
-            <button onclick="guestLogin()" class="text-amber-600 font-bold hover:underline">Use Free Guest Mode</button>
-            <button onclick="router.navigate('register-free')" class="text-slate-500 hover:underline">New Student?</button>
-          </div>
         </div>
       `,
 
       studentDashboard: () => {
         const student = auth.getStudent() || { name: "Guest Student", class: "10", studentId: "GST-999", type: "Guest" };
-        const isGuest = auth.isGuest();
         const hasNotesAccess = student.type === 'Admission';
 
         return `
           <div class="space-y-8">
             <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <span class="text-xs ${hasNotesAccess ? 'bg-amber-400 text-indigo-950 font-black' : isGuest ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-emerald-500 text-white font-bold'} px-2.5 py-0.5 rounded-md uppercase">
-                  ${hasNotesAccess ? 'Full Institutional Admission (Notes + Mocks)' : isGuest ? 'Guest Demo' : 'Mock Assessment Registration'}
+                <span class="text-xs ${hasNotesAccess ? 'bg-amber-400 text-indigo-950 font-black' : 'bg-emerald-500 text-white font-bold'} px-2.5 py-0.5 rounded-md uppercase">
+                  ${hasNotesAccess ? 'Full Institutional Admission (Notes + Mocks)' : 'Mock Assessment Registration'}
                 </span>
                 <h2 class="text-2xl sm:text-3xl font-black mt-2">Namaste, ${student.name}</h2>
-                <p class="text-xs text-indigo-200 mt-1">Designated: <strong>Odisha Board Class ${student.class}</strong> | Student ID: <span class="font-mono text-amber-300 font-bold">${student.studentId}</span></p>
-              </div>
-              <div class="flex gap-2">
-                ${!hasNotesAccess ? `
-                  <button onclick="router.navigate('admission')" class="bg-amber-500 hover:bg-amber-400 text-xs text-indigo-950 font-black px-4 py-2.5 rounded-xl transition shadow">
-                    Upgrade to Full Notes Access <i class="fa-solid fa-lock-open ml-1"></i>
-                  </button>
-                ` : `
-                  <button onclick="router.navigate('student-history')" class="bg-indigo-800 hover:bg-indigo-700 text-xs text-white font-bold px-4 py-2.5 rounded-xl border border-indigo-600 transition">
-                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> My Test History
-                  </button>
-                `}
+                <p class="text-xs text-indigo-200 mt-1">Designated: <strong>Odisha Board Class ${student.class}</strong> | ID: <span class="font-mono text-amber-300 font-bold">${student.studentId}</span></p>
               </div>
             </div>
 
@@ -693,15 +550,12 @@
                 <div class="w-12 h-12 rounded-2xl ${hasNotesAccess ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-400'} flex items-center justify-center text-2xl font-bold">
                   <i class="fa-solid fa-file-lines"></i>
                 </div>
-                <div class="flex items-center justify-between">
-                  <h3 class="text-xl font-bold text-slate-900">Chapter Revision Notes</h3>
-                  ${!hasNotesAccess ? `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-lock"></i> Admission Only</span>` : `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">Unlocked</span>`}
-                </div>
+                <h3 class="text-xl font-bold text-slate-900">Chapter Revision Notes</h3>
                 <p class="text-xs text-slate-500 leading-relaxed">
-                  Read complete theory revision notes, formulas and question summaries prepared for Odisha Board.
+                  Read complete theory revision notes, formulas and question summaries.
                 </p>
-                <button onclick="${hasNotesAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-3 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold'} rounded-xl transition text-xs tracking-wider uppercase">
-                  ${hasNotesAccess ? 'Browse Chapter Notes' : 'Unlock Chapter Notes'} <i class="fa-solid fa-arrow-right ml-1"></i>
+                <button onclick="${hasNotesAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-3 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black' : 'bg-slate-100 text-slate-700 font-bold'} rounded-xl transition text-xs tracking-wider uppercase">
+                  ${hasNotesAccess ? 'Browse Chapter Notes' : 'Unlock Chapter Notes 🔒'} <i class="fa-solid fa-arrow-right ml-1"></i>
                 </button>
               </div>
             </div>
@@ -726,7 +580,7 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              ${subjects.length > 0 ? subjects.map(sub => `
+              ${subjects.map(sub => `
                 <div onclick="router.navigate('topic-select', { subjectId: '${sub.id}' })" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-600 hover:shadow-md cursor-pointer transition flex items-center justify-between group">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-sm group-hover:bg-indigo-600 group-hover:text-white transition">
@@ -739,11 +593,7 @@
                   </div>
                   <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-indigo-600 transition text-sm"></i>
                 </div>
-              `).join('') : `
-                <div class="col-span-full bg-white p-8 rounded-2xl text-center text-slate-400 text-xs">
-                  No subjects configured for Class ${student.class} yet.
-                </div>
-              `}
+              `).join('')}
             </div>
           </div>
         `;
@@ -926,9 +776,7 @@
       resultScreen: (res) => `
         <div class="max-w-3xl mx-auto space-y-6">
           <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl text-center space-y-4">
-            <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-3xl font-black">
-              ✓
-            </div>
+            <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-3xl font-black">✓</div>
             <div>
               <span class="text-[10px] uppercase font-bold text-indigo-600 tracking-wider">Evaluation Completed</span>
               <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Satyapeeth Official Assessment Scorecard</h2>
@@ -957,9 +805,6 @@
             <div class="pt-4 flex justify-center gap-3">
               <button onclick="router.navigate('student-dashboard')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">
                 Return to Dashboard
-              </button>
-              <button onclick="router.navigate('student-history')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
-                View Past Score History
               </button>
             </div>
           </div>
@@ -995,59 +840,6 @@
         </div>
       `,
 
-      studentHistory: () => {
-        const student = auth.getStudent() || { studentId: "GST-999" };
-        const results = db.get(DB_KEYS.RESULTS).filter(r => r.studentId === student.studentId);
-
-        return `
-          <div class="max-w-4xl mx-auto space-y-6">
-            <button onclick="router.navigate('student-dashboard')" class="text-xs text-indigo-600 font-bold hover:underline">
-              <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-            </button>
-            <div class="flex justify-between items-center">
-              <h2 class="text-2xl font-black text-slate-900">My Completed Test History</h2>
-              <span class="text-xs bg-slate-200 font-bold px-3 py-1 rounded-full text-slate-700">${results.length} Records</span>
-            </div>
-
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-              <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                  <thead class="bg-slate-50 border-b border-slate-100 uppercase text-slate-500 font-bold">
-                    <tr>
-                      <th class="p-4">Date & Time</th>
-                      <th class="p-4">Subject & Chapter</th>
-                      <th class="p-4">Mode</th>
-                      <th class="p-4">Score</th>
-                      <th class="p-4">Percentage</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100">
-                    ${results.length > 0 ? results.map(r => `
-                      <tr class="hover:bg-slate-50">
-                        <td class="p-4 text-slate-500">${r.date}</td>
-                        <td class="p-4">
-                          <strong class="text-slate-900">${r.subjectName}</strong>
-                          <p class="text-[10px] text-slate-400">${r.topicName}</p>
-                        </td>
-                        <td class="p-4">
-                          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${r.mode === 'exam' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'} uppercase">${r.mode}</span>
-                        </td>
-                        <td class="p-4 font-mono font-bold text-slate-900">${r.obtainedMarks} / ${r.totalMarks}</td>
-                        <td class="p-4 font-bold ${r.percentage >= 60 ? 'text-emerald-600' : 'text-amber-600'}">${r.percentage}%</td>
-                      </tr>
-                    `).join('') : `
-                      <tr>
-                        <td colspan="5" class="p-8 text-center text-slate-400">No mock assessments completed under this profile yet.</td>
-                      </tr>
-                    `}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        `;
-      },
-
       adminAuth: () => `
         <div class="max-w-md mx-auto bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl space-y-6">
           <div class="text-center space-y-1">
@@ -1057,18 +849,15 @@
             <h2 class="text-2xl font-black text-white">Satyapeeth Admin Auth</h2>
             <p class="text-xs text-slate-400">Restricted personnel gateway.</p>
           </div>
-
           <form onsubmit="handleAdminLogin(event)" class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Admin User ID</label>
               <input type="text" id="adminUserId" required placeholder="Enter Admin User ID" class="w-full p-3.5 bg-slate-900 border border-slate-800 rounded-xl outline-none focus:border-amber-400 text-sm text-white font-mono">
             </div>
-
             <div>
               <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Admin Password</label>
               <input type="password" id="adminPassword" required placeholder="••••••••" class="w-full p-3.5 bg-slate-900 border border-slate-800 rounded-xl outline-none focus:border-amber-400 text-sm text-white font-mono">
             </div>
-
             <button type="submit" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl shadow-lg transition text-sm">
               Unlock Master Suite <i class="fa-solid fa-lock-open ml-1"></i>
             </button>
@@ -1093,30 +882,100 @@
                 <h2 class="text-xl sm:text-2xl font-black mt-1">Admin: Satyajeet Dash</h2>
               </div>
               <div class="flex flex-wrap gap-2">
+                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code"></i> Smart HTML Importer</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'overview' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'overview' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Overview</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Free Mocks (${registrations.filter(r => r.status === 'Pending').length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Enrolled Students (${students.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Students (${students.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'questions' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'questions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Questions (${questions.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'bulk' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'bulk' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Bulk Import</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'results' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Results</button>
               </div>
             </div>
-
             ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, results, subjects, topics })}
           </div>
         `;
       },
 
       adminTabs: {
-        overview: ({ admissions, registrations, students, questions, results }) => `
+        'html-upload': () => {
+          const classes = db.get(DB_KEYS.CLASSES);
+          return `
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-6">
+              <div class="border-b pb-4">
+                <span class="text-xs bg-indigo-100 text-indigo-900 font-bold px-2.5 py-0.5 rounded uppercase">Universal Code Parser</span>
+                <h3 class="text-xl font-black text-slate-900 mt-1">Smart HTML / Code Question Uploader</h3>
+                <p class="text-xs text-slate-500">Paste your full HTML template code directly. Select target Class, Subject, and Topic below.</p>
+              </div>
+
+              <form onsubmit="handleHtmlImport(event)" class="space-y-4">
+                <!-- 1. Class Selector + Add New Class -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">1. Select Target Class</label>
+                    <select id="impClassSelect" onchange="updateImporterSubjects()" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold outline-none focus:border-indigo-600">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Or Add New Class</label>
+                    <div class="flex gap-2">
+                      <input type="text" id="impNewClass" placeholder="e.g. 11 or 12" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs outline-none">
+                      <button type="button" onclick="addNewClass()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs">Add</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Subject Selector + Add New Subject -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">2. Select Subject</label>
+                    <select id="impSubjectSelect" onchange="updateImporterTopics()" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold outline-none focus:border-indigo-600"></select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Or Add New Subject</label>
+                    <div class="flex gap-2">
+                      <input type="text" id="impNewSubject" placeholder="e.g. Political Science" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs outline-none">
+                      <button type="button" onclick="addNewSubject()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs">Add</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Topic Selector + Add New Topic -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">3. Select Chapter / Topic</label>
+                    <select id="impTopicSelect" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold outline-none focus:border-indigo-600"></select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Or Add New Chapter/Topic Name</label>
+                    <div class="flex gap-2">
+                      <input type="text" id="impNewTopic" placeholder="e.g. Important Articles Set 1" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs outline-none">
+                      <button type="button" onclick="addNewTopic()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs">Add</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. HTML Code Box -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">4. Paste Your Full HTML Code</label>
+                  <textarea id="impHtmlCode" required rows="10" placeholder="Paste your HTML page code directly here... (System will automatically extract all questionsData from it)" class="w-full p-4 bg-slate-950 text-emerald-400 font-mono text-xs rounded-2xl outline-none focus:border-indigo-600 border border-slate-800"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-sm transition shadow-lg">
+                  <i class="fa-solid fa-bolt-lightning mr-1"></i> Parse & Import All Questions into Portal
+                </button>
+              </form>
+            </div>
+          `;
+        },
+
+        overview: ({ admissions, registrations, students, questions }) => `
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
               <span class="text-[10px] uppercase font-bold text-slate-400">Total Enrolled</span>
               <p class="text-2xl font-black text-slate-900 mt-1">${students.length}</p>
             </div>
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span class="text-[10px] uppercase font-bold text-amber-600">Pending Full Admissions</span>
+              <span class="text-[10px] uppercase font-bold text-amber-600">Pending Admissions</span>
               <p class="text-2xl font-black text-amber-600 mt-1">${admissions.filter(a => a.status === 'Pending').length}</p>
             </div>
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
@@ -1124,7 +983,7 @@
               <p class="text-2xl font-black text-emerald-600 mt-1">${registrations.filter(r => r.status === 'Pending').length}</p>
             </div>
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span class="text-[10px] uppercase font-bold text-indigo-600">Question Bank</span>
+              <span class="text-[10px] uppercase font-bold text-indigo-600">Questions in Bank</span>
               <p class="text-2xl font-black text-indigo-600 mt-1">${questions.length}</p>
             </div>
           </div>
@@ -1132,19 +991,11 @@
 
         admissions: ({ admissions }) => `
           <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-black text-slate-900">Full Institutional Admission Requests (Notes + Mocks)</h3>
+            <h3 class="text-lg font-black text-slate-900">Admission Applications</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 uppercase text-slate-400 font-bold border-b">
-                  <tr>
-                    <th class="p-3">Student Name</th>
-                    <th class="p-3">Class</th>
-                    <th class="p-3">Guardian</th>
-                    <th class="p-3">Mobile & Email</th>
-                    <th class="p-3">School</th>
-                    <th class="p-3">Status</th>
-                    <th class="p-3">Action</th>
-                  </tr>
+                  <tr><th class="p-3">Student Name</th><th class="p-3">Class</th><th class="p-3">Guardian</th><th class="p-3">Mobile & Email</th><th class="p-3">Status</th><th class="p-3">Action</th></tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                   ${admissions.length > 0 ? admissions.map(a => `
@@ -1152,27 +1003,11 @@
                       <td class="p-3 font-bold text-slate-900">${a.name}</td>
                       <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">Class ${a.class}</span></td>
                       <td class="p-3 text-slate-600">${a.guardian}</td>
-                      <td class="p-3">
-                        <div>${a.phone}</div>
-                        <div class="text-[10px] text-slate-400">${a.email}</div>
-                      </td>
-                      <td class="p-3 text-slate-500">${a.school}</td>
-                      <td class="p-3">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${a.status}</span>
-                      </td>
-                      <td class="p-3">
-                        ${a.status === 'Pending' ? `
-                          <button onclick="approveStudent('adm', '${a.id}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-lg text-[10px] shadow">
-                            Approve Full Access
-                          </button>
-                        ` : `
-                          <span class="text-[10px] text-slate-400">Enrolled (${a.assignedStudentId})</span>
-                        `}
-                      </td>
+                      <td class="p-3"><div>${a.phone}</div><div class="text-[10px] text-slate-400">${a.email}</div></td>
+                      <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${a.status}</span></td>
+                      <td class="p-3">${a.status === 'Pending' ? `<button onclick="approveStudent('adm', '${a.id}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-lg text-[10px] shadow">Approve Full Access</button>` : `<span class="text-[10px] text-slate-400">Enrolled (${a.assignedStudentId})</span>`}</td>
                     </tr>
-                  `).join('') : `
-                    <tr><td colspan="7" class="p-6 text-center text-slate-400">No admission applications submitted yet.</td></tr>
-                  `}
+                  `).join('') : `<tr><td colspan="6" class="p-6 text-center text-slate-400">No applications yet.</td></tr>`}
                 </tbody>
               </table>
             </div>
@@ -1181,43 +1016,22 @@
 
         registrations: ({ registrations }) => `
           <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-black text-slate-900">Free Mock Test Registrations</h3>
+            <h3 class="text-lg font-black text-slate-900">Free Mock Registrations</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 uppercase text-slate-400 font-bold border-b">
-                  <tr>
-                    <th class="p-3">Student Name</th>
-                    <th class="p-3">Class</th>
-                    <th class="p-3">Mobile & Email</th>
-                    <th class="p-3">Status</th>
-                    <th class="p-3">Action</th>
-                  </tr>
+                  <tr><th class="p-3">Student Name</th><th class="p-3">Class</th><th class="p-3">Mobile & Email</th><th class="p-3">Status</th><th class="p-3">Action</th></tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                   ${registrations.length > 0 ? registrations.map(r => `
                     <tr>
                       <td class="p-3 font-bold text-slate-900">${r.name}</td>
                       <td class="p-3"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold">Class ${r.class}</span></td>
-                      <td class="p-3">
-                        <div>${r.phone}</div>
-                        <div class="text-[10px] text-slate-400">${r.email}</div>
-                      </td>
-                      <td class="p-3">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${r.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${r.status}</span>
-                      </td>
-                      <td class="p-3">
-                        ${r.status === 'Pending' ? `
-                          <button onclick="approveStudent('reg', '${r.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10px] shadow">
-                            Approve Mock Key
-                          </button>
-                        ` : `
-                          <span class="text-[10px] text-slate-400">Enrolled (${r.assignedStudentId})</span>
-                        `}
-                      </td>
+                      <td class="p-3"><div>${r.phone}</div><div class="text-[10px] text-slate-400">${r.email}</div></td>
+                      <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${r.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${r.status}</span></td>
+                      <td class="p-3">${r.status === 'Pending' ? `<button onclick="approveStudent('reg', '${r.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10px] shadow">Approve Mock Key</button>` : `<span class="text-[10px] text-slate-400">Enrolled (${r.assignedStudentId})</span>`}</td>
                     </tr>
-                  `).join('') : `
-                    <tr><td colspan="5" class="p-6 text-center text-slate-400">No free mock registrations submitted yet.</td></tr>
-                  `}
+                  `).join('') : `<tr><td colspan="5" class="p-6 text-center text-slate-400">No registrations yet.</td></tr>`}
                 </tbody>
               </table>
             </div>
@@ -1226,177 +1040,44 @@
 
         students: ({ students }) => `
           <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-black text-slate-900">Enrolled Student Database & Assigned Passwords</h3>
+            <h3 class="text-lg font-black text-slate-900">Enrolled Students Database</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 uppercase text-slate-400 font-bold border-b">
-                  <tr>
-                    <th class="p-3">Student ID</th>
-                    <th class="p-3">Name</th>
-                    <th class="p-3">Class & Access</th>
-                    <th class="p-3">Login Key (Mobile)</th>
-                    <th class="p-3">Password</th>
-                    <th class="p-3">Action</th>
-                  </tr>
+                  <tr><th class="p-3">Student ID</th><th class="p-3">Name</th><th class="p-3">Class & Type</th><th class="p-3">Mobile Key</th><th class="p-3">Password</th><th class="p-3">Action</th></tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                   ${students.length > 0 ? students.map(s => `
                     <tr>
                       <td class="p-3 font-mono font-bold text-indigo-600">${s.studentId}</td>
                       <td class="p-3 font-bold text-slate-900">${s.name}</td>
-                      <td class="p-3">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.type === 'Admission' ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'}">Class ${s.class} (${s.type})</span>
-                      </td>
+                      <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.type === 'Admission' ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'}">Class ${s.class} (${s.type})</span></td>
                       <td class="p-3 text-slate-600">${s.phone}</td>
                       <td class="p-3"><code class="bg-amber-50 text-amber-800 px-2 py-0.5 rounded font-mono font-bold border border-amber-200">${s.password}</code></td>
-                      <td class="p-3">
-                        <button onclick="deleteStudent('${s.studentId}')" class="text-rose-600 hover:underline text-[10px] font-bold">Remove</button>
-                      </td>
+                      <td class="p-3"><button onclick="deleteStudent('${s.studentId}')" class="text-rose-600 hover:underline text-[10px] font-bold">Remove</button></td>
                     </tr>
-                  `).join('') : `
-                    <tr><td colspan="6" class="p-6 text-center text-slate-400">No active students registered yet.</td></tr>
-                  `}
+                  `).join('') : `<tr><td colspan="6" class="p-6 text-center text-slate-400">No active students yet.</td></tr>`}
                 </tbody>
               </table>
             </div>
           </div>
         `,
 
-        questions: ({ subjects, topics, questions }) => `
-          <div class="space-y-6">
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-              <h3 class="text-lg font-black text-slate-900">Add New Question</h3>
-              <form onsubmit="handleCreateQuestion(event)" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Class</label>
-                    <select id="admQClass" onchange="updateAdminDropdowns()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold">
-                      <option value="10">Class 10</option>
-                      <option value="9">Class 9</option>
-                      <option value="8">Class 8</option>
-                      <option value="7">Class 7</option>
-                      <option value="6">Class 6</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Subject</label>
-                    <select id="admQSubject" onchange="updateAdminTopicsDropdown()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold"></select>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Chapter / Topic</label>
-                    <select id="admQTopic" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold"></select>
-                  </div>
-                </div>
-
-                <div class="space-y-2">
-                  <input type="text" id="admQTextEn" required placeholder="Question in English *" class="w-full p-3 bg-slate-50 border rounded-xl text-xs outline-none focus:border-indigo-600">
-                  <input type="text" id="admQTextOr" placeholder="Question in Odia (ଓଡ଼ିଆ ପ୍ରଶ୍ନ)" class="w-full p-3 bg-slate-50 border rounded-xl text-xs outline-none focus:border-indigo-600">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input type="text" id="admQOptA" required placeholder="Option A *" class="p-2.5 bg-slate-50 border rounded-xl text-xs">
-                  <input type="text" id="admQOptB" required placeholder="Option B *" class="p-2.5 bg-slate-50 border rounded-xl text-xs">
-                  <input type="text" id="admQOptC" required placeholder="Option C *" class="p-2.5 bg-slate-50 border rounded-xl text-xs">
-                  <input type="text" id="admQOptD" required placeholder="Option D *" class="p-2.5 bg-slate-50 border rounded-xl text-xs">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Correct Answer Key *</label>
-                    <select id="admQCorrect" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold">
-                      <option value="A">Option A</option>
-                      <option value="B">Option B</option>
-                      <option value="C">Option C</option>
-                      <option value="D">Option D</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Explanation / ବ୍ୟାଖ୍ୟା</label>
-                    <input type="text" id="admQExp" placeholder="Why is this answer correct?" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs">
-                  </div>
-                </div>
-
-                <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow transition">
-                  <i class="fa-solid fa-plus mr-1"></i> Save Question to Database
-                </button>
-              </form>
-            </div>
-
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-              <h3 class="text-lg font-black text-slate-900">Current Question Repository (${questions.length})</h3>
-              <div class="space-y-3">
-                ${questions.map((q, idx) => `
-                  <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex justify-between items-start gap-4">
-                    <div>
-                      <span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[10px]">Class ${q.class}</span>
-                      <h4 class="font-bold text-slate-900 mt-1">${idx + 1}. ${q.question}</h4>
-                      ${q.questionOdia ? `<p class="text-indigo-950 font-semibold mt-0.5">${q.questionOdia}</p>` : ''}
-                      <p class="text-emerald-700 font-bold mt-1">Correct Key: Option ${q.correctAnswer} (${q.options[q.correctAnswer]})</p>
-                    </div>
-                    <button onclick="deleteQuestion('${q.id}')" class="text-rose-600 hover:underline font-bold text-[10px]">Delete</button>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        `,
-
-        bulk: () => `
-          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
-            <div>
-              <h3 class="text-lg font-black text-slate-900">Bulk JSON / Code Importer</h3>
-              <p class="text-xs text-slate-500">Paste questions in standard JSON format.</p>
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex justify-between items-center">
-                <label class="text-xs font-bold text-slate-700 uppercase">JSON Question Array</label>
-                <button onclick="copySampleJSON()" class="text-xs text-indigo-600 font-bold hover:underline">
-                  <i class="fa-solid fa-copy mr-1"></i> Copy Sample Template
-                </button>
-              </div>
-              <textarea id="bulkJsonInput" rows="10" placeholder="Paste JSON array here..." class="w-full p-4 bg-slate-950 text-emerald-400 font-mono text-xs rounded-2xl outline-none focus:border-indigo-600 border border-slate-800"></textarea>
-            </div>
-
-            <button onclick="handleBulkImport()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl text-xs transition shadow-lg">
-              Validate & Import to Bank <i class="fa-solid fa-file-import ml-1"></i>
-            </button>
-          </div>
-        `,
-
-        results: ({ results }) => `
+        questions: ({ questions }) => `
           <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-black text-slate-900">Global Student Results Tracker</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 uppercase text-slate-400 font-bold border-b">
-                  <tr>
-                    <th class="p-3">Student Name</th>
-                    <th class="p-3">Class</th>
-                    <th class="p-3">Subject & Chapter</th>
-                    <th class="p-3">Score</th>
-                    <th class="p-3">Percentage</th>
-                    <th class="p-3">Date</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  ${results.length > 0 ? results.map(r => `
-                    <tr>
-                      <td class="p-3 font-bold text-slate-900">${r.studentName}</td>
-                      <td class="p-3">Class ${r.class}</td>
-                      <td class="p-3">
-                        <strong>${r.subjectName}</strong>
-                        <div class="text-[10px] text-slate-400">${r.topicName}</div>
-                      </td>
-                      <td class="p-3 font-mono font-bold">${r.obtainedMarks} / ${r.totalMarks}</td>
-                      <td class="p-3 font-bold ${r.percentage >= 60 ? 'text-emerald-600' : 'text-amber-600'}">${r.percentage}%</td>
-                      <td class="p-3 text-slate-500">${r.date}</td>
-                    </tr>
-                  `).join('') : `
-                    <tr><td colspan="6" class="p-6 text-center text-slate-400">No test results saved in the database yet.</td></tr>
-                  `}
-                </tbody>
-              </table>
+            <h3 class="text-lg font-black text-slate-900">Current Question Bank Repository (${questions.length})</h3>
+            <div class="space-y-3">
+              ${questions.map((q, idx) => `
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex justify-between items-start gap-4">
+                  <div>
+                    <span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[10px]">Class ${q.class}</span>
+                    <h4 class="font-bold text-slate-900 mt-1">${idx + 1}. ${q.question}</h4>
+                    ${q.questionOdia ? `<p class="text-indigo-950 font-semibold mt-0.5">${q.questionOdia}</p>` : ''}
+                    <p class="text-emerald-700 font-bold mt-1">Correct Key: Option ${q.correctAnswer} (${q.options[q.correctAnswer]})</p>
+                  </div>
+                  <button onclick="deleteQuestion('${q.id}')" class="text-rose-600 hover:underline font-bold text-[10px]">Delete</button>
+                </div>
+              `).join('')}
             </div>
           </div>
         `
@@ -1404,8 +1085,142 @@
     };
 
     /**
-     * USER ACTION CONTROLLER
+     * DYNAMIC SMART HTML IMPORTER CONTROLLERS
      */
+    function updateImporterSubjects() {
+      const cls = document.getElementById('impClassSelect').value;
+      const subSelect = document.getElementById('impSubjectSelect');
+      const subjects = db.get(DB_KEYS.SUBJECTS).filter(s => s.class === cls);
+      
+      subSelect.innerHTML = subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      updateImporterTopics();
+    }
+
+    function updateImporterTopics() {
+      const subId = document.getElementById('impSubjectSelect').value;
+      const topSelect = document.getElementById('impTopicSelect');
+      const topics = db.get(DB_KEYS.TOPICS).filter(t => t.subjectId === subId);
+      
+      topSelect.innerHTML = topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    }
+
+    function addNewClass() {
+      const newCls = document.getElementById('impNewClass').value.trim();
+      if (!newCls) return alert("Enter class name or number!");
+      const classes = db.get(DB_KEYS.CLASSES);
+      if (!classes.includes(newCls)) {
+        classes.push(newCls);
+        db.set(DB_KEYS.CLASSES, classes);
+        toast("Class Added", `Class ${newCls} created successfully.`, "success");
+        router.navigate('admin-dashboard', { tab: 'html-upload' });
+      }
+    }
+
+    function addNewSubject() {
+      const cls = document.getElementById('impClassSelect').value;
+      const newSubName = document.getElementById('impNewSubject').value.trim();
+      if (!newSubName) return alert("Enter subject name!");
+
+      const subjects = db.get(DB_KEYS.SUBJECTS);
+      const newSubId = "sub_" + cls + "_" + Date.now();
+      subjects.push({ id: newSubId, class: cls, name: newSubName });
+      db.set(DB_KEYS.SUBJECTS, subjects);
+
+      toast("Subject Added", `${newSubName} created for Class ${cls}.`, "success");
+      document.getElementById('impNewSubject').value = '';
+      updateImporterSubjects();
+      document.getElementById('impSubjectSelect').value = newSubId;
+      updateImporterTopics();
+    }
+
+    function addNewTopic() {
+      const cls = document.getElementById('impClassSelect').value;
+      const subId = document.getElementById('impSubjectSelect').value;
+      const newTopName = document.getElementById('impNewTopic').value.trim();
+      if (!newTopName) return alert("Enter chapter/topic name!");
+
+      const topics = db.get(DB_KEYS.TOPICS);
+      const newTopId = "top_" + cls + "_" + Date.now();
+      topics.push({ id: newTopId, class: cls, subjectId: subId, name: newTopName, isDemo: topics.filter(t => t.subjectId === subId).length === 0 });
+      db.set(DB_KEYS.TOPICS, topics);
+
+      toast("Topic Created", `${newTopName} created successfully.`, "success");
+      document.getElementById('impNewTopic').value = '';
+      updateImporterTopics();
+      document.getElementById('impTopicSelect').value = newTopId;
+    }
+
+    function handleHtmlImport(e) {
+      e.preventDefault();
+      const cls = document.getElementById('impClassSelect').value;
+      const subId = document.getElementById('impSubjectSelect').value;
+      const topId = document.getElementById('impTopicSelect').value;
+      const htmlCode = document.getElementById('impHtmlCode').value;
+
+      if (!subId || !topId) {
+        return alert("Please select or add a Subject and Chapter/Topic first!");
+      }
+
+      try {
+        let extractedQuestions = [];
+
+        // Match questionsData array from pasted HTML/JS
+        const jsMatch = htmlCode.match(/questionsData\s*=\s*(\[[\s\S]*?\]);/);
+        
+        if (jsMatch && jsMatch[1]) {
+          const rawParsed = Function('"use strict";return (' + jsMatch[1] + ')')();
+          
+          rawParsed.forEach(q => {
+            extractedQuestions.push({
+              id: "q_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+              class: cls,
+              subjectId: subId,
+              topicId: topId,
+              question: q.qEn || q.question || "Question",
+              questionOdia: q.qOr || q.questionOdia || "",
+              options: q.options || { A: "", B: "", C: "", D: "" },
+              correctAnswer: q.ans || q.correctAnswer || "A",
+              explanation: (q.expOr || "") + "\n" + (q.expEn || q.explanation || "") + (q.analysis ? "\n" + q.analysis.join("\n") : ""),
+              marks: 1
+            });
+          });
+        } else {
+          // Direct JSON Fallback
+          const rawParsed = JSON.parse(htmlCode);
+          if (Array.isArray(rawParsed)) {
+            rawParsed.forEach(q => {
+              extractedQuestions.push({
+                id: "q_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+                class: cls,
+                subjectId: subId,
+                topicId: topId,
+                question: q.question || q.qEn,
+                questionOdia: q.questionOdia || q.qOr || "",
+                options: q.options,
+                correctAnswer: q.correctAnswer || q.ans,
+                explanation: q.explanation || q.expOr || "",
+                marks: 1
+              });
+            });
+          }
+        }
+
+        if (extractedQuestions.length === 0) {
+          throw new Error("No questionsData array found in the pasted HTML code.");
+        }
+
+        const allQuestions = db.get(DB_KEYS.QUESTIONS);
+        extractedQuestions.forEach(q => allQuestions.push(q));
+        db.set(DB_KEYS.QUESTIONS, allQuestions);
+
+        toast("HTML Import Success! 🚀", `Successfully parsed and loaded ${extractedQuestions.length} questions into the Portal.`, "success");
+        router.navigate('admin-dashboard', { tab: 'questions' });
+
+      } catch (err) {
+        toast("Parser Error", err.message, "error");
+      }
+    }
+
     function handleRegistrationSubmit(e) {
       e.preventDefault();
       const newReg = {
@@ -1417,12 +1232,10 @@
         status: "Pending",
         date: new Date().toLocaleDateString()
       };
-
       const registrations = db.get(DB_KEYS.REGISTRATIONS);
       registrations.push(newReg);
       db.set(DB_KEYS.REGISTRATIONS, registrations);
-
-      toast('Registration Submitted!', 'Satyapeeth Admin will verify and send your password.', 'success');
+      toast('Registration Submitted!', 'Admin will verify and provide your login password.', 'success');
       router.navigate('home');
     }
 
@@ -1439,12 +1252,10 @@
         status: "Pending",
         date: new Date().toLocaleDateString()
       };
-
       const admissions = db.get(DB_KEYS.ADMISSIONS);
       admissions.push(newAdm);
       db.set(DB_KEYS.ADMISSIONS, admissions);
-
-      toast('Admission Submitted!', 'Details submitted for Full Access. Admin will contact you.', 'success');
+      toast('Admission Submitted!', 'Details submitted for Full Access (Notes + Mocks).', 'success');
       router.navigate('home');
     }
 
@@ -1461,7 +1272,7 @@
         toast('Welcome!', `Logged in as ${student.name}`, 'success');
         router.navigate('student-dashboard');
       } else {
-        toast('Login Failed', 'Incorrect mobile/email or unverified password.', 'error');
+        toast('Login Failed', 'Incorrect login details or unverified password.', 'error');
       }
     }
 
@@ -1479,24 +1290,22 @@
     }
 
     function showNotesLockPrompt() {
-      confirmDialog('Institutional Notes Locked 🔒', 'Chapter Revision Notes & E-Books are exclusive to Full Admission students. Would you like to submit your Admission form now?', () => {
+      confirmDialog('Institutional Notes Locked 🔒', 'Chapter Revision Notes are exclusive to Full Admission students. Submit your Admission form now?', () => {
         router.navigate('admission');
       });
     }
 
-    // ROBUST ADMIN AUTHENTICATION
     function handleAdminLogin(e) {
       e.preventDefault();
       const user = document.getElementById('adminUserId').value.trim().toLowerCase();
       const pass = document.getElementById('adminPassword').value.trim();
 
-      // Case-insensitive user check & password verification
       if ((user === "satyajeets308" || user === "satyajeet308") && pass === "Kalyani@123") {
         auth.setAdmin({ user: "Satyajeets308", role: "superadmin" });
-        toast('Admin Unlocked', 'Welcome Satyajeet Dash! Master session active.', 'success');
-        router.navigate('admin-dashboard', { tab: 'overview' });
+        toast('Admin Unlocked', 'Master session established.', 'success');
+        router.navigate('admin-dashboard', { tab: 'html-upload' });
       } else {
-        toast('Access Denied', 'Invalid User ID or Password. (Check User ID: Satyajeets308)', 'error');
+        toast('Access Denied', 'Invalid User ID or Password.', 'error');
       }
     }
 
@@ -1518,7 +1327,6 @@
 
       const studentId = "SP" + record.class + "-" + Math.floor(1000 + Math.random() * 9000);
       const password = "PASS" + Math.floor(1000 + Math.random() * 9000);
-
       record.assignedStudentId = studentId;
 
       const students = db.get(DB_KEYS.STUDENTS);
@@ -1538,126 +1346,23 @@
     }
 
     function deleteStudent(studentId) {
-      confirmDialog('Remove Student', 'Are you sure you want to delete this student profile?', () => {
+      confirmDialog('Remove Student', 'Delete this student profile?', () => {
         let students = db.get(DB_KEYS.STUDENTS).filter(s => s.studentId !== studentId);
         db.set(DB_KEYS.STUDENTS, students);
-        toast('Student Removed', 'Profile successfully deleted.', 'info');
+        toast('Student Removed', 'Profile deleted.', 'info');
         router.navigate('admin-dashboard', { tab: 'students' });
       });
     }
 
-    function updateAdminDropdowns() {
-      const cls = document.getElementById('admQClass').value;
-      const subSelect = document.getElementById('admQSubject');
-      const subjects = db.get(DB_KEYS.SUBJECTS).filter(s => s.class === cls);
-      
-      subSelect.innerHTML = subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-      updateAdminTopicsDropdown();
-    }
-
-    function updateAdminTopicsDropdown() {
-      const subId = document.getElementById('admQSubject').value;
-      const topSelect = document.getElementById('admQTopic');
-      const topics = db.get(DB_KEYS.TOPICS).filter(t => t.subjectId === subId);
-      
-      topSelect.innerHTML = topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-    }
-
-    function handleCreateQuestion(e) {
-      e.preventDefault();
-      const newQ = {
-        id: "q_" + Date.now(),
-        class: document.getElementById('admQClass').value,
-        subjectId: document.getElementById('admQSubject').value,
-        topicId: document.getElementById('admQTopic').value,
-        question: document.getElementById('admQTextEn').value.trim(),
-        questionOdia: document.getElementById('admQTextOr').value.trim(),
-        options: {
-          A: document.getElementById('admQOptA').value.trim(),
-          B: document.getElementById('admQOptB').value.trim(),
-          C: document.getElementById('admQOptC').value.trim(),
-          D: document.getElementById('admQOptD').value.trim()
-        },
-        correctAnswer: document.getElementById('admQCorrect').value,
-        explanation: document.getElementById('admQExp').value.trim(),
-        marks: 1,
-        difficulty: "Medium"
-      };
-
-      const questions = db.get(DB_KEYS.QUESTIONS);
-      questions.push(newQ);
-      db.set(DB_KEYS.QUESTIONS, questions);
-
-      toast('Saved', 'Question added to repository.', 'success');
-      router.navigate('admin-dashboard', { tab: 'questions' });
-    }
-
     function deleteQuestion(qId) {
-      confirmDialog('Delete Question', 'Are you sure you want to permanently delete this question?', () => {
+      confirmDialog('Delete Question', 'Permanently delete this question?', () => {
         let questions = db.get(DB_KEYS.QUESTIONS).filter(q => q.id !== qId);
         db.set(DB_KEYS.QUESTIONS, questions);
-        toast('Deleted', 'Question removed from database.', 'info');
+        toast('Deleted', 'Question removed.', 'info');
         router.navigate('admin-dashboard', { tab: 'questions' });
       });
     }
 
-    function handleBulkImport() {
-      const raw = document.getElementById('bulkJsonInput').value.trim();
-      try {
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) throw new Error('Data must be a JSON array of questions.');
-
-        let validCount = 0;
-        const questions = db.get(DB_KEYS.QUESTIONS);
-
-        parsed.forEach(item => {
-          if (item.question && item.options && item.correctAnswer && item.class) {
-            questions.push({
-              id: item.id || ("q_bulk_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4)),
-              class: String(item.class),
-              subjectId: item.subjectId || "sub_10_ps",
-              topicId: item.topicId || "top_10_ps_1",
-              question: item.question,
-              questionOdia: item.questionOdia || "",
-              options: item.options,
-              correctAnswer: item.correctAnswer,
-              explanation: item.explanation || "",
-              marks: item.marks || 1,
-              difficulty: item.difficulty || "Medium"
-            });
-            validCount++;
-          }
-        });
-
-        db.set(DB_KEYS.QUESTIONS, questions);
-        toast('Bulk Import Successful', `Imported ${validCount} questions into the bank.`, 'success');
-        router.navigate('admin-dashboard', { tab: 'questions' });
-      } catch (err) {
-        toast('Import Error', err.message, 'error');
-      }
-    }
-
-    function copySampleJSON() {
-      const sample = [
-        {
-          "class": "10",
-          "subjectId": "sub_10_ps",
-          "topicId": "top_10_ps_1",
-          "question": "What is the chemical formula of water?",
-          "questionOdia": "ଜଳର ରାସାୟନିକ ସଙ୍କେତ କ’ଣ?",
-          "options": { "A": "H2O", "B": "CO2", "C": "NaCl", "D": "O2" },
-          "correctAnswer": "A",
-          "explanation": "Water consists of 2 hydrogen atoms and 1 oxygen atom.",
-          "marks": 1
-        }
-      ];
-      navigator.clipboard.writeText(JSON.stringify(sample, null, 2));
-      toast('Copied', 'Sample JSON format copied to clipboard.', 'info');
-    }
-
-    /**
-     * TEST EXECUTION ENGINE
-     */
     function startTestEngine(subjectId, topicId, mode) {
       const subject = db.get(DB_KEYS.SUBJECTS).find(s => s.id === subjectId);
       const topic = db.get(DB_KEYS.TOPICS).find(t => t.id === topicId);
@@ -1687,7 +1392,6 @@
       } else {
         navTimer.classList.add('hidden');
       }
-
       router.navigate('test-screen');
     }
 
@@ -1698,10 +1402,8 @@
         const m = Math.floor(activeExam.timeLeft / 60);
         const s = activeExam.timeLeft % 60;
         const timeStr = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
-        
         const navTimerVal = document.getElementById('navTimerVal');
         if (navTimerVal) navTimerVal.innerText = timeStr;
-
         if (activeExam.timeLeft <= 0) {
           clearInterval(activeExam.timerInterval);
           finishTest(true);
@@ -1718,13 +1420,11 @@
       document.getElementById('testMetaMode').className = `font-extrabold uppercase px-2 py-0.5 rounded text-[10px] ${activeExam.mode === 'exam' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`;
       document.getElementById('testMetaTopic').innerText = activeExam.topic ? activeExam.topic.name : 'All Topics';
       document.getElementById('testMetaProgress').innerText = `${activeExam.currentIndex + 1} / ${activeExam.questions.length}`;
-
       document.getElementById('testQEn').innerText = `Q${activeExam.currentIndex + 1}. ${q.question}`;
       document.getElementById('testQOr').innerText = q.questionOdia || '';
 
       const container = document.getElementById('testOptionsBox');
       container.innerHTML = '';
-
       const userPick = activeExam.answers[q.id];
 
       Object.entries(q.options).forEach(([key, val]) => {
@@ -1759,7 +1459,6 @@
           </div>
           ${activeExam.mode === 'practice' && activeExam.practiceRevealed[q.id] && key === q.correctAnswer ? '<i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>' : ''}
         `;
-
         btn.onclick = () => selectOption(q.id, key);
         container.appendChild(btn);
       });
@@ -1773,7 +1472,7 @@
             <i class="fa-solid ${userPick === q.correctAnswer ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
             <span>${userPick === q.correctAnswer ? 'Correct Answer!' : 'Incorrect Answer'}</span>
           </div>
-          <p class="text-slate-700 text-[11px] leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct curriculum factual answer.'}</p>
+          <p class="text-slate-700 text-[11px] leading-relaxed whitespace-pre-line"><strong>Explanation:</strong> ${q.explanation || 'Direct factual answer.'}</p>
         `;
       } else {
         practiceBox.classList.add('hidden');
@@ -1791,9 +1490,7 @@
 
     function selectOption(qId, key) {
       activeExam.answers[qId] = key;
-      if (activeExam.mode === 'practice') {
-        activeExam.practiceRevealed[qId] = true;
-      }
+      if (activeExam.mode === 'practice') activeExam.practiceRevealed[qId] = true;
       renderQuestion();
     }
 
@@ -1803,7 +1500,7 @@
     }
 
     function confirmSubmitTest() {
-      confirmDialog('Submit Assessment', 'Are you sure you want to finish and submit your mock test?', () => {
+      confirmDialog('Submit Assessment', 'Finish and submit your mock test?', () => {
         finishTest(false);
       });
     }
@@ -1845,8 +1542,8 @@
         studentId: student.studentId,
         studentName: student.name,
         class: student.class,
-        subjectName: activeExam.subject ? activeExam.subject.name : 'General Science',
-        topicName: activeExam.topic ? activeExam.topic.name : 'Comprehensive Unit',
+        subjectName: activeExam.subject ? activeExam.subject.name : 'Social Science',
+        topicName: activeExam.topic ? activeExam.topic.name : 'Chapter Unit',
         mode: activeExam.mode,
         totalMarks,
         obtainedMarks,
@@ -1861,7 +1558,7 @@
       results.unshift(resultPayload);
       db.set(DB_KEYS.RESULTS, results);
 
-      if (isAutoTimeout) toast('Time Out', 'Exam submitted automatically as the timer reached 00:00.', 'warning');
+      if (isAutoTimeout) toast('Time Out', 'Exam submitted automatically.', 'warning');
       router.navigate('result-screen', { resultData: resultPayload });
     }
 
