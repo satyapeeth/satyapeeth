@@ -2,7 +2,7 @@
 <html lang="or" class="h-full bg-slate-50">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SATYAPEETH — Odisha Board Online CBT & Learning Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -10,200 +10,145 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', 'Noto Sans Oriya', sans-serif; }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    body { font-family: 'Inter', 'Noto Sans Oriya', sans-serif; -webkit-tap-highlight-color: transparent; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="h-full flex flex-col text-slate-800 antialiased custom-scrollbar">
+<body class="h-full flex flex-col text-slate-800 antialiased custom-scrollbar selection:bg-amber-200">
 
-  <div id="toastContainer" class="fixed top-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+  <!-- Toast Notification System -->
+  <div id="toastContainer" class="fixed top-3 right-3 left-3 sm:left-auto z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Header -->
+  <!-- Global Header -->
   <header class="bg-indigo-950 text-white sticky top-0 z-40 border-b border-indigo-900 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3 cursor-pointer" onclick="router.navigate('home')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-indigo-950 font-black text-xl shadow-inner">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-2 sm:gap-3 cursor-pointer select-none" onclick="router.navigate('home')">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-indigo-950 font-black text-sm sm:text-xl shadow-inner">
           SP
         </div>
         <div>
-          <span class="text-xl font-black tracking-wider text-amber-400">SATYAPEETH</span>
-          <span class="hidden sm:inline-block text-[10px] text-indigo-200 uppercase tracking-widest font-semibold ml-2 border-l border-indigo-700 pl-2">Odisha Board Prep</span>
+          <span class="text-base sm:text-xl font-black tracking-wider text-amber-400">SATYAPEETH</span>
+          <span class="hidden md:inline-block text-[10px] text-indigo-200 uppercase tracking-widest font-semibold ml-2 border-l border-indigo-700 pl-2">Odisha Board Prep</span>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-3">
-        <div id="navTimerBadge" class="hidden flex items-center gap-2 bg-rose-950/80 border border-rose-500 text-rose-300 px-3 py-1.5 rounded-lg text-xs font-mono font-bold tracking-widest animate-pulse">
+      <!-- Navigation Actions -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- Live Exam Timer Badge -->
+        <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold animate-pulse">
           <i class="fa-solid fa-stopwatch"></i>
           <span id="navTimerVal">00:00</span>
         </div>
 
-        <div id="navUserBadge" class="hidden flex items-center gap-2 bg-indigo-900 border border-indigo-700 px-3 py-1.5 rounded-lg text-xs font-medium">
-          <i class="fa-solid fa-user-graduate text-amber-400"></i>
-          <span id="navUserName" class="font-bold text-white"></span>
-          <span id="navUserType" class="px-1.5 py-0.5 rounded text-[10px] font-bold"></span>
+        <!-- User Badge -->
+        <div id="navUserBadge" class="hidden flex items-center gap-1.5 bg-indigo-900 border border-indigo-700 px-2.5 py-1 rounded-lg text-xs">
+          <i class="fa-solid fa-user-graduate text-amber-400 text-xs"></i>
+          <span id="navUserName" class="font-bold text-white text-xs truncate max-w-[100px] sm:max-w-[150px]"></span>
+          <span id="navUserType" class="px-1.5 py-0.5 rounded text-[9px] font-extrabold hidden sm:inline-block"></span>
         </div>
 
-        <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs bg-indigo-800 hover:bg-indigo-700 border border-indigo-600 px-3.5 py-2 rounded-lg font-bold text-white transition">
-          <i class="fa-solid fa-right-to-bracket mr-1"></i> Login
+        <!-- Auth Action Buttons -->
+        <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs bg-indigo-800 hover:bg-indigo-700 border border-indigo-600 px-2.5 sm:px-3.5 py-1.5 rounded-lg font-bold text-white transition">
+          Login
         </button>
-        <button id="navRegBtn" onclick="router.navigate('register-free')" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg font-bold transition shadow-sm">
+        <button id="navRegBtn" onclick="router.navigate('register-free')" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition">
           Register
         </button>
-        <button id="navAdmBtn" onclick="router.navigate('admission')" class="text-xs bg-amber-500 hover:bg-amber-400 text-indigo-950 px-3.5 py-2 rounded-lg font-extrabold transition shadow-sm">
+        <button id="navAdmBtn" onclick="router.navigate('admission')" class="text-xs bg-amber-500 hover:bg-amber-400 text-indigo-950 px-2.5 sm:px-3 py-1.5 rounded-lg font-extrabold transition">
           Admission
         </button>
-        <button id="navLogoutBtn" onclick="auth.logout()" class="hidden text-xs bg-slate-800 hover:bg-rose-900 border border-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-lg font-bold transition">
+        <button id="navLogoutBtn" onclick="auth.logout()" class="hidden text-xs bg-slate-800 hover:bg-rose-900 border border-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg font-bold transition">
           <i class="fa-solid fa-power-off"></i>
         </button>
-        <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs bg-indigo-900/50 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2.5 py-2 rounded-lg transition" title="Admin Portal">
+        <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2 py-1.5 rounded-lg transition" title="Admin Portal">
           <i class="fa-solid fa-shield-halved"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <main id="app" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8"></main>
+  <!-- Main View Container -->
+  <main id="app" class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6"></main>
 
-  <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white max-w-md w-full rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all p-6 text-center">
-      <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-xl">
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white max-w-sm w-full rounded-2xl shadow-2xl border border-slate-100 p-5 text-center">
+      <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-lg">
         <i class="fa-solid fa-triangle-exclamation"></i>
       </div>
-      <h3 id="confirmTitle" class="text-lg font-bold text-slate-900 mb-2">Confirm Action</h3>
-      <p id="confirmMsg" class="text-sm text-slate-600 mb-6">Are you sure you want to proceed?</p>
-      <div class="flex gap-3">
-        <button id="confirmCancelBtn" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition">Cancel</button>
-        <button id="confirmOkBtn" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition">Confirm</button>
+      <h3 id="confirmTitle" class="text-base font-bold text-slate-900 mb-1">Confirm Action</h3>
+      <p id="confirmMsg" class="text-xs text-slate-600 mb-5 leading-relaxed"></p>
+      <div class="flex gap-2">
+        <button id="confirmCancelBtn" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Cancel</button>
+        <button id="confirmOkBtn" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">Confirm</button>
       </div>
     </div>
   </div>
 
-  <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-xs text-center">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <p>&copy; 2026 <strong>SATYAPEETH</strong> — State Level Odisha Board Assessment Network</p>
-      <div class="flex gap-6">
-        <span>BSE Odisha Curriculum</span>
-        <span>Class 6 to 10 Special</span>
-      </div>
+  <footer class="bg-slate-900 text-slate-400 py-4 border-t border-slate-800 text-[11px] text-center">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <p>&copy; 2026 <strong>SATYAPEETH</strong> — BSE Odisha Examination Portal</p>
+      <span>Classes 6 to 10 Special Curriculum</span>
     </div>
   </footer>
 
   <script>
-    const DB_VERSION = "v4_html_upload_engine";
+    /**
+     * DATABASE & PERSISTENT SESSION ENGINE
+     */
     const DB_KEYS = {
-      STUDENTS: 'sp_students',
-      ADMISSIONS: 'sp_admissions',
-      REGISTRATIONS: 'sp_registrations',
-      CLASSES: 'sp_classes',
-      SUBJECTS: 'sp_subjects',
-      TOPICS: 'sp_topics',
-      NOTES: 'sp_notes',
-      QUESTIONS: 'sp_questions',
-      RESULTS: 'sp_results',
-      AUTH_STUDENT: 'sp_session_student',
-      AUTH_ADMIN: 'sp_session_admin'
+      STUDENTS: 'sp_students_db',
+      ADMISSIONS: 'sp_admissions_db',
+      REGISTRATIONS: 'sp_registrations_db',
+      CLASSES: 'sp_classes_db',
+      SUBJECTS: 'sp_subjects_db',
+      TOPICS: 'sp_topics_db',
+      NOTES: 'sp_notes_db',
+      QUESTIONS: 'sp_questions_db',
+      RESULTS: 'sp_results_db',
+      AUTH_STUDENT: 'sp_perm_student',
+      AUTH_ADMIN: 'sp_perm_admin'
     };
 
     const SEED_CLASSES = ["10", "9", "8", "7", "6"];
 
-    const SEED_DATA = {
-      subjects: [
-        { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
-        { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)" },
-        { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)" },
-        { id: "sub_10_ls", class: "10", name: "Life Science (ଜୀବ ବିଜ୍ଞାନ)" },
-        { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)" },
-        { id: "sub_10_eng", class: "10", name: "English" },
-        { id: "sub_9_sci", class: "9", name: "Science (ବିଜ୍ଞାନ)" },
-        { id: "sub_9_mth", class: "9", name: "Mathematics (ଗଣିତ)" },
-        { id: "sub_8_sci", class: "8", name: "Science (ବିଜ୍ଞାନ)" }
-      ],
-      topics: [
-        { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତୀୟ ଜାତୀୟ ଆନ୍ଦୋଳନରେ ଗାନ୍ଧିଜୀଙ୍କ ଆବିର୍ଭାବ", isDemo: true },
-        { id: "top_10_ps_1", class: "10", subjectId: "sub_10_ps", name: "ରାସାୟନିକ ପ୍ରତିକ୍ରିୟା ଓ ସମୀକରଣ (Chemical Reactions)", isDemo: true },
-        { id: "top_10_ls_1", class: "10", subjectId: "sub_10_ls", name: "ପୋଷଣ (Nutrition)", isDemo: true },
-        { id: "top_10_odia_1", class: "10", subjectId: "sub_10_fl_odia", name: "ବନ୍ଦେ ଉତ୍କଳ ଜନନୀ (Bande Utkala Janani)", isDemo: true },
-        { id: "top_10_mth_1", class: "10", subjectId: "sub_10_mth", name: "ସରଳ ସହସମୀକରଣ (Linear Equations)", isDemo: true }
-      ],
-      notes: [
-        {
-          id: "note_soc_1",
-          class: "10",
-          subjectId: "sub_10_soc",
-          topicId: "top_10_soc_1",
-          title: "ଭାରତୀୟ ଜାତୀୟ ଆନ୍ଦୋଳନରେ ଗାନ୍ଧିଜୀଙ୍କ ଆବିର୍ଭାବ (ସମ୍ପୂର୍ଣ୍ଣ ନୋଟ୍ସ)",
-          content: `🌟 ଜଣେ ମହାନାୟକଙ୍କ ଜନ୍ମ:
-ମହାତ୍ମା ଗାନ୍ଧୀ ୧୮୬୯ ମସିହା ଅକ୍ଟୋବର ୨ ତାରିଖରେ ଗୁଜରାଟର ପୋରବନ୍ଦରଠାରେ ଜନ୍ମଗ୍ରହଣ କରିଥିଲେ ।
+    const SEED_SUBJECTS = [
+      { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
+      { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)" },
+      { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)" },
+      { id: "sub_10_ls", class: "10", name: "Life Science (ଜୀବ ବିଜ୍ଞାନ)" },
+      { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)" },
+      { id: "sub_10_eng", class: "10", name: "English" },
+      { id: "sub_9_sci", class: "9", name: "Science (ବିଜ୍ଞାନ)" },
+      { id: "sub_9_mth", class: "9", name: "Mathematics (ଗଣିତ)" },
+      { id: "sub_9_odia", class: "9", name: "Odia (ସାହିତ୍ୟ ଧାରା)" }
+    ];
 
-🎓 ଶିକ୍ଷା ଓ ବାରିଷ୍ଟର: ୧୮୮୮ ରେ ଇଂଲଣ୍ଡ ଯାଇ ୧୮୯୧ ରେ ବାରିଷ୍ଟର ପାସ୍ କରି ଭାରତ ଫେରିଲେ ।
-
-🌍 ଦକ୍ଷିଣ ଆଫ୍ରିକା ସଂଘର୍ଷ:
-ଦାଦା ଅବଦୁଲ୍ଲାଙ୍କ ମୋକଦ୍ଦମା ପାଇଁ ୧୮୯୩ ରେ ନାଟାଲ୍ ଯାଇଥିଲେ । ୧୮୯୪ ରେ 'ନାଟାଲ୍ ଭାରତୀୟ କଂଗ୍ରେସ' ଗଠନ ଓ 'ଇଣ୍ଡିଆନ୍ ଓପିନିଅନ୍' ପତ୍ରିକା ପ୍ରକାଶ କଲେ । 'ସତ୍ୟାଗ୍ରହ' ନୀତିର ପ୍ରଥମ ପ୍ରୟୋଗ ସେଠାରେ କରିଥିଲେ ।
-
-🇮🇳 ଭାରତ ପ୍ରତ୍ୟାବର୍ତ୍ତନ ଓ ଆନ୍ଦୋଳନ:
-• ୧୯୧୫ ଜାନୁୟାରୀ ୯: ଭାରତ ପ୍ରତ୍ୟାବର୍ତ୍ତନ (ପ୍ରବାସୀ ଭାରତୀୟ ଦିବସ) ।
-• ରାଜନୈତିକ ଗୁରୁ: ଗୋପାଳ କୃଷ୍ଣ ଗୋଖଲେ ।
-• ଚମ୍ପାରନ୍ ଆନ୍ଦୋଳନ (୧୯୧୭): ବିହାରର ନୀଳଚାଷୀଙ୍କ ତିନିକାଠିଆ (୩/୨୦) ବ୍ୟବସ୍ଥା ବିରୁଦ୍ଧରେ ପ୍ରଥମ ସଫଳ ଆନ୍ଦୋଳନ । ୨୫% ଅର୍ଥ ଫେରସ୍ତ ।
-• ଖେଡ଼ା ସତ୍ୟାଗ୍ରହ (୧୯୧୮): ଇନ୍ଦୁଲାଲ୍ ଯାଜ୍ଞିକ ଓ ସର୍ଦ୍ଦାର ପଟେଲ୍ ଙ୍କ ସହଯୋଗ ।
-• ଅହମ୍ମଦାବାଦ ଲୁଗାକଳ (୧୯୧୮): ୩୫% ମଜୁରୀ ବୃଦ୍ଧି ପାଇଁ ଅନଶନ ।
-• ରାଓଲାତ୍ ଆଇନ୍ (୧୯୧୯): ବିନା ବିଚାରରେ ଗିରଫ କଳା ଆଇନ୍ ବିରୁଦ୍ଧରେ ସର୍ବଭାରତୀୟ ହରତାଳ (୬ ଏପ୍ରିଲ୍ ୧୯୧୯) ।
-• ଜାଲିଆନାୱାଲାବାଗ୍ ହତ୍ୟାକାଣ୍ଡ (୧୩ ଏପ୍ରିଲ୍ ୧୯୧୯): ଜେନେରାଲ୍ ଡାୟାରଙ୍କ ନିର୍ଦ୍ଦେଶରେ ଗୁଳିକାଣ୍ଡ । ପ୍ରତିବାଦରେ ରବୀନ୍ଦ୍ରନାଥ ଠାକୁର 'ନାଇଟ୍' (Knight) ଓ ଗାନ୍ଧିଜୀ 'କାଇଜର-ଇ-ହିନ୍ଦ୍' ଉପାଧି ତ୍ୟାଗ କଲେ ।`
-        }
-      ],
-      questions: [
-        {
-          id: "q_soc_1",
-          class: "10",
-          subjectId: "sub_10_soc",
-          topicId: "top_10_soc_1",
-          question: "When and where was Mahatma Gandhi born?",
-          questionOdia: "ମହାତ୍ମା ଗାନ୍ଧୀ କେବେ ଏବଂ କେଉଁଠାରେ ଜନ୍ମଗ୍ରହଣ କରିଥିଲେ?",
-          options: { A: "2 October 1869, Porbandar", B: "2 October 1879, Rajkot", C: "15 August 1869, Ahmedabad", D: "2 October 1888, Porbandar" },
-          correctAnswer: "A",
-          explanation: "ମହାତ୍ମା ଗାନ୍ଧୀ ୧୮୬୯ ମସିହା ଅକ୍ଟୋବର ୨ ତାରିଖରେ ଗୁଜରାଟର ପୋରବନ୍ଦରଠାରେ ଜନ୍ମଗ୍ରହଣ କରିଥିଲେ ।",
-          marks: 1
-        },
-        {
-          id: "q_soc_2",
-          class: "10",
-          subjectId: "sub_10_soc",
-          topicId: "top_10_soc_1",
-          question: "For which merchant's case did Gandhiji travel to Natal, South Africa in 1893?",
-          questionOdia: "କେଉଁ ଭାରତୀୟ ମୁସଲମାନ ବ୍ୟବସାୟୀଙ୍କ ମୋକଦ୍ଦମା ଲଢ଼ିବା ପାଇଁ ଗାନ୍ଧିଜୀ ଦକ୍ଷିଣ ଆଫ୍ରିକାର ନାଟାଲ୍ ଯାଇଥିଲେ?",
-          options: { A: "Dada Bhai Naoroji", B: "Dada Abdulla (ଦାଦା ଅବଦୁଲ୍ଲା)", C: "Muhammad Ali Jinnah", D: "Gopal Krishna Gokhale" },
-          correctAnswer: "B",
-          explanation: "ଦାଦା ଅବଦୁଲ୍ଲା ନାମକ ଜଣେ ଭାରତୀୟ ବ୍ୟବସାୟୀଙ୍କ ମୋକଦ୍ଦମା ଲଢ଼ିବା ପାଇଁ ଗାନ୍ଧିଜୀ ଦକ୍ଷିଣ ଆଫ୍ରିକା ଯାଇଥିଲେ ।",
-          marks: 1
-        },
-        {
-          id: "q_soc_3",
-          class: "10",
-          subjectId: "sub_10_soc",
-          topicId: "top_10_soc_1",
-          question: "Which newspaper was published by Gandhiji in South Africa?",
-          questionOdia: "ଇଂରେଜଙ୍କ ଅତ୍ୟାଚାର ବିରୁଦ୍ଧରେ ଜନମତ ସୃଷ୍ଟି ପାଇଁ ଗାନ୍ଧିଜୀ ଦକ୍ଷିଣ ଆଫ୍ରିକାରେ କେଉଁ ସମ୍ବାଦପତ୍ର ପ୍ରକାଶ କଲେ?",
-          options: { A: "Young India", B: "Navajivan", C: "Indian Opinion (ଇଣ୍ଡିଆନ୍ ଓପିନିଅନ୍)", D: "Harijan" },
-          correctAnswer: "C",
-          explanation: "ଦକ୍ଷିଣ ଆଫ୍ରିକାରେ ଇଂରେଜଙ୍କ ନିର୍ଯାତନା ଜଣାଇବା ପାଇଁ ଗାନ୍ଧିଜୀ 'ଇଣ୍ଡିଆନ୍ ଓପିନିଅନ୍' ପତ୍ରିକା ପ୍ରକାଶ କରିଥିଲେ ।",
-          marks: 1
-        }
-      ]
-    };
+    const SEED_TOPICS = [
+      { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତୀୟ ଜାତୀୟ ଆନ୍ଦୋଳନରେ ଗାନ୍ଧିଜୀଙ୍କ ଆବିର୍ଭାବ", isDemo: true },
+      { id: "top_10_soc_2", class: "10", subjectId: "sub_10_soc", name: "ଅସହଯୋଗ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାର ଭୂମିକା", isDemo: false },
+      { id: "top_10_ps_1", class: "10", subjectId: "sub_10_ps", name: "ରାସାୟନିକ ପ୍ରତିକ୍ରିୟା ଓ ସମୀକରଣ", isDemo: true },
+      { id: "top_10_ls_1", class: "10", subjectId: "sub_10_ls", name: "ପୋଷଣ (Nutrition)", isDemo: true },
+      { id: "top_10_odia_1", class: "10", subjectId: "sub_10_fl_odia", name: "ବନ୍ଦେ ଉତ୍କଳ ଜନନୀ", isDemo: true },
+      { id: "top_10_mth_1", class: "10", subjectId: "sub_10_mth", name: "ସରଳ ସହସମୀକରଣ", isDemo: true }
+    ];
 
     const db = {
       get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
       set: (key, val) => localStorage.setItem(key, JSON.stringify(val)),
       init: () => {
         if (!localStorage.getItem(DB_KEYS.CLASSES)) db.set(DB_KEYS.CLASSES, SEED_CLASSES);
-        if (localStorage.getItem('sp_db_ver') !== DB_VERSION) {
-          localStorage.setItem(DB_KEYS.SUBJECTS, JSON.stringify(SEED_DATA.subjects));
-          localStorage.setItem(DB_KEYS.TOPICS, JSON.stringify(SEED_DATA.topics));
-          localStorage.setItem(DB_KEYS.QUESTIONS, JSON.stringify(SEED_DATA.questions));
-          localStorage.setItem(DB_KEYS.NOTES, JSON.stringify(SEED_DATA.notes));
-          localStorage.setItem('sp_db_ver', DB_VERSION);
-        }
+        if (!localStorage.getItem(DB_KEYS.SUBJECTS)) db.set(DB_KEYS.SUBJECTS, SEED_SUBJECTS);
+        if (!localStorage.getItem(DB_KEYS.TOPICS)) db.set(DB_KEYS.TOPICS, SEED_TOPICS);
+        if (!localStorage.getItem(DB_KEYS.QUESTIONS)) db.set(DB_KEYS.QUESTIONS, []);
+        if (!localStorage.getItem(DB_KEYS.STUDENTS)) db.set(DB_KEYS.STUDENTS, []);
+        if (!localStorage.getItem(DB_KEYS.ADMISSIONS)) db.set(DB_KEYS.ADMISSIONS, []);
+        if (!localStorage.getItem(DB_KEYS.REGISTRATIONS)) db.set(DB_KEYS.REGISTRATIONS, []);
       }
     };
     db.init();
@@ -215,26 +160,14 @@
         warning: 'bg-amber-500 text-slate-950',
         info: 'bg-indigo-600 text-white'
       };
-      const icons = {
-        success: 'fa-circle-check',
-        error: 'fa-circle-xmark',
-        warning: 'fa-triangle-exclamation',
-        info: 'fa-circle-info'
-      };
       const toastEl = document.createElement('div');
-      toastEl.className = `${colors[type]} p-4 rounded-xl shadow-xl flex items-start gap-3 pointer-events-auto transition transform translate-x-0 max-w-sm`;
-      toastEl.innerHTML = `
-        <i class="fa-solid ${icons[type]} text-lg mt-0.5"></i>
-        <div>
-          <h4 class="font-bold text-sm leading-tight">${title}</h4>
-          <p class="text-xs opacity-90 mt-0.5 leading-normal">${msg}</p>
-        </div>
-      `;
+      toastEl.className = `${colors[type]} p-3 rounded-xl shadow-xl flex items-start gap-2.5 pointer-events-auto transition transform max-w-sm border border-white/20 text-xs`;
+      toastEl.innerHTML = `<div><h4 class="font-bold">${title}</h4><p class="opacity-90 mt-0.5">${msg}</p></div>`;
       document.getElementById('toastContainer').appendChild(toastEl);
       setTimeout(() => {
         toastEl.classList.add('opacity-0', 'translate-x-full');
-        setTimeout(() => toastEl.remove(), 300);
-      }, 4000);
+        setTimeout(() => toastEl.remove(), 250);
+      }, 3500);
     }
 
     function confirmDialog(title, msg, onConfirm) {
@@ -256,21 +189,22 @@
       cancelBtn.onclick = cleanup;
     }
 
+    // PERSISTENT AUTHENTICATION (Survives Refresh)
     const auth = {
-      getStudent: () => JSON.parse(sessionStorage.getItem(DB_KEYS.AUTH_STUDENT)),
-      getAdmin: () => JSON.parse(sessionStorage.getItem(DB_KEYS.AUTH_ADMIN)),
-      isGuest: () => sessionStorage.getItem('sp_guest_mode') === 'true',
+      getStudent: () => JSON.parse(localStorage.getItem(DB_KEYS.AUTH_STUDENT)),
+      getAdmin: () => JSON.parse(localStorage.getItem(DB_KEYS.AUTH_ADMIN)),
+      isGuest: () => localStorage.getItem('sp_guest_flag') === 'true',
       setStudent: (data) => {
-        sessionStorage.removeItem('sp_guest_mode');
-        sessionStorage.setItem(DB_KEYS.AUTH_STUDENT, JSON.stringify(data));
+        localStorage.removeItem('sp_guest_flag');
+        localStorage.setItem(DB_KEYS.AUTH_STUDENT, JSON.stringify(data));
       },
-      setAdmin: (data) => sessionStorage.setItem(DB_KEYS.AUTH_ADMIN, JSON.stringify(data)),
+      setAdmin: (data) => localStorage.setItem(DB_KEYS.AUTH_ADMIN, JSON.stringify(data)),
       logout: () => {
-        sessionStorage.removeItem(DB_KEYS.AUTH_STUDENT);
-        sessionStorage.removeItem(DB_KEYS.AUTH_ADMIN);
-        sessionStorage.removeItem('sp_guest_mode');
+        localStorage.removeItem(DB_KEYS.AUTH_STUDENT);
+        localStorage.removeItem(DB_KEYS.AUTH_ADMIN);
+        localStorage.removeItem('sp_guest_flag');
         router.updateHeader();
-        toast('Logged Out', 'Session ended.', 'info');
+        toast('Logged Out', 'Session ended successfully.', 'info');
         router.navigate('home');
       }
     };
@@ -284,8 +218,7 @@
       answers: {},
       practiceRevealed: {},
       timerInterval: null,
-      timeLeft: 600,
-      startTime: null
+      timeLeft: 600
     };
 
     const router = {
@@ -303,30 +236,27 @@
         if (student) {
           navUser.classList.remove('hidden');
           document.getElementById('navUserName').innerText = student.name;
-          const userTypeBadge = document.getElementById('navUserType');
-          
+          const badge = document.getElementById('navUserType');
           if (isGuest) {
-            userTypeBadge.className = "bg-amber-400 text-indigo-950 px-1.5 py-0.5 rounded text-[10px] font-bold";
-            userTypeBadge.innerText = "Guest Demo";
+            badge.className = "bg-amber-400 text-indigo-950 px-1.5 py-0.5 rounded text-[9px] font-extrabold";
+            badge.innerText = "Guest Demo";
           } else if (student.type === 'Admission') {
-            userTypeBadge.className = "bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded text-[10px] font-black";
-            userTypeBadge.innerText = `Class ${student.class} (All-Access)`;
+            badge.className = "bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded text-[9px] font-black";
+            badge.innerText = "All Access";
           } else {
-            userTypeBadge.className = "bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold";
-            userTypeBadge.innerText = `Class ${student.class} (Mock Access)`;
+            badge.className = "bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[9px] font-bold";
+            badge.innerText = "Mock Pass";
           }
-
           loginBtn.classList.add('hidden');
           regBtn.classList.add('hidden');
           admBtn.classList.add('hidden');
           logoutBtn.classList.remove('hidden');
         } else if (admin) {
           navUser.classList.remove('hidden');
-          document.getElementById('navUserName').innerText = "Satyajeet Dash";
-          const userTypeBadge = document.getElementById('navUserType');
-          userTypeBadge.className = "bg-rose-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold";
-          userTypeBadge.innerText = "Master Admin";
-
+          document.getElementById('navUserName').innerText = "Satyajeet Sahu";
+          const badge = document.getElementById('navUserType');
+          badge.className = "bg-rose-500 text-white px-1.5 py-0.5 rounded text-[9px] font-bold";
+          badge.innerText = "Admin";
           loginBtn.classList.add('hidden');
           regBtn.classList.add('hidden');
           admBtn.classList.add('hidden');
@@ -346,11 +276,11 @@
         const app = document.getElementById('app');
 
         if (viewName.startsWith('admin-dashboard') && !auth.getAdmin()) {
-          toast('Access Denied', 'Please log in with admin master credentials.', 'error');
+          toast('Admin Only', 'Please login with admin master credentials.', 'error');
           return router.navigate('admin-auth');
         }
-        if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'student-history', 'notes-view'].includes(viewName) && !auth.getStudent()) {
-          toast('Authentication Required', 'Please login to access portal.', 'warning');
+        if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'notes-view'].includes(viewName) && !auth.getStudent()) {
+          toast('Login Required', 'Please login to access this portal.', 'warning');
           return router.navigate('login');
         }
 
@@ -365,10 +295,14 @@
           case 'mode-select': app.innerHTML = views.modeSelect(params.subjectId, params.topicId); break;
           case 'test-screen': app.innerHTML = views.testScreen(); renderQuestion(); break;
           case 'result-screen': app.innerHTML = views.resultScreen(params.resultData); break;
-          case 'student-history': app.innerHTML = views.studentHistory(); break;
           case 'notes-view': app.innerHTML = views.notesView(params.topicId); break;
           case 'admin-auth': app.innerHTML = views.adminAuth(); break;
-          case 'admin-dashboard': app.innerHTML = views.adminDashboard(params.tab || 'html-upload'); break;
+          case 'admin-dashboard':
+            app.innerHTML = views.adminDashboard(params.tab || 'html-upload');
+            if ((params.tab || 'html-upload') === 'html-upload') {
+              setTimeout(updateImporterSubjects, 50);
+            }
+            break;
           default: app.innerHTML = views.home();
         }
         window.scrollTo(0, 0);
@@ -377,51 +311,49 @@
 
     const views = {
       home: () => `
-        <div class="space-y-12">
-          <div class="relative bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 text-white rounded-3xl p-8 sm:p-12 overflow-hidden shadow-2xl border border-indigo-800">
-            <div class="relative z-10 max-w-2xl space-y-4">
-              <span class="inline-block bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                Official Odisha BSE Board (Class 6 - 10)
-              </span>
-              <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-                Empowering Odisha's Students with Real CBT Prep & Smart Notes.
-              </h1>
-              <p class="text-indigo-200 text-sm sm:text-base leading-relaxed">
-                Choose Free Mock Registration for CBT Tests, or Apply for Full Admission to get Chapter Notes, E-Books & Mock Series.
-              </p>
-              <div class="pt-4 flex flex-wrap gap-3">
-                <button onclick="router.navigate('admission')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black px-6 py-3.5 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 text-sm">
-                  Apply for Full Admission (Notes + Mocks) <i class="fa-solid fa-arrow-right ml-1"></i>
-                </button>
-                <button onclick="router.navigate('register-free')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3.5 rounded-xl shadow transition text-sm">
-                  Free Mock Registration
-                </button>
-                <button onclick="guestLogin()" class="bg-indigo-800/80 hover:bg-indigo-800 border border-indigo-600 text-white font-bold px-5 py-3.5 rounded-xl shadow transition text-sm">
-                  <i class="fa-solid fa-user-clock mr-1"></i> Guest Demo
-                </button>
-              </div>
+        <div class="space-y-6 sm:space-y-10">
+          <div class="bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-indigo-800 text-center sm:text-left">
+            <span class="inline-block bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[11px] font-bold px-3 py-0.5 rounded-full uppercase">
+              BSE Odisha Board Curriculum (6-10)
+            </span>
+            <h1 class="text-2xl sm:text-4xl font-black mt-3 leading-tight">
+              Satyapeeth Online CBT & Smart Mock Portal
+            </h1>
+            <p class="text-indigo-200 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed">
+              Official chapter-wise practice tests with instant Odia & English explanations. Register for free mock access or apply for full admission.
+            </p>
+            <div class="mt-5 flex flex-wrap gap-2.5 justify-center sm:justify-start">
+              <button onclick="router.navigate('admission')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black px-4 py-2.5 rounded-xl shadow text-xs">
+                Full Admission (Notes + Mocks)
+              </button>
+              <button onclick="router.navigate('register-free')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl shadow text-xs">
+                Free Mock Register
+              </button>
+              <button onclick="guestLogin()" class="bg-indigo-900 border border-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs">
+                Guest Demo
+              </button>
             </div>
           </div>
         </div>
       `,
 
       registerFree: () => `
-        <div class="max-w-xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl space-y-6">
-          <div class="text-center space-y-1">
-            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-wider">Free Mock Registration</span>
-            <h2 class="text-2xl font-black text-slate-900">Student Mock Test Registration</h2>
-            <p class="text-xs text-slate-500">Register to get verified login credentials for Online Mock Exams.</p>
+        <div class="max-w-md mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-5">
+          <div class="text-center">
+            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">Free Registration</span>
+            <h2 class="text-xl font-black text-slate-900 mt-1">Student Mock Registration</h2>
+            <p class="text-[11px] text-slate-500">Apply for your verified mock test credentials.</p>
           </div>
-          <form onsubmit="handleRegistrationSubmit(event)" class="space-y-4">
+          <form onsubmit="handleRegistrationSubmit(event)" class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Student Full Name *</label>
-              <input type="text" id="regName" required placeholder="e.g. Subham Dash" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-600 text-sm">
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Student Full Name *</label>
+              <input type="text" id="regName" required placeholder="e.g. Subham Dash" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none focus:border-emerald-600">
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Class *</label>
-                <select id="regClass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-600 text-sm font-semibold">
-                  <option value="10">Class 10 (Matric)</option>
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Class *</label>
+                <select id="regClass" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold outline-none">
+                  <option value="10">Class 10</option>
                   <option value="9">Class 9</option>
                   <option value="8">Class 8</option>
                   <option value="7">Class 7</option>
@@ -429,42 +361,42 @@
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Phone *</label>
-                <input type="tel" id="regPhone" required placeholder="10-digit number" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-600 text-sm">
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Mobile / WhatsApp *</label>
+                <input type="tel" id="regPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
               </div>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
-              <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-600 text-sm">
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Email Address *</label>
+              <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
             </div>
-            <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-lg transition text-sm">
-              Submit Mock Registration <i class="fa-solid fa-arrow-right ml-1"></i>
+            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
+              Submit Registration
             </button>
           </form>
         </div>
       `,
 
       admission: () => `
-        <div class="max-w-xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl space-y-6">
-          <div class="text-center space-y-1">
-            <span class="text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full uppercase tracking-wider">Full Institutional Access</span>
-            <h2 class="text-2xl font-black text-slate-900">Student Admission Form</h2>
-            <p class="text-xs text-slate-500">Apply for Full Access: Chapter Notes, E-Books & Online CBT Mock Series.</p>
+        <div class="max-w-md mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-5">
+          <div class="text-center">
+            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full uppercase">Full Access</span>
+            <h2 class="text-xl font-black text-slate-900 mt-1">Student Admission Form</h2>
+            <p class="text-[11px] text-slate-500">Access full chapter notes, e-books and mock tests.</p>
           </div>
-          <form onsubmit="handleAdmissionSubmit(event)" class="space-y-4">
+          <form onsubmit="handleAdmissionSubmit(event)" class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Student Full Name *</label>
-              <input type="text" id="admName" required placeholder="e.g. Priyaranjan Mohapatra" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Student Full Name *</label>
+              <input type="text" id="admName" required placeholder="e.g. Priyaranjan Mohapatra" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none focus:border-amber-500">
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Guardian's Name *</label>
-                <input type="text" id="admGuardian" required placeholder="Father/Mother Name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Guardian Name *</label>
+                <input type="text" id="admGuardian" required placeholder="Father/Mother" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Class *</label>
-                <select id="admClass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm font-semibold">
-                  <option value="10">Class 10 (Matric)</option>
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Class *</label>
+                <select id="admClass" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold outline-none">
+                  <option value="10">Class 10</option>
                   <option value="9">Class 9</option>
                   <option value="8">Class 8</option>
                   <option value="7">Class 7</option>
@@ -472,90 +404,89 @@
                 </select>
               </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Mobile *</label>
-                <input type="tel" id="admPhone" required placeholder="10-digit number" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Mobile / WhatsApp *</label>
+                <input type="tel" id="admPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
-                <input type="email" id="admEmail" required placeholder="student@gmail.com" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Email *</label>
+                <input type="email" id="admEmail" required placeholder="email@gmail.com" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
               </div>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">School Name *</label>
-              <input type="text" id="admSchool" required placeholder="e.g. Ravenshaw Collegiate School, Cuttack" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">School Name *</label>
+              <input type="text" id="admSchool" required placeholder="School Name" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
             </div>
-            <button type="submit" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl shadow-lg transition text-sm">
-              Submit Admission Application <i class="fa-solid fa-paper-plane ml-1"></i>
+            <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+              Submit Admission Application
             </button>
           </form>
         </div>
       `,
 
       login: () => `
-        <div class="max-w-md mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl space-y-6">
-          <div class="text-center space-y-1">
-            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider">Student Portal</span>
-            <h2 class="text-2xl font-black text-slate-900">Student Sign In</h2>
-            <p class="text-xs text-slate-500">Sign in using credentials assigned by Satyapeeth Admin.</p>
+        <div class="max-w-sm mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-5">
+          <div class="text-center">
+            <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full uppercase">Student Portal</span>
+            <h2 class="text-xl font-black text-slate-900 mt-1">Student Sign In</h2>
+            <p class="text-[11px] text-slate-500">Sign in with credentials approved by Admin.</p>
           </div>
-          <form onsubmit="handleStudentLogin(event)" class="space-y-4">
+          <form onsubmit="handleStudentLogin(event)" class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile Number or Email</label>
-              <input type="text" id="loginUser" required placeholder="Enter Mobile or Email" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Mobile / Student ID</label>
+              <input type="text" id="loginUser" required placeholder="Enter Mobile Number" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none focus:border-indigo-600">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
-              <input type="password" id="loginPass" required placeholder="Enter Password" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600 text-sm">
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Password</label>
+              <input type="password" id="loginPass" required placeholder="Enter Password" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none focus:border-indigo-600">
             </div>
-            <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-lg transition text-sm">
-              Authenticate & Open Dashboard <i class="fa-solid fa-arrow-right ml-1"></i>
+            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition shadow">
+              Authenticate & Open
             </button>
           </form>
+          <div class="pt-3 border-t text-center">
+            <button onclick="guestLogin()" class="text-amber-600 font-bold text-xs hover:underline">Use Free Guest Demo</button>
+          </div>
         </div>
       `,
 
       studentDashboard: () => {
-        const student = auth.getStudent() || { name: "Guest Student", class: "10", studentId: "GST-999", type: "Guest" };
+        const student = auth.getStudent() || { name: "Guest Student", class: "10", studentId: "GST-DEMO", type: "Guest" };
         const hasNotesAccess = student.type === 'Admission';
 
         return `
-          <div class="space-y-8">
-            <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="space-y-5">
+            <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-5 sm:p-7 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
-                <span class="text-xs ${hasNotesAccess ? 'bg-amber-400 text-indigo-950 font-black' : 'bg-emerald-500 text-white font-bold'} px-2.5 py-0.5 rounded-md uppercase">
-                  ${hasNotesAccess ? 'Full Institutional Admission (Notes + Mocks)' : 'Mock Assessment Registration'}
+                <span class="text-[10px] ${hasNotesAccess ? 'bg-amber-400 text-indigo-950 font-black' : 'bg-emerald-500 text-white font-bold'} px-2 py-0.5 rounded uppercase">
+                  ${hasNotesAccess ? 'Full Access Student' : 'Mock Test Access'}
                 </span>
-                <h2 class="text-2xl sm:text-3xl font-black mt-2">Namaste, ${student.name}</h2>
-                <p class="text-xs text-indigo-200 mt-1">Designated: <strong>Odisha Board Class ${student.class}</strong> | ID: <span class="font-mono text-amber-300 font-bold">${student.studentId}</span></p>
+                <h2 class="text-xl sm:text-2xl font-black mt-1">Namaste, ${student.name}</h2>
+                <p class="text-[11px] text-indigo-200">Class ${student.class} | ID: <span class="font-mono text-amber-300 font-bold">${student.studentId}</span></p>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-indigo-500 transition space-y-4">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold">
-                  <i class="fa-solid fa-book-open-reader"></i>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                  <i class="fa-solid fa-book-open"></i>
                 </div>
-                <h3 class="text-xl font-bold text-slate-900">Curriculum Mock Assessments</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">
-                  Attempt Odisha Board Class ${student.class} official subject mock tests in Exam or Practice Mode.
-                </p>
-                <button onclick="router.navigate('subject-select')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl transition text-xs tracking-wider uppercase">
-                  Launch Class ${student.class} Tests <i class="fa-solid fa-arrow-right ml-1"></i>
+                <h3 class="text-base font-bold text-slate-900">Class ${student.class} Mock Tests</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Attempt chapter-wise objective exams with bilingual explanations.</p>
+                <button onclick="router.navigate('subject-select')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">
+                  Start Mock Tests &rarr;
                 </button>
               </div>
 
-              <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                <div class="w-12 h-12 rounded-2xl ${hasNotesAccess ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-400'} flex items-center justify-center text-2xl font-bold">
+              <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <div class="w-10 h-10 rounded-xl ${hasNotesAccess ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-400'} flex items-center justify-center text-xl font-bold">
                   <i class="fa-solid fa-file-lines"></i>
                 </div>
-                <h3 class="text-xl font-bold text-slate-900">Chapter Revision Notes</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">
-                  Read complete theory revision notes, formulas and question summaries.
-                </p>
-                <button onclick="${hasNotesAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-3 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black' : 'bg-slate-100 text-slate-700 font-bold'} rounded-xl transition text-xs tracking-wider uppercase">
-                  ${hasNotesAccess ? 'Browse Chapter Notes' : 'Unlock Chapter Notes 🔒'} <i class="fa-solid fa-arrow-right ml-1"></i>
+                <h3 class="text-base font-bold text-slate-900">Revision Notes</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Full theory revision notes and summaries for BSE curriculum.</p>
+                <button onclick="${hasNotesAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-2.5 ${hasNotesAccess ? 'bg-amber-500 text-indigo-950 font-black' : 'bg-slate-100 text-slate-600 font-bold'} rounded-xl text-xs transition">
+                  ${hasNotesAccess ? 'View Notes' : 'Unlock Notes 🔒'} &rarr;
                 </button>
               </div>
             </div>
@@ -565,33 +496,28 @@
 
       subjectSelect: () => {
         const student = auth.getStudent() || { class: "10" };
-        const subjects = db.get(DB_KEYS.SUBJECTS).filter(s => s.class === student.class);
+        const subjects = db.get(DB_KEYS.SUBJECTS).filter(s => s.class === String(student.class));
 
         return `
-          <div class="space-y-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <button onclick="router.navigate('student-dashboard')" class="text-xs text-indigo-600 font-bold mb-1 hover:underline">
-                  <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-                </button>
-                <h2 class="text-2xl font-black text-slate-900">Class ${student.class} Subjects</h2>
-                <p class="text-xs text-slate-500">Select a subject to view authorized chapter mock units & notes</p>
-              </div>
-            </div>
+          <div class="space-y-4">
+            <button onclick="router.navigate('student-dashboard')" class="text-xs text-indigo-600 font-bold hover:underline">
+              &larr; Back to Dashboard
+            </button>
+            <h2 class="text-xl font-black text-slate-900">Class ${student.class} Subjects</h2>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               ${subjects.map(sub => `
-                <div onclick="router.navigate('topic-select', { subjectId: '${sub.id}' })" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-600 hover:shadow-md cursor-pointer transition flex items-center justify-between group">
+                <div onclick="router.navigate('topic-select', { subjectId: '${sub.id}' })" class="bg-white p-4 rounded-2xl border border-slate-200 hover:border-indigo-600 hover:shadow cursor-pointer transition flex items-center justify-between">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-sm group-hover:bg-indigo-600 group-hover:text-white transition">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs">
                       <i class="fa-solid fa-book"></i>
                     </div>
                     <div>
-                      <h4 class="font-bold text-slate-900 text-sm">${sub.name}</h4>
-                      <span class="text-[10px] text-slate-400 uppercase font-semibold">Odisha Board BSE</span>
+                      <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${sub.name}</h4>
+                      <span class="text-[10px] text-slate-400">Odisha Board</span>
                     </div>
                   </div>
-                  <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-indigo-600 transition text-sm"></i>
+                  <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
                 </div>
               `).join('')}
             </div>
@@ -607,47 +533,44 @@
         const topics = db.get(DB_KEYS.TOPICS).filter(t => t.subjectId === subjectId);
 
         return `
-          <div class="space-y-6">
-            <div>
-              <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 font-bold mb-1 hover:underline">
-                <i class="fa-solid fa-arrow-left"></i> Back to Subjects
-              </button>
-              <h2 class="text-2xl font-black text-slate-900">${subject ? subject.name : 'Select Topic'}</h2>
-              <p class="text-xs text-slate-500">Pick a specific chapter to launch your evaluation or read revision notes</p>
-            </div>
+          <div class="space-y-4">
+            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 font-bold hover:underline">
+              &larr; Back to Subjects
+            </button>
+            <h2 class="text-lg sm:text-xl font-black text-slate-900">${subject ? subject.name : 'Chapters'}</h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               ${topics.length > 0 ? topics.map((top, idx) => {
                 const qCount = db.get(DB_KEYS.QUESTIONS).filter(q => q.topicId === top.id).length;
                 const isLocked = isGuest && idx > 0;
 
                 return `
-                  <div class="bg-white p-5 rounded-2xl border ${isLocked ? 'border-slate-200 bg-slate-50/60 opacity-80' : 'border-slate-200 hover:border-indigo-600'} shadow-sm transition space-y-4">
+                  <div class="bg-white p-4 rounded-2xl border ${isLocked ? 'border-slate-200 opacity-70 bg-slate-50' : 'border-slate-200'} shadow-sm space-y-3">
                     <div class="flex items-start justify-between gap-2">
-                      <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg ${isLocked ? 'bg-slate-200 text-slate-500' : 'bg-amber-50 text-amber-700'} flex items-center justify-center font-bold text-xs">
+                      <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-xs">
                           ${idx + 1}
                         </div>
                         <div>
-                          <h4 class="font-bold text-slate-900 text-sm leading-snug">${top.name}</h4>
-                          <span class="text-[10px] text-indigo-600 font-semibold">${qCount} Questions Available</span>
+                          <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${top.name}</h4>
+                          <span class="text-[10px] text-indigo-600 font-semibold">${qCount} Questions</span>
                         </div>
                       </div>
-                      ${isLocked ? `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 rounded flex items-center gap-1"><i class="fa-solid fa-lock"></i> Locked</span>` : ''}
+                      ${isLocked ? `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 rounded"><i class="fa-solid fa-lock"></i> Locked</span>` : ''}
                     </div>
 
                     <div class="flex gap-2 pt-2 border-t border-slate-100">
-                      <button onclick="${isLocked ? `showGuestLockPrompt()` : `router.navigate('mode-select', { subjectId: '${subjectId}', topicId: '${top.id}' })`}" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition text-center">
-                        <i class="fa-solid fa-play mr-1"></i> Mock Test
+                      <button onclick="${isLocked ? `showGuestLockPrompt()` : `router.navigate('mode-select', { subjectId: '${subjectId}', topicId: '${top.id}' })`}" class="flex-1 py-1.5 bg-indigo-600 text-white font-bold text-xs rounded-xl transition">
+                        Mock Test
                       </button>
-                      <button onclick="${hasNotesAccess ? `router.navigate('notes-view', { topicId: '${top.id}' })` : `showNotesLockPrompt()`}" class="flex-1 py-2 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'} text-xs rounded-xl transition text-center">
-                        <i class="fa-solid fa-file-lines mr-1"></i> Notes ${!hasNotesAccess ? '🔒' : ''}
+                      <button onclick="${hasNotesAccess ? `router.navigate('notes-view', { topicId: '${top.id}' })` : `showNotesLockPrompt()`}" class="flex-1 py-1.5 ${hasNotesAccess ? 'bg-amber-500 text-indigo-950 font-bold' : 'bg-slate-100 text-slate-500'} text-xs rounded-xl transition">
+                        Notes ${!hasNotesAccess ? '🔒' : ''}
                       </button>
                     </div>
                   </div>
                 `;
               }).join('') : `
-                <div class="col-span-full bg-white p-8 rounded-2xl text-center text-slate-400 text-xs">
+                <div class="col-span-full bg-white p-6 rounded-2xl text-center text-slate-400 text-xs">
                   No chapters uploaded under this subject yet.
                 </div>
               `}
@@ -656,79 +579,27 @@
         `;
       },
 
-      notesView: (topicId) => {
-        const topic = db.get(DB_KEYS.TOPICS).find(t => t.id === topicId);
-        const note = db.get(DB_KEYS.NOTES).find(n => n.topicId === topicId);
-
-        return `
-          <div class="max-w-3xl mx-auto space-y-6">
-            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 font-bold hover:underline">
-              <i class="fa-solid fa-arrow-left"></i> Back to Chapters
-            </button>
-
-            <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-4">
-              <span class="text-xs bg-amber-100 text-amber-900 font-bold px-3 py-1 rounded-full uppercase tracking-wider">Institutional Revision Notes</span>
-              <h2 class="text-2xl font-black text-slate-900">${topic ? topic.name : 'Chapter Notes'}</h2>
-              
-              <div class="prose max-w-none text-slate-800 text-sm leading-relaxed whitespace-pre-line bg-slate-50 p-6 rounded-2xl border border-slate-200 font-sans">
-                ${note ? note.content : 'Revision notes for this chapter are currently being finalized by the faculty.'}
-              </div>
-
-              <div class="pt-4 flex justify-between items-center border-t border-slate-100">
-                <button onclick="router.navigate('mode-select', { subjectId: topic.subjectId, topicId: topic.id })" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">
-                  Start CBT Mock for this Chapter <i class="fa-solid fa-arrow-right ml-1"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      },
-
       modeSelect: (subjectId, topicId) => {
-        const subject = db.get(DB_KEYS.SUBJECTS).find(s => s.id === subjectId);
         const topic = db.get(DB_KEYS.TOPICS).find(t => t.id === topicId);
-
         return `
-          <div class="max-w-2xl mx-auto space-y-6">
+          <div class="max-w-md mx-auto space-y-4">
             <button onclick="router.navigate('topic-select', { subjectId: '${subjectId}' })" class="text-xs text-indigo-600 font-bold hover:underline">
-              <i class="fa-solid fa-arrow-left"></i> Back to Chapters
+              &larr; Back to Chapters
             </button>
-
-            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-center space-y-1">
-              <span class="text-[10px] uppercase font-bold text-indigo-600 tracking-wider">${subject ? subject.name : ''}</span>
-              <h2 class="text-xl font-black text-slate-900">${topic ? topic.name : ''}</h2>
-              <p class="text-xs text-slate-500">Choose your assessment method</p>
+            <div class="bg-white p-4 rounded-2xl border text-center">
+              <h2 class="text-base font-black text-slate-900">${topic ? topic.name : 'Test'}</h2>
+              <p class="text-[11px] text-slate-500">Choose your assessment mode</p>
             </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-gradient-to-b from-indigo-900 to-slate-900 text-white p-6 rounded-3xl shadow-xl hover:shadow-2xl cursor-pointer transition transform hover:-translate-y-1 space-y-4">
-                <div class="w-12 h-12 rounded-2xl bg-amber-400 text-indigo-950 flex items-center justify-center text-2xl font-black">
-                  <i class="fa-solid fa-stopwatch"></i>
-                </div>
-                <div>
-                  <h3 class="text-lg font-black text-amber-300">OPTION A: EXAM MODE</h3>
-                  <p class="text-xs text-indigo-200 mt-1 leading-relaxed">
-                    Official CBT style. 10-minute timer, no answers revealed during testing. Full score + explanations shown after final submission.
-                  </p>
-                </div>
-                <div class="pt-2">
-                  <span class="inline-block bg-indigo-800 text-amber-300 text-[10px] font-bold px-3 py-1 rounded-md">Start Real CBT Test &rarr;</span>
-                </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-indigo-950 text-white p-5 rounded-2xl cursor-pointer hover:bg-indigo-900 transition text-center space-y-2">
+                <i class="fa-solid fa-stopwatch text-2xl text-amber-400"></i>
+                <h3 class="font-bold text-sm">Exam CBT Mode</h3>
+                <p class="text-[10px] text-indigo-200">10-Minute Timed Mock</p>
               </div>
-
-              <div onclick="startTestEngine('${subjectId}', '${topicId}', 'practice')" class="bg-white p-6 rounded-3xl border-2 border-emerald-500 shadow-lg hover:shadow-xl cursor-pointer transition transform hover:-translate-y-1 space-y-4">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-black">
-                  <i class="fa-solid fa-bolt-lightning"></i>
-                </div>
-                <div>
-                  <h3 class="text-lg font-black text-emerald-800">OPTION B: PRACTICE MODE</h3>
-                  <p class="text-xs text-slate-600 mt-1 leading-relaxed">
-                    Interactive learning mode. Touch any answer to instantly see correctness, along with in-depth Odia & English explanations.
-                  </p>
-                </div>
-                <div class="pt-2">
-                  <span class="inline-block bg-emerald-50 text-emerald-800 text-[10px] font-bold px-3 py-1 rounded-md">Start Interactive Prep &rarr;</span>
-                </div>
+              <div onclick="startTestEngine('${subjectId}', '${topicId}', 'practice')" class="bg-emerald-700 text-white p-5 rounded-2xl cursor-pointer hover:bg-emerald-600 transition text-center space-y-2">
+                <i class="fa-solid fa-bolt text-2xl text-amber-300"></i>
+                <h3 class="font-bold text-sm">Practice Mode</h3>
+                <p class="text-[10px] text-emerald-100">Instant Explanations</p>
               </div>
             </div>
           </div>
@@ -736,130 +607,70 @@
       },
 
       testScreen: () => `
-        <div class="max-w-3xl mx-auto space-y-6">
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center text-xs">
-            <div>
-              <span id="testMetaMode" class="font-extrabold uppercase px-2 py-0.5 rounded text-[10px]"></span>
-              <span id="testMetaTopic" class="font-bold text-slate-700 ml-2"></span>
-            </div>
-            <div class="font-mono font-bold text-slate-500">
-              Q: <span id="testMetaProgress" class="text-indigo-600 font-extrabold">1 / 1</span>
-            </div>
+        <div class="max-w-2xl mx-auto space-y-4">
+          <div class="bg-white p-3 rounded-xl border flex justify-between items-center text-xs">
+            <span id="testMetaMode" class="font-bold uppercase px-2 py-0.5 rounded text-[10px]"></span>
+            <span class="font-mono font-bold text-slate-500">Q: <span id="testMetaProgress" class="text-indigo-600">1 / 1</span></span>
           </div>
-
-          <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
+          <div class="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <div>
-              <h3 id="testQEn" class="text-base sm:text-lg font-bold text-slate-900 leading-snug"></h3>
-              <h4 id="testQOr" class="text-sm sm:text-base font-semibold text-indigo-950 mt-1 leading-snug"></h4>
+              <h3 id="testQEn" class="text-sm sm:text-base font-bold text-slate-900 leading-snug"></h3>
+              <h4 id="testQOr" class="text-xs sm:text-sm font-semibold text-indigo-950 mt-1 leading-snug"></h4>
             </div>
-
-            <div id="testOptionsBox" class="space-y-3"></div>
-            <div id="testPracticeBox" class="hidden p-4 rounded-2xl text-xs space-y-2 border"></div>
-
-            <div class="flex justify-between items-center pt-4 border-t border-slate-100">
-              <button onclick="navigateQuestion(-1)" id="testPrevBtn" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">
-                <i class="fa-solid fa-chevron-left mr-1"></i> Previous
-              </button>
-              <div class="flex gap-2">
-                <button onclick="navigateQuestion(1)" id="testNextBtn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">
-                  Next <i class="fa-solid fa-chevron-right ml-1"></i>
-                </button>
-                <button onclick="confirmSubmitTest()" id="testSubmitBtn" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs transition shadow">
-                  Submit Assessment <i class="fa-solid fa-check ml-1"></i>
-                </button>
-              </div>
+            <div id="testOptionsBox" class="space-y-2"></div>
+            <div id="testPracticeBox" class="hidden p-3 rounded-xl text-xs space-y-1 border"></div>
+            <div class="flex justify-between items-center pt-3 border-t">
+              <button onclick="navigateQuestion(-1)" id="testPrevBtn" class="px-3 py-1.5 bg-slate-100 text-slate-700 font-bold rounded-lg text-xs">Previous</button>
+              <button onclick="navigateQuestion(1)" id="testNextBtn" class="px-4 py-1.5 bg-indigo-600 text-white font-bold rounded-lg text-xs">Next</button>
+              <button onclick="confirmSubmitTest()" id="testSubmitBtn" class="px-4 py-1.5 bg-emerald-600 text-white font-bold rounded-lg text-xs hidden">Submit</button>
             </div>
           </div>
         </div>
       `,
 
       resultScreen: (res) => `
-        <div class="max-w-3xl mx-auto space-y-6">
-          <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl text-center space-y-4">
-            <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-3xl font-black">✓</div>
-            <div>
-              <span class="text-[10px] uppercase font-bold text-indigo-600 tracking-wider">Evaluation Completed</span>
-              <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Satyapeeth Official Assessment Scorecard</h2>
-              <p class="text-xs text-slate-500 mt-1">${res.subjectName} &bull; ${res.topicName}</p>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
-              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                <span class="text-[10px] uppercase font-bold text-slate-400">Total Score</span>
-                <p class="text-xl font-black text-indigo-600">${res.obtainedMarks} / ${res.totalMarks}</p>
-              </div>
-              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                <span class="text-[10px] uppercase font-bold text-slate-400">Percentage</span>
-                <p class="text-xl font-black text-slate-800">${res.percentage}%</p>
-              </div>
-              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                <span class="text-[10px] uppercase font-bold text-emerald-600">Correct</span>
-                <p class="text-xl font-black text-emerald-600">${res.correctCount}</p>
-              </div>
-              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                <span class="text-[10px] uppercase font-bold text-rose-600">Incorrect</span>
-                <p class="text-xl font-black text-rose-600">${res.wrongCount}</p>
-              </div>
-            </div>
-
-            <div class="pt-4 flex justify-center gap-3">
-              <button onclick="router.navigate('student-dashboard')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">
-                Return to Dashboard
-              </button>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <h3 class="text-base font-black text-slate-900">Question-Wise Explanations & Key</h3>
-            ${res.breakdown.map((item, idx) => `
-              <div class="bg-white p-5 rounded-2xl border ${item.isCorrect ? 'border-emerald-200 bg-emerald-50/20' : 'border-rose-200 bg-rose-50/20'} space-y-3">
-                <div class="flex justify-between items-start gap-2">
-                  <h4 class="font-bold text-slate-900 text-sm">Q${idx + 1}. ${item.question}</h4>
-                  <span class="text-[10px] font-extrabold px-2 py-0.5 rounded ${item.isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                    ${item.isCorrect ? 'Correct (+1)' : 'Incorrect (0)'}
-                  </span>
-                </div>
-                ${item.questionOdia ? `<p class="text-xs font-semibold text-indigo-950">${item.questionOdia}</p>` : ''}
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div class="p-2.5 rounded-lg ${item.userAnswer === item.correctAnswer ? 'bg-emerald-100 text-emerald-900 font-bold' : 'bg-rose-100 text-rose-900 font-bold'}">
-                    Your Selection: <strong>Option ${item.userAnswer || 'None (Unanswered)'}</strong>
-                  </div>
-                  <div class="p-2.5 rounded-lg bg-indigo-50 text-indigo-900 font-bold">
-                    Correct Option: <strong>Option ${item.correctAnswer} (${item.correctOptionText})</strong>
-                  </div>
-                </div>
-
-                <div class="bg-amber-50/80 p-3 rounded-xl border border-amber-200 text-xs text-slate-800 space-y-1">
-                  <span class="font-bold text-amber-900 flex items-center gap-1.5"><i class="fa-solid fa-lightbulb"></i> Concept Clarification / ବ୍ୟାଖ୍ୟା:</span>
-                  <p class="leading-relaxed text-[11px]">${item.explanation || 'Direct curriculum factual answer.'}</p>
-                </div>
-              </div>
-            `).join('')}
-          </div>
+        <div class="max-w-2xl mx-auto bg-white p-5 rounded-2xl border text-center space-y-4">
+          <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-black">✓</div>
+          <h2 class="text-lg font-black text-slate-900">Scorecard: ${res.obtainedMarks} / ${res.totalMarks} (${res.percentage}%)</h2>
+          <button onclick="router.navigate('student-dashboard')" class="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl">Return to Dashboard</button>
         </div>
       `,
 
+      notesView: (topicId) => {
+        const topic = db.get(DB_KEYS.TOPICS).find(t => t.id === topicId);
+        const note = db.get(DB_KEYS.NOTES).find(n => n.topicId === topicId);
+        return `
+          <div class="max-w-2xl mx-auto space-y-4">
+            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 font-bold hover:underline">&larr; Back</button>
+            <div class="bg-white p-5 rounded-2xl border space-y-3">
+              <h2 class="text-base font-black text-slate-900">${topic ? topic.name : 'Notes'}</h2>
+              <div class="text-xs text-slate-800 leading-relaxed whitespace-pre-line bg-slate-50 p-4 rounded-xl border font-sans">
+                ${note ? note.content : 'Revision notes are being finalized.'}
+              </div>
+            </div>
+          </div>
+        `;
+      },
+
       adminAuth: () => `
-        <div class="max-w-md mx-auto bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl space-y-6">
-          <div class="text-center space-y-1">
-            <div class="w-12 h-12 rounded-2xl bg-indigo-900 text-amber-400 flex items-center justify-center mx-auto text-xl font-bold mb-3 border border-indigo-700">
+        <div class="max-w-sm mx-auto bg-slate-950 text-white rounded-3xl p-5 sm:p-7 border border-slate-800 shadow-2xl space-y-5">
+          <div class="text-center">
+            <div class="w-10 h-10 rounded-xl bg-indigo-900 text-amber-400 flex items-center justify-center mx-auto text-lg font-bold mb-2">
               <i class="fa-solid fa-shield-halved"></i>
             </div>
-            <h2 class="text-2xl font-black text-white">Satyapeeth Admin Auth</h2>
-            <p class="text-xs text-slate-400">Restricted personnel gateway.</p>
+            <h2 class="text-lg font-black text-white">Satyapeeth Admin Auth</h2>
           </div>
-          <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+          <form onsubmit="handleAdminLogin(event)" class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Admin User ID</label>
-              <input type="text" id="adminUserId" required placeholder="Enter Admin User ID" class="w-full p-3.5 bg-slate-900 border border-slate-800 rounded-xl outline-none focus:border-amber-400 text-sm text-white font-mono">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">User ID</label>
+              <input type="text" id="adminUserId" required placeholder="Enter Admin User ID" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Admin Password</label>
-              <input type="password" id="adminPassword" required placeholder="••••••••" class="w-full p-3.5 bg-slate-900 border border-slate-800 rounded-xl outline-none focus:border-amber-400 text-sm text-white font-mono">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Password</label>
+              <input type="password" id="adminPassword" required placeholder="••••••••" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white">
             </div>
-            <button type="submit" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl shadow-lg transition text-sm">
-              Unlock Master Suite <i class="fa-solid fa-lock-open ml-1"></i>
+            <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+              Unlock Master Suite
             </button>
           </form>
         </div>
@@ -870,27 +681,25 @@
         const registrations = db.get(DB_KEYS.REGISTRATIONS);
         const students = db.get(DB_KEYS.STUDENTS);
         const questions = db.get(DB_KEYS.QUESTIONS);
-        const results = db.get(DB_KEYS.RESULTS);
-        const subjects = db.get(DB_KEYS.SUBJECTS);
-        const topics = db.get(DB_KEYS.TOPICS);
 
         return `
-          <div class="space-y-6">
-            <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-900 text-white p-4 sm:p-6 rounded-3xl border border-slate-800 shadow-xl">
-              <div>
-                <span class="text-xs bg-amber-500 text-indigo-950 font-black px-2 py-0.5 rounded uppercase">Master Controller</span>
-                <h2 class="text-xl sm:text-2xl font-black mt-1">Admin: Satyajeet Dash</h2>
+          <div class="space-y-4">
+            <div class="bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 space-y-3">
+              <div class="flex justify-between items-center">
+                <div>
+                  <span class="text-[10px] bg-amber-500 text-indigo-950 font-black px-2 py-0.5 rounded uppercase">Master Controller</span>
+                  <h2 class="text-base sm:text-lg font-black mt-1">Admin: Satyajeet Sahu</h2>
+                </div>
               </div>
-              <div class="flex flex-wrap gap-2">
-                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code"></i> Smart HTML Importer</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'overview' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'overview' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Overview</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Free Mocks (${registrations.filter(r => r.status === 'Pending').length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Students (${students.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'questions' })" class="px-3 py-2 rounded-xl text-xs font-bold ${activeTab === 'questions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Questions (${questions.length})</button>
+              <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code mr-1"></i> HTML Parser</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Mocks (${registrations.filter(r => r.status === 'Pending').length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Students (${students.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'questions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'questions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Questions (${questions.length})</button>
               </div>
             </div>
-            ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, results, subjects, topics })}
+            ${views.adminTabs[activeTab]({ admissions, registrations, students, questions })}
           </div>
         `;
       },
@@ -899,183 +708,130 @@
         'html-upload': () => {
           const classes = db.get(DB_KEYS.CLASSES);
           return `
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-6">
-              <div class="border-b pb-4">
-                <span class="text-xs bg-indigo-100 text-indigo-900 font-bold px-2.5 py-0.5 rounded uppercase">Universal Code Parser</span>
-                <h3 class="text-xl font-black text-slate-900 mt-1">Smart HTML / Code Question Uploader</h3>
-                <p class="text-xs text-slate-500">Paste your full HTML template code directly. Select target Class, Subject, and Topic below.</p>
-              </div>
-
-              <form onsubmit="handleHtmlImport(event)" class="space-y-4">
-                <!-- 1. Class Selector + Add New Class -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div class="bg-white rounded-2xl border p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Smart HTML Question Parser</h3>
+              <form onsubmit="handleHtmlImport(event)" class="space-y-3">
+                <!-- Class Selection -->
+                <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
                   <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">1. Select Target Class</label>
-                    <select id="impClassSelect" onchange="updateImporterSubjects()" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold outline-none focus:border-indigo-600">
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">1. Select Target Class</label>
+                    <select id="impClassSelect" onchange="updateImporterSubjects()" class="w-full p-2 bg-white border rounded-lg text-xs font-bold">
                       ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
                     </select>
                   </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Or Add New Class</label>
-                    <div class="flex gap-2">
-                      <input type="text" id="impNewClass" placeholder="e.g. 11 or 12" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs outline-none">
-                      <button type="button" onclick="addNewClass()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs">Add</button>
-                    </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="impNewClass" placeholder="Or New Class (e.g. 11)" class="w-full p-1.5 bg-white border rounded-lg text-xs">
+                    <button type="button" onclick="addNewClass()" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">Add</button>
                   </div>
                 </div>
 
-                <!-- 2. Subject Selector + Add New Subject -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <!-- Subject Selection -->
+                <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
                   <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">2. Select Subject</label>
-                    <select id="impSubjectSelect" onchange="updateImporterTopics()" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold outline-none focus:border-indigo-600"></select>
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">2. Select Subject</label>
+                    <select id="impSubjectSelect" onchange="updateImporterTopics()" class="w-full p-2 bg-white border rounded-lg text-xs font-bold"></select>
                   </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Or Add New Subject</label>
-                    <div class="flex gap-2">
-                      <input type="text" id="impNewSubject" placeholder="e.g. Political Science" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs outline-none">
-                      <button type="button" onclick="addNewSubject()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs">Add</button>
-                    </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="impNewSubject" placeholder="Or New Subject Name" class="w-full p-1.5 bg-white border rounded-lg text-xs">
+                    <button type="button" onclick="addNewSubject()" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">Add</button>
                   </div>
                 </div>
 
-                <!-- 3. Topic Selector + Add New Topic -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <!-- Topic Selection -->
+                <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
                   <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">3. Select Chapter / Topic</label>
-                    <select id="impTopicSelect" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold outline-none focus:border-indigo-600"></select>
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">3. Select Chapter / Topic</label>
+                    <select id="impTopicSelect" class="w-full p-2 bg-white border rounded-lg text-xs font-bold"></select>
                   </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Or Add New Chapter/Topic Name</label>
-                    <div class="flex gap-2">
-                      <input type="text" id="impNewTopic" placeholder="e.g. Important Articles Set 1" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs outline-none">
-                      <button type="button" onclick="addNewTopic()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs">Add</button>
-                    </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="impNewTopic" placeholder="Or New Chapter/Topic Name" class="w-full p-1.5 bg-white border rounded-lg text-xs">
+                    <button type="button" onclick="addNewTopic()" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">Add</button>
                   </div>
                 </div>
 
-                <!-- 4. HTML Code Box -->
+                <!-- Code Box -->
                 <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">4. Paste Your Full HTML Code</label>
-                  <textarea id="impHtmlCode" required rows="10" placeholder="Paste your HTML page code directly here... (System will automatically extract all questionsData from it)" class="w-full p-4 bg-slate-950 text-emerald-400 font-mono text-xs rounded-2xl outline-none focus:border-indigo-600 border border-slate-800"></textarea>
+                  <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">4. Paste Your HTML Code</label>
+                  <textarea id="impHtmlCode" required rows="8" placeholder="Paste full HTML code with questionsData here..." class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border"></textarea>
                 </div>
 
-                <button type="submit" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-sm transition shadow-lg">
-                  <i class="fa-solid fa-bolt-lightning mr-1"></i> Parse & Import All Questions into Portal
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+                  Parse & Import Questions into Live Bank
                 </button>
               </form>
             </div>
           `;
         },
 
-        overview: ({ admissions, registrations, students, questions }) => `
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span class="text-[10px] uppercase font-bold text-slate-400">Total Enrolled</span>
-              <p class="text-2xl font-black text-slate-900 mt-1">${students.length}</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span class="text-[10px] uppercase font-bold text-amber-600">Pending Admissions</span>
-              <p class="text-2xl font-black text-amber-600 mt-1">${admissions.filter(a => a.status === 'Pending').length}</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span class="text-[10px] uppercase font-bold text-emerald-600">Pending Mock Regs</span>
-              <p class="text-2xl font-black text-emerald-600 mt-1">${registrations.filter(r => r.status === 'Pending').length}</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span class="text-[10px] uppercase font-bold text-indigo-600">Questions in Bank</span>
-              <p class="text-2xl font-black text-indigo-600 mt-1">${questions.length}</p>
-            </div>
-          </div>
-        `,
-
         admissions: ({ admissions }) => `
-          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-black text-slate-900">Admission Applications</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 uppercase text-slate-400 font-bold border-b">
-                  <tr><th class="p-3">Student Name</th><th class="p-3">Class</th><th class="p-3">Guardian</th><th class="p-3">Mobile & Email</th><th class="p-3">Status</th><th class="p-3">Action</th></tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  ${admissions.length > 0 ? admissions.map(a => `
-                    <tr>
-                      <td class="p-3 font-bold text-slate-900">${a.name}</td>
-                      <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">Class ${a.class}</span></td>
-                      <td class="p-3 text-slate-600">${a.guardian}</td>
-                      <td class="p-3"><div>${a.phone}</div><div class="text-[10px] text-slate-400">${a.email}</div></td>
-                      <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${a.status}</span></td>
-                      <td class="p-3">${a.status === 'Pending' ? `<button onclick="approveStudent('adm', '${a.id}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-lg text-[10px] shadow">Approve Full Access</button>` : `<span class="text-[10px] text-slate-400">Enrolled (${a.assignedStudentId})</span>`}</td>
-                    </tr>
-                  `).join('') : `<tr><td colspan="6" class="p-6 text-center text-slate-400">No applications yet.</td></tr>`}
-                </tbody>
-              </table>
+          <div class="bg-white rounded-2xl border p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900">Admission Applications (${admissions.length})</h3>
+            <div class="space-y-2">
+              ${admissions.length > 0 ? admissions.map(a => `
+                <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-center gap-2">
+                  <div>
+                    <h4 class="font-bold text-slate-900">${a.name} (Class ${a.class})</h4>
+                    <p class="text-[10px] text-slate-500">Phone: ${a.phone} | Guardian: ${a.guardian}</p>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${a.status}</span>
+                  </div>
+                  ${a.status === 'Pending' ? `
+                    <button onclick="approveStudent('adm', '${a.id}')" class="px-3 py-1.5 bg-amber-500 text-indigo-950 font-black rounded-lg text-xs">Approve</button>
+                  ` : `<span class="text-[10px] text-slate-400">ID: ${a.assignedStudentId}</span>`}
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No admissions submitted yet.</p>'}
             </div>
           </div>
         `,
 
         registrations: ({ registrations }) => `
-          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-black text-slate-900">Free Mock Registrations</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 uppercase text-slate-400 font-bold border-b">
-                  <tr><th class="p-3">Student Name</th><th class="p-3">Class</th><th class="p-3">Mobile & Email</th><th class="p-3">Status</th><th class="p-3">Action</th></tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  ${registrations.length > 0 ? registrations.map(r => `
-                    <tr>
-                      <td class="p-3 font-bold text-slate-900">${r.name}</td>
-                      <td class="p-3"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold">Class ${r.class}</span></td>
-                      <td class="p-3"><div>${r.phone}</div><div class="text-[10px] text-slate-400">${r.email}</div></td>
-                      <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${r.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${r.status}</span></td>
-                      <td class="p-3">${r.status === 'Pending' ? `<button onclick="approveStudent('reg', '${r.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10px] shadow">Approve Mock Key</button>` : `<span class="text-[10px] text-slate-400">Enrolled (${r.assignedStudentId})</span>`}</td>
-                    </tr>
-                  `).join('') : `<tr><td colspan="5" class="p-6 text-center text-slate-400">No registrations yet.</td></tr>`}
-                </tbody>
-              </table>
+          <div class="bg-white rounded-2xl border p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900">Free Mock Registrations (${registrations.length})</h3>
+            <div class="space-y-2">
+              ${registrations.length > 0 ? registrations.map(r => `
+                <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-center gap-2">
+                  <div>
+                    <h4 class="font-bold text-slate-900">${r.name} (Class ${r.class})</h4>
+                    <p class="text-[10px] text-slate-500">Phone: ${r.phone}</p>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${r.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${r.status}</span>
+                  </div>
+                  ${r.status === 'Pending' ? `
+                    <button onclick="approveStudent('reg', '${r.id}')" class="px-3 py-1.5 bg-emerald-600 text-white font-bold rounded-lg text-xs">Approve</button>
+                  ` : `<span class="text-[10px] text-slate-400">ID: ${r.assignedStudentId}</span>`}
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No registrations submitted yet.</p>'}
             </div>
           </div>
         `,
 
         students: ({ students }) => `
-          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-black text-slate-900">Enrolled Students Database</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 uppercase text-slate-400 font-bold border-b">
-                  <tr><th class="p-3">Student ID</th><th class="p-3">Name</th><th class="p-3">Class & Type</th><th class="p-3">Mobile Key</th><th class="p-3">Password</th><th class="p-3">Action</th></tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  ${students.length > 0 ? students.map(s => `
-                    <tr>
-                      <td class="p-3 font-mono font-bold text-indigo-600">${s.studentId}</td>
-                      <td class="p-3 font-bold text-slate-900">${s.name}</td>
-                      <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.type === 'Admission' ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'}">Class ${s.class} (${s.type})</span></td>
-                      <td class="p-3 text-slate-600">${s.phone}</td>
-                      <td class="p-3"><code class="bg-amber-50 text-amber-800 px-2 py-0.5 rounded font-mono font-bold border border-amber-200">${s.password}</code></td>
-                      <td class="p-3"><button onclick="deleteStudent('${s.studentId}')" class="text-rose-600 hover:underline text-[10px] font-bold">Remove</button></td>
-                    </tr>
-                  `).join('') : `<tr><td colspan="6" class="p-6 text-center text-slate-400">No active students yet.</td></tr>`}
-                </tbody>
-              </table>
+          <div class="bg-white rounded-2xl border p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900">Approved Student Logins (${students.length})</h3>
+            <div class="space-y-2">
+              ${students.length > 0 ? students.map(s => `
+                <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-center">
+                  <div>
+                    <h4 class="font-bold text-slate-900">${s.name} (Class ${s.class})</h4>
+                    <p class="text-[10px] text-indigo-700 font-mono">ID: ${s.studentId} | Pass: <span class="bg-amber-100 px-1 py-0.5 rounded font-bold">${s.password}</span></p>
+                  </div>
+                  <button onclick="deleteStudent('${s.studentId}')" class="text-rose-600 text-xs font-bold">Delete</button>
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No students enrolled yet.</p>'}
             </div>
           </div>
         `,
 
         questions: ({ questions }) => `
-          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-black text-slate-900">Current Question Bank Repository (${questions.length})</h3>
-            <div class="space-y-3">
+          <div class="bg-white rounded-2xl border p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900">Total Questions (${questions.length})</h3>
+            <div class="space-y-2">
               ${questions.map((q, idx) => `
-                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex justify-between items-start gap-4">
+                <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-start gap-2">
                   <div>
-                    <span class="bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded text-[10px]">Class ${q.class}</span>
+                    <span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.2 rounded text-[9px]">Class ${q.class}</span>
                     <h4 class="font-bold text-slate-900 mt-1">${idx + 1}. ${q.question}</h4>
-                    ${q.questionOdia ? `<p class="text-indigo-950 font-semibold mt-0.5">${q.questionOdia}</p>` : ''}
-                    <p class="text-emerald-700 font-bold mt-1">Correct Key: Option ${q.correctAnswer} (${q.options[q.correctAnswer]})</p>
+                    <p class="text-emerald-700 font-bold mt-0.5">Key: Option ${q.correctAnswer}</p>
                   </div>
-                  <button onclick="deleteQuestion('${q.id}')" class="text-rose-600 hover:underline font-bold text-[10px]">Delete</button>
+                  <button onclick="deleteQuestion('${q.id}')" class="text-rose-600 font-bold text-[10px]">Delete</button>
                 </div>
               `).join('')}
             </div>
@@ -1085,33 +841,42 @@
     };
 
     /**
-     * DYNAMIC SMART HTML IMPORTER CONTROLLERS
+     * DYNAMIC SMART DROPDOWN LOADERS
      */
     function updateImporterSubjects() {
-      const cls = document.getElementById('impClassSelect').value;
+      const clsSelect = document.getElementById('impClassSelect');
+      if (!clsSelect) return;
+      const cls = clsSelect.value;
       const subSelect = document.getElementById('impSubjectSelect');
-      const subjects = db.get(DB_KEYS.SUBJECTS).filter(s => s.class === cls);
-      
-      subSelect.innerHTML = subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      const subjects = db.get(DB_KEYS.SUBJECTS).filter(s => s.class === String(cls));
+
+      subSelect.innerHTML = subjects.length > 0 
+        ? subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('') 
+        : '<option value="">-- No Subject Found (Add New Below) --</option>';
+
       updateImporterTopics();
     }
 
     function updateImporterTopics() {
-      const subId = document.getElementById('impSubjectSelect').value;
+      const subSelect = document.getElementById('impSubjectSelect');
       const topSelect = document.getElementById('impTopicSelect');
+      if (!subSelect || !topSelect) return;
+      const subId = subSelect.value;
       const topics = db.get(DB_KEYS.TOPICS).filter(t => t.subjectId === subId);
-      
-      topSelect.innerHTML = topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+      topSelect.innerHTML = topics.length > 0 
+        ? topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('') 
+        : '<option value="">-- No Topic Found (Add New Below) --</option>';
     }
 
     function addNewClass() {
       const newCls = document.getElementById('impNewClass').value.trim();
-      if (!newCls) return alert("Enter class name or number!");
+      if (!newCls) return alert("Enter class number!");
       const classes = db.get(DB_KEYS.CLASSES);
       if (!classes.includes(newCls)) {
         classes.push(newCls);
         db.set(DB_KEYS.CLASSES, classes);
-        toast("Class Added", `Class ${newCls} created successfully.`, "success");
+        toast("Class Added", `Class ${newCls} created.`, "success");
         router.navigate('admin-dashboard', { tab: 'html-upload' });
       }
     }
@@ -1126,7 +891,7 @@
       subjects.push({ id: newSubId, class: cls, name: newSubName });
       db.set(DB_KEYS.SUBJECTS, subjects);
 
-      toast("Subject Added", `${newSubName} created for Class ${cls}.`, "success");
+      toast("Subject Added", `${newSubName} created.`, "success");
       document.getElementById('impNewSubject').value = '';
       updateImporterSubjects();
       document.getElementById('impSubjectSelect').value = newSubId;
@@ -1137,14 +902,14 @@
       const cls = document.getElementById('impClassSelect').value;
       const subId = document.getElementById('impSubjectSelect').value;
       const newTopName = document.getElementById('impNewTopic').value.trim();
-      if (!newTopName) return alert("Enter chapter/topic name!");
+      if (!newTopName) return alert("Enter chapter name!");
 
       const topics = db.get(DB_KEYS.TOPICS);
       const newTopId = "top_" + cls + "_" + Date.now();
-      topics.push({ id: newTopId, class: cls, subjectId: subId, name: newTopName, isDemo: topics.filter(t => t.subjectId === subId).length === 0 });
+      topics.push({ id: newTopId, class: cls, subjectId: subId, name: newTopName, isDemo: false });
       db.set(DB_KEYS.TOPICS, topics);
 
-      toast("Topic Created", `${newTopName} created successfully.`, "success");
+      toast("Topic Created", `${newTopName} created.`, "success");
       document.getElementById('impNewTopic').value = '';
       updateImporterTopics();
       document.getElementById('impTopicSelect').value = newTopId;
@@ -1163,13 +928,10 @@
 
       try {
         let extractedQuestions = [];
-
-        // Match questionsData array from pasted HTML/JS
         const jsMatch = htmlCode.match(/questionsData\s*=\s*(\[[\s\S]*?\]);/);
         
         if (jsMatch && jsMatch[1]) {
           const rawParsed = Function('"use strict";return (' + jsMatch[1] + ')')();
-          
           rawParsed.forEach(q => {
             extractedQuestions.push({
               id: "q_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
@@ -1185,7 +947,6 @@
             });
           });
         } else {
-          // Direct JSON Fallback
           const rawParsed = JSON.parse(htmlCode);
           if (Array.isArray(rawParsed)) {
             rawParsed.forEach(q => {
@@ -1205,19 +966,17 @@
           }
         }
 
-        if (extractedQuestions.length === 0) {
-          throw new Error("No questionsData array found in the pasted HTML code.");
-        }
+        if (extractedQuestions.length === 0) throw new Error("No questionsData found in code.");
 
         const allQuestions = db.get(DB_KEYS.QUESTIONS);
         extractedQuestions.forEach(q => allQuestions.push(q));
         db.set(DB_KEYS.QUESTIONS, allQuestions);
 
-        toast("HTML Import Success! 🚀", `Successfully parsed and loaded ${extractedQuestions.length} questions into the Portal.`, "success");
+        toast("Success!", `Loaded ${extractedQuestions.length} questions into Portal.`, "success");
         router.navigate('admin-dashboard', { tab: 'questions' });
 
       } catch (err) {
-        toast("Parser Error", err.message, "error");
+        toast("Parse Error", err.message, "error");
       }
     }
 
@@ -1229,13 +988,12 @@
         class: document.getElementById('regClass').value,
         phone: document.getElementById('regPhone').value.trim(),
         email: document.getElementById('regEmail').value.trim(),
-        status: "Pending",
-        date: new Date().toLocaleDateString()
+        status: "Pending"
       };
       const registrations = db.get(DB_KEYS.REGISTRATIONS);
-      registrations.push(newReg);
+      registrations.unshift(newReg);
       db.set(DB_KEYS.REGISTRATIONS, registrations);
-      toast('Registration Submitted!', 'Admin will verify and provide your login password.', 'success');
+      toast('Submitted!', 'Registration received by Admin.', 'success');
       router.navigate('home');
     }
 
@@ -1249,13 +1007,12 @@
         phone: document.getElementById('admPhone').value.trim(),
         email: document.getElementById('admEmail').value.trim(),
         school: document.getElementById('admSchool').value.trim(),
-        status: "Pending",
-        date: new Date().toLocaleDateString()
+        status: "Pending"
       };
       const admissions = db.get(DB_KEYS.ADMISSIONS);
-      admissions.push(newAdm);
+      admissions.unshift(newAdm);
       db.set(DB_KEYS.ADMISSIONS, admissions);
-      toast('Admission Submitted!', 'Details submitted for Full Access (Notes + Mocks).', 'success');
+      toast('Submitted!', 'Admission application received by Admin.', 'success');
       router.navigate('home');
     }
 
@@ -1272,25 +1029,25 @@
         toast('Welcome!', `Logged in as ${student.name}`, 'success');
         router.navigate('student-dashboard');
       } else {
-        toast('Login Failed', 'Incorrect login details or unverified password.', 'error');
+        toast('Failed', 'Incorrect mobile or password.', 'error');
       }
     }
 
     function guestLogin() {
-      sessionStorage.setItem('sp_guest_mode', 'true');
-      sessionStorage.setItem(DB_KEYS.AUTH_STUDENT, JSON.stringify({ name: "Guest Learner", class: "10", studentId: "GST-DEMO", type: "Guest" }));
-      toast('Guest Mode Activated', 'Demo limited access enabled for Class 10.', 'info');
+      localStorage.setItem('sp_guest_flag', 'true');
+      localStorage.setItem(DB_KEYS.AUTH_STUDENT, JSON.stringify({ name: "Guest Learner", class: "10", studentId: "GST-DEMO", type: "Guest" }));
+      toast('Guest Mode', 'Demo enabled for Class 10.', 'info');
       router.navigate('student-dashboard');
     }
 
     function showGuestLockPrompt() {
-      confirmDialog('Full Access Locked 🔒', 'This mock test is reserved for registered students. Register now for free?', () => {
+      confirmDialog('Locked 🔒', 'This test is reserved for registered students. Register free?', () => {
         router.navigate('register-free');
       });
     }
 
     function showNotesLockPrompt() {
-      confirmDialog('Institutional Notes Locked 🔒', 'Chapter Revision Notes are exclusive to Full Admission students. Submit your Admission form now?', () => {
+      confirmDialog('Notes Locked 🔒', 'Notes are exclusive to Full Admission students. Submit Admission form?', () => {
         router.navigate('admission');
       });
     }
@@ -1301,11 +1058,11 @@
       const pass = document.getElementById('adminPassword').value.trim();
 
       if ((user === "satyajeets308" || user === "satyajeet308") && pass === "Kalyani@123") {
-        auth.setAdmin({ user: "Satyajeets308", role: "superadmin" });
-        toast('Admin Unlocked', 'Master session established.', 'success');
+        auth.setAdmin({ user: "Satyajeet Sahu", role: "superadmin" });
+        toast('Admin Unlocked', 'Welcome Satyajeet Sahu!', 'success');
         router.navigate('admin-dashboard', { tab: 'html-upload' });
       } else {
-        toast('Access Denied', 'Invalid User ID or Password.', 'error');
+        toast('Denied', 'Invalid Admin Credentials.', 'error');
       }
     }
 
@@ -1341,21 +1098,21 @@
       });
       db.set(DB_KEYS.STUDENTS, students);
 
-      toast('Approved', `ID: ${studentId} & Password: ${password} generated.`, 'success');
+      toast('Approved', `ID: ${studentId} & Password: ${password}`, 'success');
       router.navigate('admin-dashboard', { tab: type === 'adm' ? 'admissions' : 'registrations' });
     }
 
     function deleteStudent(studentId) {
-      confirmDialog('Remove Student', 'Delete this student profile?', () => {
+      confirmDialog('Delete Student', 'Remove this profile?', () => {
         let students = db.get(DB_KEYS.STUDENTS).filter(s => s.studentId !== studentId);
         db.set(DB_KEYS.STUDENTS, students);
-        toast('Student Removed', 'Profile deleted.', 'info');
+        toast('Deleted', 'Student removed.', 'info');
         router.navigate('admin-dashboard', { tab: 'students' });
       });
     }
 
     function deleteQuestion(qId) {
-      confirmDialog('Delete Question', 'Permanently delete this question?', () => {
+      confirmDialog('Delete Question', 'Remove this question?', () => {
         let questions = db.get(DB_KEYS.QUESTIONS).filter(q => q.id !== qId);
         db.set(DB_KEYS.QUESTIONS, questions);
         toast('Deleted', 'Question removed.', 'info');
@@ -1369,7 +1126,16 @@
       let questions = db.get(DB_KEYS.QUESTIONS).filter(q => q.topicId === topicId);
 
       if (questions.length === 0) {
-        questions = db.get(DB_KEYS.QUESTIONS);
+        questions = [
+          {
+            id: "q_demo_1",
+            question: "Sample Question",
+            questionOdia: "ପ୍ରଶ୍ନ ଉପଲବ୍ଧ ନାହିଁ । (No questions in this topic)",
+            options: { A: "A", B: "B", C: "C", D: "D" },
+            correctAnswer: "A",
+            explanation: "Upload questions from Admin Smart HTML Parser."
+          }
+        ];
       }
 
       activeExam = {
@@ -1380,9 +1146,7 @@
         currentIndex: 0,
         answers: {},
         practiceRevealed: {},
-        timeLeft: 600,
-        startTime: Date.now(),
-        timerInterval: null
+        timeLeft: 600
       };
 
       const navTimer = document.getElementById('navTimerBadge');
@@ -1401,12 +1165,11 @@
         activeExam.timeLeft--;
         const m = Math.floor(activeExam.timeLeft / 60);
         const s = activeExam.timeLeft % 60;
-        const timeStr = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
         const navTimerVal = document.getElementById('navTimerVal');
-        if (navTimerVal) navTimerVal.innerText = timeStr;
+        if (navTimerVal) navTimerVal.innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
         if (activeExam.timeLeft <= 0) {
           clearInterval(activeExam.timerInterval);
-          finishTest(true);
+          finishTest();
         }
       }, 1000);
     }
@@ -1416,9 +1179,8 @@
       const isLast = activeExam.currentIndex === activeExam.questions.length - 1;
       const isFirst = activeExam.currentIndex === 0;
 
-      document.getElementById('testMetaMode').innerText = activeExam.mode === 'exam' ? 'Exam CBT' : 'Interactive Practice';
-      document.getElementById('testMetaMode').className = `font-extrabold uppercase px-2 py-0.5 rounded text-[10px] ${activeExam.mode === 'exam' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`;
-      document.getElementById('testMetaTopic').innerText = activeExam.topic ? activeExam.topic.name : 'All Topics';
+      document.getElementById('testMetaMode').innerText = activeExam.mode === 'exam' ? 'CBT Exam' : 'Practice';
+      document.getElementById('testMetaMode').className = `font-bold uppercase px-2 py-0.5 rounded text-[10px] ${activeExam.mode === 'exam' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`;
       document.getElementById('testMetaProgress').innerText = `${activeExam.currentIndex + 1} / ${activeExam.questions.length}`;
       document.getElementById('testQEn').innerText = `Q${activeExam.currentIndex + 1}. ${q.question}`;
       document.getElementById('testQOr').innerText = q.questionOdia || '';
@@ -1429,14 +1191,10 @@
 
       Object.entries(q.options).forEach(([key, val]) => {
         const btn = document.createElement('button');
-        let btnClasses = "w-full p-4 rounded-2xl border text-left font-medium text-xs sm:text-sm flex items-center justify-between transition transform active:scale-[0.99] ";
+        let btnClasses = "w-full p-3 rounded-xl border text-left font-medium text-xs flex items-center justify-between transition ";
 
         if (activeExam.mode === 'exam') {
-          if (userPick === key) {
-            btnClasses += "border-indigo-600 bg-indigo-600 text-white font-bold shadow-md";
-          } else {
-            btnClasses += "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800";
-          }
+          btnClasses += userPick === key ? "border-indigo-600 bg-indigo-600 text-white font-bold" : "border-slate-200 bg-slate-50";
         } else {
           if (activeExam.practiceRevealed[q.id]) {
             if (key === q.correctAnswer) {
@@ -1444,21 +1202,15 @@
             } else if (userPick === key) {
               btnClasses += "border-rose-600 bg-rose-50 text-rose-900 font-bold";
             } else {
-              btnClasses += "border-slate-200 bg-slate-50 opacity-60 text-slate-600";
+              btnClasses += "border-slate-200 bg-slate-50 opacity-60";
             }
           } else {
-            btnClasses += "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800";
+            btnClasses += "border-slate-200 bg-slate-50";
           }
         }
 
         btn.className = btnClasses;
-        btn.innerHTML = `
-          <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-lg bg-white/40 border border-slate-300/40 flex items-center justify-center font-bold text-xs">${key}</span>
-            <span>${val}</span>
-          </div>
-          ${activeExam.mode === 'practice' && activeExam.practiceRevealed[q.id] && key === q.correctAnswer ? '<i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>' : ''}
-        `;
+        btn.innerHTML = `<span class="font-bold mr-2">${key}.</span> <span>${val}</span>`;
         btn.onclick = () => selectOption(q.id, key);
         container.appendChild(btn);
       });
@@ -1466,14 +1218,8 @@
       const practiceBox = document.getElementById('testPracticeBox');
       if (activeExam.mode === 'practice' && activeExam.practiceRevealed[q.id]) {
         practiceBox.classList.remove('hidden');
-        practiceBox.className = userPick === q.correctAnswer ? 'p-4 rounded-2xl text-xs space-y-1.5 border border-emerald-200 bg-emerald-50' : 'p-4 rounded-2xl text-xs space-y-1.5 border border-rose-200 bg-rose-50';
-        practiceBox.innerHTML = `
-          <div class="flex items-center gap-1.5 font-bold ${userPick === q.correctAnswer ? 'text-emerald-800' : 'text-rose-800'}">
-            <i class="fa-solid ${userPick === q.correctAnswer ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
-            <span>${userPick === q.correctAnswer ? 'Correct Answer!' : 'Incorrect Answer'}</span>
-          </div>
-          <p class="text-slate-700 text-[11px] leading-relaxed whitespace-pre-line"><strong>Explanation:</strong> ${q.explanation || 'Direct factual answer.'}</p>
-        `;
+        practiceBox.className = userPick === q.correctAnswer ? 'p-3 rounded-xl text-xs border border-emerald-200 bg-emerald-50 text-emerald-900' : 'p-3 rounded-xl text-xs border border-rose-200 bg-rose-50 text-rose-900';
+        practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct answer.'}</p>`;
       } else {
         practiceBox.classList.add('hidden');
       }
@@ -1500,68 +1246,25 @@
     }
 
     function confirmSubmitTest() {
-      confirmDialog('Submit Assessment', 'Finish and submit your mock test?', () => {
-        finishTest(false);
-      });
+      confirmDialog('Submit Test', 'Submit your assessment?', finishTest);
     }
 
-    function finishTest(isAutoTimeout = false) {
+    function finishTest() {
       clearInterval(activeExam.timerInterval);
       document.getElementById('navTimerBadge').classList.add('hidden');
 
-      let correctCount = 0;
-      let wrongCount = 0;
       let obtainedMarks = 0;
-      let totalMarks = activeExam.questions.length;
-
-      const breakdown = activeExam.questions.map(q => {
-        const userAns = activeExam.answers[q.id];
-        const isCorrect = userAns === q.correctAnswer;
-        if (isCorrect) {
-          correctCount++;
-          obtainedMarks += (q.marks || 1);
-        } else if (userAns) {
-          wrongCount++;
-        }
-        return {
-          question: q.question,
-          questionOdia: q.questionOdia,
-          userAnswer: userAns,
-          correctAnswer: q.correctAnswer,
-          correctOptionText: q.options[q.correctAnswer],
-          isCorrect,
-          explanation: q.explanation
-        };
+      activeExam.questions.forEach(q => {
+        if (activeExam.answers[q.id] === q.correctAnswer) obtainedMarks++;
       });
 
+      const totalMarks = activeExam.questions.length;
       const percentage = Math.round((obtainedMarks / totalMarks) * 100) || 0;
-      const student = auth.getStudent() || { name: "Guest", class: "10", studentId: "GST-DEMO" };
 
-      const resultPayload = {
-        id: "res_" + Date.now(),
-        studentId: student.studentId,
-        studentName: student.name,
-        class: student.class,
-        subjectName: activeExam.subject ? activeExam.subject.name : 'Social Science',
-        topicName: activeExam.topic ? activeExam.topic.name : 'Chapter Unit',
-        mode: activeExam.mode,
-        totalMarks,
-        obtainedMarks,
-        correctCount,
-        wrongCount,
-        percentage,
-        date: new Date().toLocaleString(),
-        breakdown
-      };
-
-      const results = db.get(DB_KEYS.RESULTS);
-      results.unshift(resultPayload);
-      db.set(DB_KEYS.RESULTS, results);
-
-      if (isAutoTimeout) toast('Time Out', 'Exam submitted automatically.', 'warning');
-      router.navigate('result-screen', { resultData: resultPayload });
+      router.navigate('result-screen', { resultData: { obtainedMarks, totalMarks, percentage } });
     }
 
+    // Auto load on start
     window.addEventListener('DOMContentLoaded', () => {
       router.navigate('home');
     });
