@@ -20,13 +20,13 @@
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased custom-scrollbar selection:bg-amber-200">
 
-  <!-- Toast Notification System -->
+  <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed top-3 right-3 left-3 sm:left-auto z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Global Header -->
+  <!-- Header -->
   <header class="bg-indigo-950 text-white sticky top-0 z-40 border-b border-indigo-900 shadow-md">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2">
-      <!-- Brand Logo -->
+      <!-- Logo -->
       <div class="flex items-center gap-2 sm:gap-3 cursor-pointer select-none" onclick="router.navigate('home')">
         <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-indigo-950 font-black text-sm sm:text-xl shadow-inner">
           SP
@@ -37,22 +37,19 @@
         </div>
       </div>
 
-      <!-- Navigation Actions -->
+      <!-- Actions -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <!-- Live Exam Timer Badge -->
         <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold animate-pulse">
           <i class="fa-solid fa-stopwatch"></i>
           <span id="navTimerVal">00:00</span>
         </div>
 
-        <!-- User Badge -->
         <div id="navUserBadge" class="hidden flex items-center gap-1.5 bg-indigo-900 border border-indigo-700 px-2.5 py-1 rounded-lg text-xs">
           <i class="fa-solid fa-user-graduate text-amber-400 text-xs"></i>
           <span id="navUserName" class="font-bold text-white text-xs truncate max-w-[100px] sm:max-w-[150px]"></span>
           <span id="navUserType" class="px-1.5 py-0.5 rounded text-[9px] font-extrabold hidden sm:inline-block"></span>
         </div>
 
-        <!-- Auth Action Buttons -->
         <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs bg-indigo-800 hover:bg-indigo-700 border border-indigo-600 px-2.5 sm:px-3.5 py-1.5 rounded-lg font-bold text-white transition">
           Login
         </button>
@@ -65,17 +62,17 @@
         <button id="navLogoutBtn" onclick="auth.logout()" class="hidden text-xs bg-slate-800 hover:bg-rose-900 border border-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg font-bold transition">
           <i class="fa-solid fa-power-off"></i>
         </button>
-        <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2 py-1.5 rounded-lg transition" title="Admin Portal">
+        <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2 py-1.5 rounded-lg transition" title="Admin Control Room">
           <i class="fa-solid fa-shield-halved"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main View Container -->
+  <!-- Dynamic App Root -->
   <main id="app" class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6"></main>
 
-  <!-- Confirmation Modal -->
+  <!-- Global Modal -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white max-w-sm w-full rounded-2xl shadow-2xl border border-slate-100 p-5 text-center">
       <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-lg">
@@ -90,17 +87,24 @@
     </div>
   </div>
 
-  <footer class="bg-slate-900 text-slate-400 py-4 border-t border-slate-800 text-[11px] text-center">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-      <p>&copy; 2026 <strong>SATYAPEETH</strong> — BSE Odisha Examination Portal</p>
-      <span>Classes 6 to 10 Special Curriculum</span>
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-xs text-center">
+    <div class="max-w-7xl mx-auto px-4 space-y-3">
+      <div class="flex justify-center gap-4 text-sm">
+        <a href="https://youtube.com/@satyapeethofficial?si=CYEuHtru53hpw9HP" target="_blank" rel="noopener noreferrer" class="text-rose-400 hover:text-rose-300 transition flex items-center gap-1.5 font-bold">
+          <i class="fa-brands fa-youtube text-base"></i> YouTube Channel
+        </a>
+        <a href="https://www.instagram.com/satyapeeth_?igsi=eHh5d3pia2RwNnVo" target="_blank" rel="noopener noreferrer" class="text-pink-400 hover:text-pink-300 transition flex items-center gap-1.5 font-bold">
+          <i class="fa-brands fa-instagram text-base"></i> Instagram Page
+        </a>
+      </div>
+      <p>&copy; 2026 <strong>SATYAPEETH</strong> — BSE Odisha Examination & Learning Network</p>
     </div>
   </footer>
 
   <script>
-    /**
-     * DATABASE & PERSISTENT SESSION ENGINE
-     */
+    const ADMIN_WHATSAPP = "919000000000"; // Optional: Add your 10-digit phone number with 91 prefix
+
     const DB_KEYS = {
       STUDENTS: 'sp_students_db',
       ADMISSIONS: 'sp_admissions_db',
@@ -125,17 +129,14 @@
       { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)" },
       { id: "sub_10_eng", class: "10", name: "English" },
       { id: "sub_9_sci", class: "9", name: "Science (ବିଜ୍ଞାନ)" },
-      { id: "sub_9_mth", class: "9", name: "Mathematics (ଗଣିତ)" },
-      { id: "sub_9_odia", class: "9", name: "Odia (ସାହିତ୍ୟ ଧାରା)" }
+      { id: "sub_9_mth", class: "9", name: "Mathematics (ଗଣିତ)" }
     ];
 
     const SEED_TOPICS = [
       { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତୀୟ ଜାତୀୟ ଆନ୍ଦୋଳନରେ ଗାନ୍ଧିଜୀଙ୍କ ଆବିର୍ଭାବ", isDemo: true },
       { id: "top_10_soc_2", class: "10", subjectId: "sub_10_soc", name: "ଅସହଯୋଗ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାର ଭୂମିକା", isDemo: false },
       { id: "top_10_ps_1", class: "10", subjectId: "sub_10_ps", name: "ରାସାୟନିକ ପ୍ରତିକ୍ରିୟା ଓ ସମୀକରଣ", isDemo: true },
-      { id: "top_10_ls_1", class: "10", subjectId: "sub_10_ls", name: "ପୋଷଣ (Nutrition)", isDemo: true },
-      { id: "top_10_odia_1", class: "10", subjectId: "sub_10_fl_odia", name: "ବନ୍ଦେ ଉତ୍କଳ ଜନନୀ", isDemo: true },
-      { id: "top_10_mth_1", class: "10", subjectId: "sub_10_mth", name: "ସରଳ ସହସମୀକରଣ", isDemo: true }
+      { id: "top_10_ls_1", class: "10", subjectId: "sub_10_ls", name: "ପୋଷଣ (Nutrition)", isDemo: true }
     ];
 
     const db = {
@@ -161,7 +162,7 @@
         info: 'bg-indigo-600 text-white'
       };
       const toastEl = document.createElement('div');
-      toastEl.className = `${colors[type]} p-3 rounded-xl shadow-xl flex items-start gap-2.5 pointer-events-auto transition transform max-w-sm border border-white/20 text-xs`;
+      toastEl.className = `${colors[type]} p-3 rounded-xl shadow-xl flex items-start gap-2.5 pointer-events-auto transition max-w-sm border border-white/20 text-xs`;
       toastEl.innerHTML = `<div><h4 class="font-bold">${title}</h4><p class="opacity-90 mt-0.5">${msg}</p></div>`;
       document.getElementById('toastContainer').appendChild(toastEl);
       setTimeout(() => {
@@ -189,7 +190,6 @@
       cancelBtn.onclick = cleanup;
     }
 
-    // PERSISTENT AUTHENTICATION (Survives Refresh)
     const auth = {
       getStudent: () => JSON.parse(localStorage.getItem(DB_KEYS.AUTH_STUDENT)),
       getAdmin: () => JSON.parse(localStorage.getItem(DB_KEYS.AUTH_ADMIN)),
@@ -204,7 +204,7 @@
         localStorage.removeItem(DB_KEYS.AUTH_ADMIN);
         localStorage.removeItem('sp_guest_flag');
         router.updateHeader();
-        toast('Logged Out', 'Session ended successfully.', 'info');
+        toast('Logged Out', 'Session closed.', 'info');
         router.navigate('home');
       }
     };
@@ -239,7 +239,7 @@
           const badge = document.getElementById('navUserType');
           if (isGuest) {
             badge.className = "bg-amber-400 text-indigo-950 px-1.5 py-0.5 rounded text-[9px] font-extrabold";
-            badge.innerText = "Guest Demo";
+            badge.innerText = "Guest";
           } else if (student.type === 'Admission') {
             badge.className = "bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded text-[9px] font-black";
             badge.innerText = "All Access";
@@ -276,11 +276,11 @@
         const app = document.getElementById('app');
 
         if (viewName.startsWith('admin-dashboard') && !auth.getAdmin()) {
-          toast('Admin Only', 'Please login with admin master credentials.', 'error');
+          toast('Admin Area', 'Please login with Master Credentials.', 'error');
           return router.navigate('admin-auth');
         }
         if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'notes-view'].includes(viewName) && !auth.getStudent()) {
-          toast('Login Required', 'Please login to access this portal.', 'warning');
+          toast('Login Required', 'Please login to continue.', 'warning');
           return router.navigate('login');
         }
 
@@ -311,10 +311,11 @@
 
     const views = {
       home: () => `
-        <div class="space-y-6 sm:space-y-10">
+        <div class="space-y-6">
+          <!-- Main Hero Banner -->
           <div class="bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-indigo-800 text-center sm:text-left">
             <span class="inline-block bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[11px] font-bold px-3 py-0.5 rounded-full uppercase">
-              BSE Odisha Board Curriculum (6-10)
+              BSE Odisha Board Curriculum (Class 6 - 10)
             </span>
             <h1 class="text-2xl sm:text-4xl font-black mt-3 leading-tight">
               Satyapeeth Online CBT & Smart Mock Portal
@@ -334,13 +335,54 @@
               </button>
             </div>
           </div>
+
+          <!-- Feature Cards Grid (Fills Home View) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+              <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg font-bold">
+                <i class="fa-solid fa-stopwatch"></i>
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm">Real CBT Mock Engine</h3>
+              <p class="text-xs text-slate-500 leading-relaxed">Exact timed exam environment without answers shown during test. Scorecard generated instantly upon completion.</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg font-bold">
+                <i class="fa-solid fa-bolt-lightning"></i>
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm">Instant Practice Mode</h3>
+              <p class="text-xs text-slate-500 leading-relaxed">Touch options to get immediate correctness feedback along with in-depth Odia & English concept clarification.</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+              <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg font-bold">
+                <i class="fa-solid fa-book-open"></i>
+              </div>
+              <h3 class="font-bold text-slate-900 text-sm">Bilingual Revision Notes</h3>
+              <p class="text-xs text-slate-500 leading-relaxed">Full theory revision notes and high-yield question summaries prepared strictly according to BSE textbooks.</p>
+            </div>
+          </div>
+
+          <!-- Official Social Channels Banner -->
+          <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-5 sm:p-6 rounded-3xl border border-indigo-900/60 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="text-center sm:text-left space-y-1">
+              <h4 class="font-black text-base text-amber-400">Join Our Official Satyapeeth Channels</h4>
+              <p class="text-xs text-slate-300">Watch daily concept classes and get exam updates on YouTube & Instagram.</p>
+            </div>
+            <div class="flex gap-2.5">
+              <a href="https://youtube.com/@satyapeethofficial?si=CYEuHtru53hpw9HP" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                <i class="fa-brands fa-youtube text-sm"></i> YouTube
+              </a>
+              <a href="https://www.instagram.com/satyapeeth_?igsi=eHh5d3pia2RwNnVo" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-500 hover:opacity-90 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                <i class="fa-brands fa-instagram text-sm"></i> Instagram
+              </a>
+            </div>
+          </div>
         </div>
       `,
 
       registerFree: () => `
-        <div class="max-w-md mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-5">
+        <div class="max-w-md mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-4">
           <div class="text-center">
-            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">Free Registration</span>
+            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">Free Mock Registration</span>
             <h2 class="text-xl font-black text-slate-900 mt-1">Student Mock Registration</h2>
             <p class="text-[11px] text-slate-500">Apply for your verified mock test credentials.</p>
           </div>
@@ -370,14 +412,14 @@
               <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
             </div>
             <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
-              Submit Registration
+              Submit & Notify Admin <i class="fa-brands fa-whatsapp ml-1 text-sm"></i>
             </button>
           </form>
         </div>
       `,
 
       admission: () => `
-        <div class="max-w-md mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-5">
+        <div class="max-w-md mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-4">
           <div class="text-center">
             <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full uppercase">Full Access</span>
             <h2 class="text-xl font-black text-slate-900 mt-1">Student Admission Form</h2>
@@ -419,7 +461,7 @@
               <input type="text" id="admSchool" required placeholder="School Name" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
             </div>
             <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-              Submit Admission Application
+              Submit & Send to Admin <i class="fa-brands fa-whatsapp ml-1 text-sm"></i>
             </button>
           </form>
         </div>
@@ -473,7 +515,7 @@
                   <i class="fa-solid fa-book-open"></i>
                 </div>
                 <h3 class="text-base font-bold text-slate-900">Class ${student.class} Mock Tests</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">Attempt chapter-wise objective exams with bilingual explanations.</p>
+                <p class="text-xs text-slate-500 leading-relaxed">Attempt chapter-wise objective exams with bilingual explanations in CBT or Practice mode.</p>
                 <button onclick="router.navigate('subject-select')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">
                   Start Mock Tests &rarr;
                 </button>
@@ -484,7 +526,7 @@
                   <i class="fa-solid fa-file-lines"></i>
                 </div>
                 <h3 class="text-base font-bold text-slate-900">Revision Notes</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">Full theory revision notes and summaries for BSE curriculum.</p>
+                <p class="text-xs text-slate-500 leading-relaxed">Full theory revision notes and summaries prepared for BSE curriculum.</p>
                 <button onclick="${hasNotesAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-2.5 ${hasNotesAccess ? 'bg-amber-500 text-indigo-950 font-black' : 'bg-slate-100 text-slate-600 font-bold'} rounded-xl text-xs transition">
                   ${hasNotesAccess ? 'View Notes' : 'Unlock Notes 🔒'} &rarr;
                 </button>
@@ -553,7 +595,7 @@
                         </div>
                         <div>
                           <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${top.name}</h4>
-                          <span class="text-[10px] text-indigo-600 font-semibold">${qCount} Questions</span>
+                          <span class="text-[10px] text-indigo-600 font-semibold">${qCount} Questions Loaded</span>
                         </div>
                       </div>
                       ${isLocked ? `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 rounded"><i class="fa-solid fa-lock"></i> Locked</span>` : ''}
@@ -588,18 +630,18 @@
             </button>
             <div class="bg-white p-4 rounded-2xl border text-center">
               <h2 class="text-base font-black text-slate-900">${topic ? topic.name : 'Test'}</h2>
-              <p class="text-[11px] text-slate-500">Choose your assessment mode</p>
+              <p class="text-[11px] text-slate-500">Select Mode (Both modes contain the exact same updated questions)</p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-indigo-950 text-white p-5 rounded-2xl cursor-pointer hover:bg-indigo-900 transition text-center space-y-2">
                 <i class="fa-solid fa-stopwatch text-2xl text-amber-400"></i>
                 <h3 class="font-bold text-sm">Exam CBT Mode</h3>
-                <p class="text-[10px] text-indigo-200">10-Minute Timed Mock</p>
+                <p class="text-[10px] text-indigo-200">Timed Exam Without Answers Shown</p>
               </div>
               <div onclick="startTestEngine('${subjectId}', '${topicId}', 'practice')" class="bg-emerald-700 text-white p-5 rounded-2xl cursor-pointer hover:bg-emerald-600 transition text-center space-y-2">
                 <i class="fa-solid fa-bolt text-2xl text-amber-300"></i>
                 <h3 class="font-bold text-sm">Practice Mode</h3>
-                <p class="text-[10px] text-emerald-100">Instant Explanations</p>
+                <p class="text-[10px] text-emerald-100">Instant Answers & Explanations</p>
               </div>
             </div>
           </div>
@@ -610,7 +652,7 @@
         <div class="max-w-2xl mx-auto space-y-4">
           <div class="bg-white p-3 rounded-xl border flex justify-between items-center text-xs">
             <span id="testMetaMode" class="font-bold uppercase px-2 py-0.5 rounded text-[10px]"></span>
-            <span class="font-mono font-bold text-slate-500">Q: <span id="testMetaProgress" class="text-indigo-600">1 / 1</span></span>
+            <span class="font-mono font-bold text-slate-500">Q: <span id="testMetaProgress" class="text-indigo-600 font-bold">1 / 1</span></span>
           </div>
           <div class="bg-white p-4 sm:p-6 rounded-2xl border shadow-sm space-y-4">
             <div>
@@ -711,7 +753,6 @@
             <div class="bg-white rounded-2xl border p-4 sm:p-6 space-y-4">
               <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Smart HTML Question Parser</h3>
               <form onsubmit="handleHtmlImport(event)" class="space-y-3">
-                <!-- Class Selection -->
                 <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
                   <div>
                     <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">1. Select Target Class</label>
@@ -725,7 +766,6 @@
                   </div>
                 </div>
 
-                <!-- Subject Selection -->
                 <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
                   <div>
                     <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">2. Select Subject</label>
@@ -737,7 +777,6 @@
                   </div>
                 </div>
 
-                <!-- Topic Selection -->
                 <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
                   <div>
                     <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">3. Select Chapter / Topic</label>
@@ -749,7 +788,6 @@
                   </div>
                 </div>
 
-                <!-- Code Box -->
                 <div>
                   <label class="block text-[10px] font-bold text-slate-700 uppercase mb-1">4. Paste Your HTML Code</label>
                   <textarea id="impHtmlCode" required rows="8" placeholder="Paste full HTML code with questionsData here..." class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border"></textarea>
@@ -840,9 +878,6 @@
       }
     };
 
-    /**
-     * DYNAMIC SMART DROPDOWN LOADERS
-     */
     function updateImporterSubjects() {
       const clsSelect = document.getElementById('impClassSelect');
       if (!clsSelect) return;
@@ -982,37 +1017,59 @@
 
     function handleRegistrationSubmit(e) {
       e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const cls = document.getElementById('regClass').value;
+      const phone = document.getElementById('regPhone').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+
       const newReg = {
         id: "reg_" + Date.now(),
-        name: document.getElementById('regName').value.trim(),
-        class: document.getElementById('regClass').value,
-        phone: document.getElementById('regPhone').value.trim(),
-        email: document.getElementById('regEmail').value.trim(),
+        name,
+        class: cls,
+        phone,
+        email,
         status: "Pending"
       };
       const registrations = db.get(DB_KEYS.REGISTRATIONS);
       registrations.unshift(newReg);
       db.set(DB_KEYS.REGISTRATIONS, registrations);
-      toast('Submitted!', 'Registration received by Admin.', 'success');
+
+      // WhatsApp Direct Notification to Admin
+      const msg = `*NEW SATYAPEETH MOCK REGISTRATION*%0A👤 Name: ${name}%0A📚 Class: ${cls}%0A📱 Phone: ${phone}%0A✉️ Email: ${email}`;
+      window.open(`https://api.whatsapp.com/send?phone=${ADMIN_WHATSAPP}&text=${msg}`, '_blank');
+
+      toast('Submitted!', 'Registration submitted and forwarded to Admin WhatsApp.', 'success');
       router.navigate('home');
     }
 
     function handleAdmissionSubmit(e) {
       e.preventDefault();
+      const name = document.getElementById('admName').value.trim();
+      const guardian = document.getElementById('admGuardian').value.trim();
+      const cls = document.getElementById('admClass').value;
+      const phone = document.getElementById('admPhone').value.trim();
+      const email = document.getElementById('admEmail').value.trim();
+      const school = document.getElementById('admSchool').value.trim();
+
       const newAdm = {
         id: "adm_" + Date.now(),
-        name: document.getElementById('admName').value.trim(),
-        guardian: document.getElementById('admGuardian').value.trim(),
-        class: document.getElementById('admClass').value,
-        phone: document.getElementById('admPhone').value.trim(),
-        email: document.getElementById('admEmail').value.trim(),
-        school: document.getElementById('admSchool').value.trim(),
+        name,
+        guardian,
+        class: cls,
+        phone,
+        email,
+        school,
         status: "Pending"
       };
       const admissions = db.get(DB_KEYS.ADMISSIONS);
       admissions.unshift(newAdm);
       db.set(DB_KEYS.ADMISSIONS, admissions);
-      toast('Submitted!', 'Admission application received by Admin.', 'success');
+
+      // WhatsApp Direct Notification to Admin
+      const msg = `*NEW SATYAPEETH FULL ADMISSION APPLICATION*%0A👤 Name: ${name}%0A👨‍👩‍👦 Guardian: ${guardian}%0A📚 Class: ${cls}%0A🏫 School: ${school}%0A📱 Phone: ${phone}%0A✉️ Email: ${email}`;
+      window.open(`https://api.whatsapp.com/send?phone=${ADMIN_WHATSAPP}&text=${msg}`, '_blank');
+
+      toast('Submitted!', 'Admission application submitted and forwarded to Admin WhatsApp.', 'success');
       router.navigate('home');
     }
 
@@ -1264,7 +1321,6 @@
       router.navigate('result-screen', { resultData: { obtainedMarks, totalMarks, percentage } });
     }
 
-    // Auto load on start
     window.addEventListener('DOMContentLoaded', () => {
       router.navigate('home');
     });
