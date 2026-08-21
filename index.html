@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SATYAPEETH — Odisha Board Online CBT & Learning Portal</title>
+  <title>SATYAPEETH — BSE Odisha CBT Portal</title>
   
-  <!-- Tailwind CSS & Icons -->
+  <!-- Tailwind CSS & FontAwesome Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" rel="stylesheet">
 
   <!-- Firebase App & Firestore SDKs (Compat v10) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -30,12 +30,19 @@
 
   <style>
     body { font-family: 'Inter', 'Noto Sans Oriya', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+    .font-cinzel { font-family: 'Cinzel', serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    @media print {
+      body * { visibility: hidden; }
+      #printableCertificate, #printableCertificate * { visibility: visible; }
+      #printableCertificate { position: absolute; left: 0; top: 0; width: 100%; }
+    }
   </style>
 </head>
 <body class="h-full flex flex-col bg-white text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased custom-scrollbar transition-colors duration-200">
@@ -57,15 +64,13 @@
         </div>
       </div>
 
-      <!-- Actions, Dark/Light Mode & Auth Controls -->
+      <!-- Theme, Parent, Auth Controls -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        
-        <!-- Dark/Light Mode Toggle Button -->
-        <button onclick="toggleTheme()" id="themeToggleBtn" class="p-1.5 sm:p-2 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-700 text-amber-400 transition" title="Toggle Dark/Light Mode">
+        <button onclick="toggleTheme()" id="themeToggleBtn" class="p-1.5 sm:p-2 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-700 text-amber-400 transition" title="Toggle Theme">
           <i id="themeIcon" class="fa-solid fa-moon text-xs sm:text-sm"></i>
         </button>
 
-        <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2 py-1 rounded-lg text-[11px] font-mono font-bold animate-pulse">
+        <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2 py-1 rounded-lg text-xs font-mono font-bold animate-pulse">
           <i class="fa-solid fa-stopwatch"></i>
           <span id="navTimerVal">00:00</span>
         </div>
@@ -76,6 +81,9 @@
           <span id="navUserType" class="px-1.5 py-0.5 rounded text-[9px] font-extrabold hidden sm:inline-block"></span>
         </div>
 
+        <button id="navParentBtn" onclick="router.navigate('parent-portal')" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2 sm:px-2.5 py-1.5 rounded-lg font-bold text-slate-200 transition">
+          <i class="fa-solid fa-users text-amber-400 mr-1"></i> Parent
+        </button>
         <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs bg-indigo-800 hover:bg-indigo-700 border border-indigo-600 px-2.5 sm:px-3 py-1.5 rounded-lg font-bold text-white transition">
           Login
         </button>
@@ -88,14 +96,14 @@
         <button id="navLogoutBtn" onclick="auth.logout()" class="hidden text-xs bg-slate-800 hover:bg-rose-900 border border-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg font-bold transition" title="Log Out">
           <i class="fa-solid fa-power-off"></i>
         </button>
-        <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2 py-1.5 rounded-lg transition" title="Admin Control Room">
+        <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2 py-1.5 rounded-lg transition" title="Admin Room">
           <i class="fa-solid fa-shield-halved"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- App View Container -->
+  <!-- App Main Router View -->
   <main id="app" class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6"></main>
 
   <!-- Confirmation Modal -->
@@ -113,7 +121,7 @@
     </div>
   </div>
 
-  <!-- Footer with Social Links -->
+  <!-- Footer -->
   <footer class="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 py-6 border-t border-slate-200 dark:border-slate-800 text-xs text-center">
     <div class="max-w-7xl mx-auto px-4 space-y-3">
       <div class="flex justify-center gap-5 text-sm">
@@ -124,7 +132,7 @@
           <i class="fa-brands fa-instagram text-base"></i> Instagram Page
         </a>
       </div>
-      <p>&copy; 2026 <strong>SATYAPEETH</strong> — BSE Odisha Examination & Learning Network</p>
+      <p>&copy; 2026 <strong>SATYAPEETH</strong> — BSE Odisha Examination & Learning Network | Admin: Satyajeet Sahu</p>
     </div>
   </footer>
 
@@ -144,15 +152,17 @@
 
     firebase.initializeApp(firebaseConfig);
     const firestore = firebase.firestore();
+    const ADMIN_PHONE = "919556576071";
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_persistent_student_v2',
-      AUTH_ADMIN: 'sp_persistent_admin_v2',
+      AUTH_STUDENT: 'sp_persistent_student_v3',
+      AUTH_ADMIN: 'sp_persistent_admin_v3',
+      AUTH_PARENT: 'sp_persistent_parent_v3',
       CLASSES: 'sp_classes_cache',
       THEME: 'sp_theme_pref'
     };
 
-    // Dark/Light Theme Manager (Default is Light)
+    // Dark/Light Theme Handler
     function initTheme() {
       const savedTheme = localStorage.getItem(DB_KEYS.THEME) || 'light';
       if (savedTheme === 'dark') {
@@ -170,11 +180,12 @@
       document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400 text-xs sm:text-sm' : 'fa-solid fa-moon text-amber-400 text-xs sm:text-sm';
     }
 
-    // In-memory Realtime Cloud Cache
+    // In-memory Cloud Cache
     let cloudState = {
       students: [],
       admissions: [],
       registrations: [],
+      results: [],
       subjects: [
         { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
         { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)" },
@@ -207,6 +218,11 @@
       firestore.collection("registrations").orderBy("timestamp", "desc").onSnapshot(snapshot => {
         cloudState.registrations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'registrations' });
+      });
+
+      firestore.collection("results").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        cloudState.results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'results' });
       });
 
       firestore.collection("subjects").onSnapshot(snapshot => {
@@ -262,7 +278,19 @@
       cancelBtn.onclick = cleanup;
     }
 
-    // Persistent Auth Controller (Never logs out unless clicked)
+    // WhatsApp Notification Trigger
+    function sendWhatsAppNotification(type, payload) {
+      let text = "";
+      if (type === 'registration') {
+        text = `🔔 *New Free Mock Registration (Satyapeeth)*%0A%0A👤 *Name:* ${payload.name}%0A📚 *Class:* ${payload.class}%0A📱 *Phone:* ${payload.phone}%0A📧 *Email:* ${payload.email}`;
+      } else if (type === 'admission') {
+        text = `🌟 *New Full Admission Application (Satyapeeth)*%0A%0A👤 *Student:* ${payload.name}%0A👨‍👩‍👦 *Guardian:* ${payload.guardian}%0A📚 *Class:* ${payload.class}%0A📱 *Phone:* ${payload.phone}%0A🏫 *School:* ${payload.school}`;
+      }
+      const url = `https://api.whatsapp.com/send?phone=${ADMIN_PHONE}&text=${text}`;
+      window.open(url, '_blank');
+    }
+
+    // Persistent Auth
     const auth = {
       getStudent: () => {
         try { return JSON.parse(localStorage.getItem(DB_KEYS.AUTH_STUDENT)); } catch (e) { return null; }
@@ -270,19 +298,24 @@
       getAdmin: () => {
         try { return JSON.parse(localStorage.getItem(DB_KEYS.AUTH_ADMIN)); } catch (e) { return null; }
       },
+      getParent: () => {
+        try { return JSON.parse(localStorage.getItem(DB_KEYS.AUTH_PARENT)); } catch (e) { return null; }
+      },
       isGuest: () => localStorage.getItem('sp_guest_flag') === 'true',
       setStudent: (data) => {
         localStorage.removeItem('sp_guest_flag');
         localStorage.setItem(DB_KEYS.AUTH_STUDENT, JSON.stringify(data));
       },
       setAdmin: (data) => localStorage.setItem(DB_KEYS.AUTH_ADMIN, JSON.stringify(data)),
+      setParent: (data) => localStorage.setItem(DB_KEYS.AUTH_PARENT, JSON.stringify(data)),
       logout: () => {
-        confirmDialog('Log Out', 'Are you sure you want to log out from Satyapeeth?', () => {
+        confirmDialog('Log Out', 'Are you sure you want to log out?', () => {
           localStorage.removeItem(DB_KEYS.AUTH_STUDENT);
           localStorage.removeItem(DB_KEYS.AUTH_ADMIN);
+          localStorage.removeItem(DB_KEYS.AUTH_PARENT);
           localStorage.removeItem('sp_guest_flag');
           router.updateHeader();
-          toast('Logged Out', 'Session closed successfully.', 'info');
+          toast('Logged Out', 'Session closed.', 'info');
           router.navigate('home');
         });
       }
@@ -305,6 +338,7 @@
       updateHeader: () => {
         const student = auth.getStudent();
         const admin = auth.getAdmin();
+        const parent = auth.getParent();
         const isGuest = auth.isGuest();
         const navUser = document.getElementById('navUserBadge');
         const loginBtn = document.getElementById('navLoginBtn');
@@ -326,6 +360,16 @@
             badge.className = "bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[9px] font-bold";
             badge.innerText = "Mock Pass";
           }
+          loginBtn.classList.add('hidden');
+          regBtn.classList.add('hidden');
+          admBtn.classList.add('hidden');
+          logoutBtn.classList.remove('hidden');
+        } else if (parent) {
+          navUser.classList.remove('hidden');
+          document.getElementById('navUserName').innerText = "Parent: " + parent.phone;
+          const badge = document.getElementById('navUserType');
+          badge.className = "bg-teal-500 text-white px-1.5 py-0.5 rounded text-[9px] font-bold";
+          badge.innerText = "Parent";
           loginBtn.classList.add('hidden');
           regBtn.classList.add('hidden');
           admBtn.classList.add('hidden');
@@ -368,6 +412,7 @@
           case 'register-free': app.innerHTML = views.registerFree(); break;
           case 'admission': app.innerHTML = views.admission(); break;
           case 'login': app.innerHTML = views.login(); break;
+          case 'parent-portal': app.innerHTML = views.parentPortal(); break;
           case 'student-dashboard': app.innerHTML = views.studentDashboard(); break;
           case 'subject-select': app.innerHTML = views.subjectSelect(); break;
           case 'topic-select': app.innerHTML = views.topicSelect(params.subjectId); break;
@@ -380,6 +425,8 @@
             app.innerHTML = views.adminDashboard(params.tab || 'html-upload');
             if ((params.tab || 'html-upload') === 'html-upload') {
               setTimeout(updateImporterSubjects, 50);
+            } else if ((params.tab || 'html-upload') === 'single-q') {
+              setTimeout(updateSingleQSubjects, 50);
             } else if ((params.tab || 'html-upload') === 'notes-admin') {
               setTimeout(updateNotesSubjects, 50);
             }
@@ -401,14 +448,17 @@
               Satyapeeth Online CBT & Smart Learning Portal
             </h1>
             <p class="text-indigo-200 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed">
-              Official chapter-wise practice tests with instant Odia & English explanations, interactive mock exams, and complete revision notes.
+              Official chapter-wise practice tests with large high-contrast fonts, Odia & English explanations, PDF notes, and instant parent progress tracking.
             </p>
             <div class="mt-5 flex flex-wrap gap-2.5 justify-center sm:justify-start">
               <button onclick="router.navigate('admission')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black px-4 py-2.5 rounded-xl shadow text-xs">
-                Full Admission (Notes + Mocks)
+                Full Admission (PDF Notes + Mocks)
               </button>
               <button onclick="router.navigate('register-free')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl shadow text-xs">
                 Free Mock Register
+              </button>
+              <button onclick="router.navigate('parent-portal')" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-4 py-2.5 rounded-xl shadow text-xs">
+                <i class="fa-solid fa-users mr-1"></i> Parent Portal
               </button>
               <button onclick="guestLogin()" class="bg-indigo-900/80 border border-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs">
                 Guest Demo
@@ -419,39 +469,24 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg font-bold">
-                <i class="fa-solid fa-stopwatch"></i>
+                <i class="fa-solid fa-award"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Real CBT Mock Engine</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Timed mock exams without answers revealed during the test. Detailed scorecards provided at the end.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">75%+ Official Certificate</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Score 75% or higher in any mock test to earn an authorized Satyapeeth digital achievement certificate.</p>
             </div>
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold">
-                <i class="fa-solid fa-bolt-lightning"></i>
+                <i class="fa-solid fa-file-pdf"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Interactive Practice Mode</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Instant correct/incorrect feedback with bilingual Odia & English concept clarification.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Official PDF Notes</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">View and download clean PDF chapter notes directly inside your student dashboard.</p>
             </div>
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold">
-                <i class="fa-solid fa-book-bookmark"></i>
+                <i class="fa-solid fa-users"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Chapter Revision Notes</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Complete syllabus notes curated by expert educators, uploaded directly from the Admin suite.</p>
-            </div>
-          </div>
-
-          <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-5 sm:p-6 rounded-3xl border border-indigo-900/60 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="text-center sm:text-left space-y-1">
-              <h4 class="font-black text-base text-amber-400">Join Official Satyapeeth Channels</h4>
-              <p class="text-xs text-slate-300">Watch video lessons and join live doubt clearing sessions.</p>
-            </div>
-            <div class="flex gap-2.5">
-              <a href="https://youtube.com/@satyapeethofficial?si=CYEuHtru53hpw9HP" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
-                <i class="fa-brands fa-youtube text-sm"></i> YouTube
-              </a>
-              <a href="https://www.instagram.com/satyapeeth_?igsi=eHh5d3pia2RwNnVo" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-500 hover:opacity-90 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
-                <i class="fa-brands fa-instagram text-sm"></i> Instagram
-              </a>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Parent Performance View</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Parents can log in with their phone number to check their child's scores and test report cards.</p>
             </div>
           </div>
         </div>
@@ -481,7 +516,7 @@
                 </select>
               </div>
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Mobile / WhatsApp *</label>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent Mobile / WhatsApp *</label>
                 <input type="tel" id="regPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
               </div>
             </div>
@@ -490,7 +525,7 @@
               <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
             </div>
             <button type="submit" id="regSubmitBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
-              Submit to Cloud Server
+              Submit & Send WhatsApp Alert
             </button>
           </form>
         </div>
@@ -501,7 +536,7 @@
           <div class="text-center">
             <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full uppercase">All Access Pass</span>
             <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Admission Form</h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Unlock full chapter revision notes & unlimited mock tests.</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Unlock PDF notes, marksheet tracking & CBT mocks.</p>
           </div>
           <form onsubmit="handleAdmissionSubmit(event)" class="space-y-3">
             <div>
@@ -510,7 +545,7 @@
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Guardian Name *</label>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent / Guardian Name *</label>
                 <input type="text" id="admGuardian" required placeholder="Father/Mother" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
               </div>
               <div>
@@ -526,7 +561,7 @@
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Mobile / WhatsApp *</label>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent WhatsApp No *</label>
                 <input type="tel" id="admPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
               </div>
               <div>
@@ -539,11 +574,70 @@
               <input type="text" id="admSchool" required placeholder="School Name" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
             </div>
             <button type="submit" id="admSubmitBtn" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-              Submit Cloud Admission
+              Submit & Send WhatsApp Alert
             </button>
           </form>
         </div>
       `,
+
+      parentPortal: () => {
+        const parent = auth.getParent();
+        if (parent) {
+          const studentResults = cloudState.results.filter(r => r.parentPhone === parent.phone || r.studentPhone === parent.phone);
+          return `
+            <div class="max-w-2xl mx-auto space-y-4">
+              <div class="bg-gradient-to-r from-teal-900 to-slate-900 text-white p-5 rounded-2xl flex justify-between items-center shadow-lg">
+                <div>
+                  <span class="text-[10px] bg-teal-500 text-slate-950 font-black px-2 py-0.5 rounded uppercase">Parent Portal</span>
+                  <h2 class="text-lg font-black mt-1">Student Performance Monitor</h2>
+                  <p class="text-xs text-teal-200">Registered Phone: ${parent.phone}</p>
+                </div>
+                <button onclick="auth.logout()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg transition">Exit</button>
+              </div>
+
+              <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white">Assessment Marksheets (${studentResults.length})</h3>
+                <div class="space-y-2">
+                  ${studentResults.length > 0 ? studentResults.map(res => `
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
+                      <div>
+                        <h4 class="font-bold text-slate-900 dark:text-white">${res.studentName} — ${res.topicName}</h4>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400">Score: <strong class="text-indigo-600 dark:text-indigo-400">${res.obtainedMarks} / ${res.totalMarks}</strong> (${res.percentage}%)</p>
+                      </div>
+                      ${res.percentage >= 75 ? `
+                        <button onclick="openCertificateModal('${res.id}')" class="px-2.5 py-1 bg-amber-500 text-indigo-950 font-extrabold rounded-lg text-[11px] shadow">
+                          <i class="fa-solid fa-award mr-1"></i> Certificate
+                        </button>
+                      ` : `<span class="text-[10px] font-bold text-slate-400">Completed</span>`}
+                    </div>
+                  `).join('') : '<p class="text-xs text-slate-400 text-center py-6">No test results recorded yet for this mobile number.</p>'}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="max-w-sm mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div class="text-center">
+              <div class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center mx-auto text-lg font-bold mb-2">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <h2 class="text-xl font-black text-slate-900 dark:text-white">Parent Portal Login</h2>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Enter the mobile number provided during admission/registration to view results.</p>
+            </div>
+            <form onsubmit="handleParentLogin(event)" class="space-y-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent Mobile Number</label>
+                <input type="tel" id="parentPhoneInput" required placeholder="Enter 10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-teal-600 text-slate-900 dark:text-white">
+              </div>
+              <button type="submit" class="w-full py-3 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl text-xs transition shadow">
+                View Student Performance
+              </button>
+            </form>
+          </div>
+        `;
+      },
 
       login: () => `
         <div class="max-w-sm mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-5">
@@ -562,7 +656,7 @@
               <input type="password" id="loginPass" required placeholder="Enter Password" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-600 text-slate-900 dark:text-white">
             </div>
             <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition shadow">
-              Authenticate & Stay Logged In
+              Authenticate & Open Portal
             </button>
           </form>
           <div class="pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
@@ -593,7 +687,7 @@
                   <i class="fa-solid fa-book-open"></i>
                 </div>
                 <h3 class="text-base font-bold text-slate-900 dark:text-white">Class ${student.class} Mock Tests</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Attempt chapter-wise objective exams in CBT or Practice mode.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Attempt chapter-wise objective exams in CBT or Practice mode with large fonts.</p>
                 <button onclick="router.navigate('subject-select')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">
                   Start Mock Tests &rarr;
                 </button>
@@ -601,12 +695,12 @@
 
               <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
                 <div class="w-10 h-10 rounded-xl ${hasNotesAccess ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} flex items-center justify-center text-xl font-bold">
-                  <i class="fa-solid fa-file-lines"></i>
+                  <i class="fa-solid fa-file-pdf"></i>
                 </div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Revision Notes</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Full theory revision notes and summaries prepared for BSE curriculum.</p>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">PDF Revision Notes</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Official PDF notes, formulas, and summaries prepared for BSE curriculum.</p>
                 <button onclick="${hasNotesAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-2.5 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold'} rounded-xl text-xs transition">
-                  ${hasNotesAccess ? 'View Notes' : 'Unlock Notes 🔒'} &rarr;
+                  ${hasNotesAccess ? 'View PDF Notes' : 'Unlock PDF Notes 🔒'} &rarr;
                 </button>
               </div>
             </div>
@@ -676,7 +770,7 @@
                           <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">${top.name}</h4>
                           <div class="flex items-center gap-2 mt-0.5">
                             <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">${qCount} Questions</span>
-                            ${hasNote ? '<span class="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded font-bold">Notes Ready</span>' : ''}
+                            ${hasNote ? '<span class="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded font-bold">PDF Ready</span>' : ''}
                           </div>
                         </div>
                       </div>
@@ -688,7 +782,7 @@
                         Mock Test
                       </button>
                       <button onclick="${hasNotesAccess ? `router.navigate('notes-view', { topicId: '${top.id}' })` : `showNotesLockPrompt()`}" class="flex-1 py-1.5 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'} text-xs rounded-xl transition">
-                        Notes ${!hasNotesAccess ? '🔒' : ''}
+                        PDF Notes ${!hasNotesAccess ? '🔒' : ''}
                       </button>
                     </div>
                   </div>
@@ -718,7 +812,7 @@
               <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-indigo-950 text-white p-5 rounded-2xl cursor-pointer hover:bg-indigo-900 transition text-center space-y-2 border border-indigo-900 shadow">
                 <i class="fa-solid fa-stopwatch text-2xl text-amber-400"></i>
                 <h3 class="font-bold text-sm">Exam CBT Mode</h3>
-                <p class="text-[10px] text-indigo-200">Timed Exam Without Answers Shown</p>
+                <p class="text-[10px] text-indigo-200">Timed Exam (Target: 75%+ for Certificate)</p>
               </div>
               <div onclick="startTestEngine('${subjectId}', '${topicId}', 'practice')" class="bg-emerald-700 text-white p-5 rounded-2xl cursor-pointer hover:bg-emerald-600 transition text-center space-y-2 border border-emerald-800 shadow">
                 <i class="fa-solid fa-bolt text-2xl text-amber-300"></i>
@@ -731,49 +825,94 @@
       },
 
       testScreen: () => `
-        <div class="max-w-2xl mx-auto space-y-4">
-          <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
-            <span id="testMetaMode" class="font-bold uppercase px-2 py-0.5 rounded text-[10px]"></span>
-            <span class="font-mono font-bold text-slate-500 dark:text-slate-400">Q: <span id="testMetaProgress" class="text-indigo-600 dark:text-indigo-400 font-bold">1 / 1</span></span>
+        <div class="max-w-3xl mx-auto space-y-4">
+          <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex justify-between items-center">
+            <span id="testMetaMode" class="font-bold uppercase px-2.5 py-1 rounded text-xs"></span>
+            <span class="font-mono font-bold text-slate-500 dark:text-slate-400 text-sm">Question: <span id="testMetaProgress" class="text-indigo-600 dark:text-indigo-400 font-black">1 / 1</span></span>
           </div>
-          <div class="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-            <div>
-              <h3 id="testQEn" class="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug"></h3>
-              <h4 id="testQOr" class="text-xs sm:text-sm font-semibold text-indigo-950 dark:text-indigo-300 mt-1 leading-snug"></h4>
+
+          <!-- Question Body with Larger & Cleaner Typography -->
+          <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
+            <div class="space-y-2 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <h3 id="testQEn" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-relaxed"></h3>
+              <h4 id="testQOr" class="text-sm sm:text-base font-semibold text-indigo-950 dark:text-amber-300 leading-relaxed"></h4>
             </div>
-            <div id="testOptionsBox" class="space-y-2"></div>
-            <div id="testPracticeBox" class="hidden p-3 rounded-xl text-xs space-y-1 border"></div>
-            <div class="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800">
-              <button onclick="navigateQuestion(-1)" id="testPrevBtn" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg text-xs">Previous</button>
-              <button onclick="navigateQuestion(1)" id="testNextBtn" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs">Next</button>
-              <button onclick="confirmSubmitTest()" id="testSubmitBtn" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs hidden">Submit Exam</button>
+
+            <!-- Clear High-Contrast Options -->
+            <div id="testOptionsBox" class="space-y-3"></div>
+
+            <div id="testPracticeBox" class="hidden p-4 rounded-2xl text-xs sm:text-sm space-y-1.5 border"></div>
+
+            <div class="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800">
+              <button onclick="navigateQuestion(-1)" id="testPrevBtn" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs sm:text-sm transition">Previous</button>
+              <button onclick="navigateQuestion(1)" id="testNextBtn" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm transition shadow">Next</button>
+              <button onclick="confirmSubmitTest()" id="testSubmitBtn" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs sm:text-sm hidden transition shadow">Submit Exam</button>
             </div>
           </div>
         </div>
       `,
 
-      resultScreen: (res) => `
-        <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4">
-          <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl font-black">✓</div>
-          <h2 class="text-lg font-black text-slate-900 dark:text-white">Scorecard: ${res.obtainedMarks} / ${res.totalMarks} (${res.percentage}%)</h2>
-          <button onclick="router.navigate('student-dashboard')" class="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl">Return to Dashboard</button>
-        </div>
-      `,
+      resultScreen: (res) => {
+        const isEligible = res.percentage >= 75;
+        return `
+          <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 text-center space-y-5 shadow-lg">
+            <div class="w-16 h-16 ${isEligible ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'} rounded-full flex items-center justify-center mx-auto text-2xl font-black shadow-inner">
+              ${isEligible ? '<i class="fa-solid fa-award"></i>' : '✓'}
+            </div>
+            
+            <div>
+              <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Score: ${res.obtainedMarks} / ${res.totalMarks} (${res.percentage}%)</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${res.topicName}</p>
+            </div>
+
+            ${isEligible ? `
+              <div class="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-900/60 space-y-2">
+                <h4 class="font-black text-amber-800 dark:text-amber-300 text-sm">🎉 Congratulations! You scored 75%+</h4>
+                <p class="text-xs text-amber-700 dark:text-amber-400">Your authorized Satyapeeth Certificate of Achievement is unlocked.</p>
+                <button onclick="openCertificateModal('${res.id}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+                  View & Download Certificate
+                </button>
+              </div>
+            ` : `
+              <p class="text-xs text-slate-500">Target 75% or higher to unlock the Satyapeeth Certificate of Achievement.</p>
+            `}
+
+            <button onclick="router.navigate('student-dashboard')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow">
+              Return to Dashboard
+            </button>
+          </div>
+        `;
+      },
 
       notesView: (topicId) => {
         const topic = cloudState.topics.find(t => t.id === topicId);
         const note = cloudState.notes.find(n => n.topicId === topicId);
+
         return `
-          <div class="max-w-3xl mx-auto space-y-4">
+          <div class="max-w-4xl mx-auto space-y-4">
             <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">&larr; Back to Subjects</button>
-            <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
-              <div class="border-b border-slate-200 dark:border-slate-800 pb-3">
-                <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 px-2 py-0.5 rounded uppercase">Verified Revision Notes</span>
-                <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">${topic ? topic.name : 'Chapter Notes'}</h2>
+            <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                  <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 px-2 py-0.5 rounded uppercase">Official Notes</span>
+                  <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">${topic ? topic.name : 'Chapter Notes'}</h2>
+                </div>
+                ${note && note.pdfUrl ? `
+                  <a href="${note.pdfUrl}" target="_blank" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-pdf"></i> Open Full PDF
+                  </a>
+                ` : ''}
               </div>
-              <div class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-950/60 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 font-sans">
-                ${note ? note.content : 'Notes for this chapter will be uploaded soon by Admin.'}
-              </div>
+
+              ${note && note.pdfUrl ? `
+                <div class="w-full h-[550px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                  <iframe src="${note.pdfUrl.includes('drive.google.com') ? note.pdfUrl.replace('/view', '/preview') : note.pdfUrl}" class="w-full h-full border-0"></iframe>
+                </div>
+              ` : `
+                <div class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-950/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                  ${note && note.content ? note.content : 'PDF and revision notes for this chapter will be uploaded soon.'}
+                </div>
+              `}
             </div>
           </div>
         `;
@@ -809,6 +948,7 @@
         const students = cloudState.students;
         const questions = cloudState.questions;
         const notes = cloudState.notes;
+        const results = cloudState.results;
 
         return `
           <div class="space-y-4">
@@ -821,14 +961,16 @@
               </div>
               <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                 <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code mr-1"></i> HTML Parser</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pen mr-1"></i> Upload Notes (${notes.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'single-q' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'single-q' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-plus mr-1"></i> Add Single Q</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pdf mr-1"></i> PDF Notes (${notes.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'results' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Results (${results.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Mocks (${registrations.filter(r => r.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Students (${students.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'questions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'questions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Questions (${questions.length})</button>
               </div>
             </div>
-            ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes })}
+            ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes, results })}
           </div>
         `;
       },
@@ -870,7 +1012,7 @@
                     <select id="impTopicSelect" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
                   </div>
                   <div class="flex gap-2">
-                    <input type="text" id="impNewTopic" placeholder="Or New Chapter/Topic Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white">
+                    <input type="text" id="impNewTopic" placeholder="Or New Chapter Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white">
                     <button type="button" onclick="addNewTopic()" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">Add</button>
                   </div>
                 </div>
@@ -888,11 +1030,86 @@
           `;
         },
 
+        'single-q': () => {
+          const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Manual Single Question Creator</h3>
+              <form onsubmit="handleSingleQuestionSave(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class</label>
+                    <select id="sqClassSelect" onchange="updateSingleQSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Subject</label>
+                    <select id="sqSubjectSelect" onchange="updateSingleQTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter / Topic</label>
+                    <select id="sqTopicSelect" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Question (English)</label>
+                  <input type="text" id="sqQEn" required placeholder="Type English Question" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Question (Odia - Optional)</label>
+                  <input type="text" id="sqQOr" placeholder="ଓଡ଼ିଆରେ ପ୍ରଶ୍ନ ଲେଖନ୍ତୁ" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Option A</label>
+                    <input type="text" id="sqOptA" required placeholder="Option A" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Option B</label>
+                    <input type="text" id="sqOptB" required placeholder="Option B" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Option C</label>
+                    <input type="text" id="sqOptC" required placeholder="Option C" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Option D</label>
+                    <input type="text" id="sqOptD" required placeholder="Option D" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Correct Answer Key</label>
+                    <select id="sqCorrectAns" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      <option value="A">Option A</option>
+                      <option value="B">Option B</option>
+                      <option value="C">Option C</option>
+                      <option value="D">Option D</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Explanation (Optional)</label>
+                    <input type="text" id="sqExp" placeholder="Short concept / reason" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow">
+                  Save Question to Cloud Bank
+                </button>
+              </form>
+            </div>
+          `;
+        },
+
         'notes-admin': ({ notes }) => {
           const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
           return `
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
-              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Cloud Revision Notes Manager</h3>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">PDF Revision Notes Manager</h3>
               
               <form onsubmit="handleNoteSave(event)" class="space-y-3">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -913,17 +1130,41 @@
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter Notes Content (Odia / English / Points)</label>
-                  <textarea id="noteContentInput" required rows="10" placeholder="Type or paste complete chapter summary, key points, formulas, and concepts here..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">PDF File Link (Google Drive / Direct PDF URL)</label>
+                  <input type="url" id="notePdfUrlInput" placeholder="https://drive.google.com/file/d/.../view?usp=sharing" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Summary / Additional Points</label>
+                  <textarea id="noteContentInput" rows="5" placeholder="Summary notes..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-                  Publish Notes to Cloud Server
+                  Publish PDF & Notes to Cloud
                 </button>
               </form>
             </div>
           `;
         },
+
+        results: ({ results }) => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Realtime Mock Marksheets (${results.length})</h3>
+            <div class="space-y-2">
+              ${results.length > 0 ? results.map(r => `
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center gap-2">
+                  <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white">${r.studentName} (Class ${r.studentClass})</h4>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">${r.topicName} | Score: <strong class="text-indigo-600 dark:text-indigo-400">${r.obtainedMarks} / ${r.totalMarks}</strong> (${r.percentage}%)</p>
+                  </div>
+                  ${r.percentage >= 75 ? `
+                    <button onclick="openCertificateModal('${r.id}')" class="px-2.5 py-1 bg-amber-500 text-indigo-950 font-bold rounded-lg text-[10px]">Certificate</button>
+                  ` : `<span class="text-[10px] text-slate-400">Completed</span>`}
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No test submissions yet.</p>'}
+            </div>
+          </div>
+        `,
 
         admissions: ({ admissions }) => `
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
@@ -1002,6 +1243,7 @@
       }
     };
 
+    // Helper functions for Selectors
     function updateImporterSubjects() {
       const clsSelect = document.getElementById('impClassSelect');
       if (!clsSelect) return;
@@ -1011,7 +1253,7 @@
 
       subSelect.innerHTML = subjects.length > 0 
         ? subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('') 
-        : '<option value="">-- No Subject Found (Add New Below) --</option>';
+        : '<option value="">-- No Subject Found --</option>';
 
       updateImporterTopics();
     }
@@ -1025,60 +1267,103 @@
 
       topSelect.innerHTML = topics.length > 0 
         ? topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('') 
-        : '<option value="">-- No Topic Found (Add New Below) --</option>';
+        : '<option value="">-- No Topic Found --</option>';
     }
 
-    // Notes Admin Form Selectors
+    function updateSingleQSubjects() {
+      const cls = document.getElementById('sqClassSelect').value;
+      const subSelect = document.getElementById('sqSubjectSelect');
+      const subjects = cloudState.subjects.filter(s => String(s.class) === String(cls));
+      subSelect.innerHTML = subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      updateSingleQTopics();
+    }
+
+    function updateSingleQTopics() {
+      const subId = document.getElementById('sqSubjectSelect').value;
+      const topSelect = document.getElementById('sqTopicSelect');
+      const topics = cloudState.topics.filter(t => t.subjectId === subId);
+      topSelect.innerHTML = topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    }
+
     function updateNotesSubjects() {
-      const clsSelect = document.getElementById('noteClassSelect');
-      if (!clsSelect) return;
-      const cls = clsSelect.value;
+      const cls = document.getElementById('noteClassSelect').value;
       const subSelect = document.getElementById('noteSubjectSelect');
       const subjects = cloudState.subjects.filter(s => String(s.class) === String(cls));
-
-      subSelect.innerHTML = subjects.length > 0 
-        ? subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('') 
-        : '<option value="">-- No Subject Found --</option>';
-
+      subSelect.innerHTML = subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
       updateNotesTopics();
     }
 
     function updateNotesTopics() {
-      const subSelect = document.getElementById('noteSubjectSelect');
+      const subId = document.getElementById('noteSubjectSelect').value;
       const topSelect = document.getElementById('noteTopicSelect');
-      if (!subSelect || !topSelect) return;
-      const subId = subSelect.value;
       const topics = cloudState.topics.filter(t => t.subjectId === subId);
-
-      topSelect.innerHTML = topics.length > 0 
-        ? topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('') 
-        : '<option value="">-- No Topic Found --</option>';
-
+      topSelect.innerHTML = topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
       loadExistingNote();
     }
 
     function loadExistingNote() {
       const topSelect = document.getElementById('noteTopicSelect');
-      const contentInput = document.getElementById('noteContentInput');
-      if (!topSelect || !contentInput) return;
+      if (!topSelect) return;
       const topId = topSelect.value;
       const existing = cloudState.notes.find(n => n.topicId === topId);
-      contentInput.value = existing ? existing.content : '';
+      document.getElementById('notePdfUrlInput').value = existing ? existing.pdfUrl || '' : '';
+      document.getElementById('noteContentInput').value = existing ? existing.content || '' : '';
     }
 
     function handleNoteSave(e) {
       e.preventDefault();
       const topId = document.getElementById('noteTopicSelect').value;
+      const pdfUrl = document.getElementById('notePdfUrlInput').value.trim();
       const content = document.getElementById('noteContentInput').value.trim();
 
-      if (!topId) return alert("Please select a Chapter / Topic!");
+      if (!topId) return alert("Select Chapter first!");
 
       firestore.collection("notes").doc(topId).set({
         topicId: topId,
+        pdfUrl: pdfUrl,
         content: content,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-        toast("Notes Published!", "Chapter notes successfully saved on cloud server.", "success");
+        toast("Notes Saved!", "PDF notes and content updated on cloud.", "success");
+      });
+    }
+
+    function handleSingleQuestionSave(e) {
+      e.preventDefault();
+      const cls = document.getElementById('sqClassSelect').value;
+      const subId = document.getElementById('sqSubjectSelect').value;
+      const topId = document.getElementById('sqTopicSelect').value;
+      const qEn = document.getElementById('sqQEn').value.trim();
+      const qOr = document.getElementById('sqQOr').value.trim();
+      const optA = document.getElementById('sqOptA').value.trim();
+      const optB = document.getElementById('sqOptB').value.trim();
+      const optC = document.getElementById('sqOptC').value.trim();
+      const optD = document.getElementById('sqOptD').value.trim();
+      const ans = document.getElementById('sqCorrectAns').value;
+      const exp = document.getElementById('sqExp').value.trim();
+
+      if (!subId || !topId) return alert("Select Subject & Chapter!");
+
+      firestore.collection("questions").add({
+        class: cls,
+        subjectId: subId,
+        topicId: topId,
+        question: qEn,
+        questionOdia: qOr,
+        options: { A: optA, B: optB, C: optC, D: optD },
+        correctAnswer: ans,
+        explanation: exp,
+        marks: 1,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        toast("Saved!", "Single question uploaded to Cloud Bank.", "success");
+        document.getElementById('sqQEn').value = '';
+        document.getElementById('sqQOr').value = '';
+        document.getElementById('sqOptA').value = '';
+        document.getElementById('sqOptB').value = '';
+        document.getElementById('sqOptC').value = '';
+        document.getElementById('sqOptD').value = '';
+        document.getElementById('sqExp').value = '';
       });
     }
 
@@ -1130,9 +1415,7 @@
       const topId = document.getElementById('impTopicSelect').value;
       const htmlCode = document.getElementById('impHtmlCode').value;
 
-      if (!subId || !topId) {
-        return alert("Please select or add a Subject and Chapter/Topic first!");
-      }
+      if (!subId || !topId) return alert("Select Subject & Chapter first!");
 
       try {
         let extractedQuestions = [];
@@ -1177,7 +1460,7 @@
       e.preventDefault();
       const btn = document.getElementById('regSubmitBtn');
       btn.disabled = true;
-      btn.innerText = "Syncing with Cloud...";
+      btn.innerText = "Syncing...";
 
       const newReg = {
         name: document.getElementById('regName').value.trim(),
@@ -1190,7 +1473,8 @@
 
       firestore.collection("registrations").add(newReg)
         .then(() => {
-          toast('Submitted!', 'Registration saved in Cloud & Admin notified.', 'success');
+          toast('Submitted!', 'Registration saved in Cloud & WhatsApp Alert opened.', 'success');
+          sendWhatsAppNotification('registration', newReg);
           router.navigate('home');
         })
         .catch(err => {
@@ -1203,7 +1487,7 @@
       e.preventDefault();
       const btn = document.getElementById('admSubmitBtn');
       btn.disabled = true;
-      btn.innerText = "Syncing with Cloud...";
+      btn.innerText = "Syncing...";
 
       const newAdm = {
         name: document.getElementById('admName').value.trim(),
@@ -1218,7 +1502,8 @@
 
       firestore.collection("admissions").add(newAdm)
         .then(() => {
-          toast('Submitted!', 'Admission application saved in Cloud & Admin notified.', 'success');
+          toast('Submitted!', 'Admission saved in Cloud & WhatsApp Alert opened.', 'success');
+          sendWhatsAppNotification('admission', newAdm);
           router.navigate('home');
         })
         .catch(err => {
@@ -1241,13 +1526,21 @@
         toast('Welcome Back!', `Logged in as ${student.name}`, 'success');
         router.navigate('student-dashboard');
       } else {
-        toast('Login Failed', 'Account not found or not yet approved by Admin.', 'error');
+        toast('Login Failed', 'Credentials not found or not approved by Admin.', 'error');
       }
+    }
+
+    function handleParentLogin(e) {
+      e.preventDefault();
+      const phone = document.getElementById('parentPhoneInput').value.trim();
+      auth.setParent({ phone: phone });
+      toast('Parent Login', 'Viewing student report card.', 'success');
+      router.navigate('parent-portal');
     }
 
     function guestLogin() {
       localStorage.setItem('sp_guest_flag', 'true');
-      localStorage.setItem(DB_KEYS.AUTH_STUDENT, JSON.stringify({ name: "Guest Learner", class: "10", studentId: "GST-DEMO", type: "Guest" }));
+      localStorage.setItem(DB_KEYS.AUTH_STUDENT, JSON.stringify({ name: "Guest Learner", class: "10", studentId: "GST-DEMO", type: "Guest", phone: "9876543210", email: "guest@satyapeeth.in", guardian: "Guest Parent" }));
       toast('Guest Mode', 'Demo session enabled for Class 10.', 'info');
       router.navigate('student-dashboard');
     }
@@ -1259,7 +1552,7 @@
     }
 
     function showNotesLockPrompt() {
-      confirmDialog('Notes Locked 🔒', 'Notes are exclusive to Full Admission students. Submit Admission form?', () => {
+      confirmDialog('Notes Locked 🔒', 'PDF notes are exclusive to Full Admission students. Submit Admission form?', () => {
         router.navigate('admission');
       });
     }
@@ -1295,6 +1588,7 @@
       firestore.collection("students").add({
         studentId,
         name: record.name,
+        guardian: record.guardian || "Guardian",
         class: record.class,
         phone: record.phone,
         email: record.email,
@@ -1302,23 +1596,19 @@
         type: type === 'adm' ? "Admission" : "Registration",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-        toast('Approved!', `Generated Student ID: ${studentId} & Password: ${password}`, 'success');
+        toast('Approved!', `Student ID: ${studentId} & Password: ${password}`, 'success');
       });
     }
 
     function deleteStudent(docId) {
       confirmDialog('Delete Student', 'Remove this profile from cloud?', () => {
-        firestore.collection("students").doc(docId).delete().then(() => {
-          toast('Deleted', 'Student removed from cloud.', 'info');
-        });
+        firestore.collection("students").doc(docId).delete().then(() => toast('Deleted', 'Student removed.', 'info'));
       });
     }
 
     function deleteQuestion(docId) {
       confirmDialog('Delete Question', 'Remove this question from cloud?', () => {
-        firestore.collection("questions").doc(docId).delete().then(() => {
-          toast('Deleted', 'Question removed.', 'info');
-        });
+        firestore.collection("questions").doc(docId).delete().then(() => toast('Deleted', 'Question removed.', 'info'));
       });
     }
 
@@ -1331,7 +1621,7 @@
         questions = [
           {
             id: "q_demo_1",
-            question: "Sample Assessment Question",
+            question: "Sample Objective Question",
             questionOdia: "ପ୍ରଶ୍ନ ଉପଲବ୍ଧ ନାହିଁ । (Upload questions from Admin Smart HTML Parser)",
             options: { A: "Option A", B: "Option B", C: "Option C", D: "Option D" },
             correctAnswer: "A",
@@ -1382,7 +1672,7 @@
       const isFirst = activeExam.currentIndex === 0;
 
       document.getElementById('testMetaMode').innerText = activeExam.mode === 'exam' ? 'CBT Exam' : 'Practice';
-      document.getElementById('testMetaMode').className = `font-bold uppercase px-2 py-0.5 rounded text-[10px] ${activeExam.mode === 'exam' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'}`;
+      document.getElementById('testMetaMode').className = `font-bold uppercase px-2.5 py-1 rounded text-xs ${activeExam.mode === 'exam' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'}`;
       document.getElementById('testMetaProgress').innerText = `${activeExam.currentIndex + 1} / ${activeExam.questions.length}`;
       document.getElementById('testQEn').innerText = `Q${activeExam.currentIndex + 1}. ${q.question}`;
       document.getElementById('testQOr').innerText = q.questionOdia || '';
@@ -1393,12 +1683,12 @@
 
       Object.entries(q.options).forEach(([key, val]) => {
         const btn = document.createElement('button');
-        let btnClasses = "w-full p-3 rounded-xl border text-left font-medium text-xs flex items-center justify-between transition ";
+        let btnClasses = "w-full p-3.5 rounded-2xl border text-left font-medium text-xs sm:text-sm flex items-center justify-between transition leading-relaxed ";
 
         if (activeExam.mode === 'exam') {
           btnClasses += userPick === key 
-            ? "border-indigo-600 bg-indigo-600 text-white font-bold" 
-            : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200";
+            ? "border-indigo-600 bg-indigo-600 text-white font-bold shadow" 
+            : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-indigo-400";
         } else {
           if (activeExam.practiceRevealed[q.id]) {
             if (key === q.correctAnswer) {
@@ -1406,15 +1696,15 @@
             } else if (userPick === key) {
               btnClasses += "border-rose-600 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-300 font-bold";
             } else {
-              btnClasses += "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 opacity-50 text-slate-700 dark:text-slate-300";
+              btnClasses += "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 opacity-50 text-slate-700 dark:text-slate-300";
             }
           } else {
-            btnClasses += "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200";
+            btnClasses += "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200";
           }
         }
 
         btn.className = btnClasses;
-        btn.innerHTML = `<span class="font-bold mr-2">${key}.</span> <span>${val}</span>`;
+        btn.innerHTML = `<span class="font-bold mr-2.5 text-sm">${key}.</span> <span class="flex-1">${val}</span>`;
         btn.onclick = () => selectOption(q.id, key);
         container.appendChild(btn);
       });
@@ -1423,9 +1713,9 @@
       if (activeExam.mode === 'practice' && activeExam.practiceRevealed[q.id]) {
         practiceBox.classList.remove('hidden');
         practiceBox.className = userPick === q.correctAnswer 
-          ? 'p-3 rounded-xl text-xs border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200' 
-          : 'p-3 rounded-xl text-xs border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200';
-        practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct factual answer.'}</p>`;
+          ? 'p-4 rounded-2xl text-xs sm:text-sm border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200' 
+          : 'p-4 rounded-2xl text-xs sm:text-sm border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200';
+        practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct factual question.'}</p>`;
       } else {
         practiceBox.classList.add('hidden');
       }
@@ -1466,20 +1756,107 @@
 
       const totalMarks = activeExam.questions.length;
       const percentage = Math.round((obtainedMarks / totalMarks) * 100) || 0;
+      const student = auth.getStudent() || { name: "Guest Student", class: "10", phone: "9876543210", email: "guest@satyapeeth.in", guardian: "Guest Parent" };
 
-      router.navigate('result-screen', { resultData: { obtainedMarks, totalMarks, percentage } });
+      const resultPayload = {
+        studentName: student.name,
+        studentClass: student.class,
+        studentPhone: student.phone || '',
+        parentPhone: student.phone || '',
+        parentName: student.guardian || 'Guardian',
+        studentEmail: student.email || '',
+        subjectName: activeExam.subject ? activeExam.subject.name : 'All Subjects',
+        topicName: activeExam.topic ? activeExam.topic.name : 'Chapter Test',
+        obtainedMarks,
+        totalMarks,
+        percentage,
+        certificateId: "SP-CERT-" + Date.now().toString().slice(-6),
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      firestore.collection("results").add(resultPayload).then(docRef => {
+        router.navigate('result-screen', { resultData: { id: docRef.id, ...resultPayload } });
+      });
     }
 
-    // App Bootstrapping
+    // Dynamic Certificate Modal
+    function openCertificateModal(resultId) {
+      const res = cloudState.results.find(r => r.id === resultId);
+      if (!res) return;
+
+      const certHtml = `
+        <div id="certModalBackdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 overflow-y-auto">
+          <div class="max-w-xl w-full bg-[#fdfdfb] text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-amber-400 relative space-y-5" id="printableCertificate">
+            
+            <div class="border-2 border-indigo-950 p-5 rounded-2xl relative space-y-4">
+              <div class="flex justify-between items-center">
+                <div class="w-8 h-8 rounded-lg bg-indigo-950 text-amber-400 flex items-center justify-center font-cinzel font-black text-sm">
+                  SP
+                </div>
+                <div class="text-center">
+                  <h2 class="font-cinzel text-xl sm:text-2xl font-black tracking-widest text-indigo-950">SATYAPEETH</h2>
+                  <p class="text-[10px] uppercase font-bold tracking-widest text-amber-700">Certificate of Achievement</p>
+                </div>
+                <i class="fa-solid fa-award text-2xl text-amber-500"></i>
+              </div>
+
+              <div class="text-center space-y-2 py-3">
+                <p class="text-xs italic text-slate-600">This certificate is proudly presented to</p>
+                <h3 class="text-xl sm:text-2xl font-black text-indigo-950 border-b-2 border-amber-400 pb-1 inline-block uppercase tracking-wide">
+                  ${res.studentName}
+                </h3>
+                <p class="text-xs text-slate-700 leading-relaxed max-w-sm mx-auto">
+                  For successfully demonstrating academic excellence in <br><strong class="text-indigo-950">${res.topicName}</strong> with a score of <strong>${res.percentage}%</strong>.
+                </p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-600 border-t border-slate-200 pt-3">
+                <p><strong>Parent Name:</strong> ${res.parentName}</p>
+                <p><strong>Email ID:</strong> ${res.studentEmail}</p>
+                <p><strong>Date:</strong> ${res.date}</p>
+                <p><strong>Certificate ID:</strong> <span class="font-mono text-indigo-950 font-bold">${res.certificateId}</span></p>
+              </div>
+
+              <div class="flex justify-between items-end pt-4">
+                <div class="text-left text-[9px] text-slate-400">
+                  <p>BSE Odisha Curriculum</p>
+                  <p>Verified Academic Credential</p>
+                </div>
+                <div class="text-right">
+                  <div class="font-serif italic font-bold text-xs text-indigo-950 border-b border-slate-400 pb-0.5">Satyajeet Sahu</div>
+                  <p class="text-[9px] uppercase tracking-wider font-bold text-slate-600">Authorized Signature</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-2 print:hidden">
+              <button onclick="window.print()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-print"></i> Print / Download
+              </button>
+              <button onclick="document.getElementById('certModalBackdrop').remove()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl text-xs transition">
+                Close
+              </button>
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', certHtml);
+    }
+
+    // App Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
       initRealtimeSync();
-      
-      // Keep user in their current view if already authenticated
+
       if (auth.getStudent()) {
         router.navigate('student-dashboard');
       } else if (auth.getAdmin()) {
         router.navigate('admin-dashboard');
+      } else if (auth.getParent()) {
+        router.navigate('parent-portal');
       } else {
         router.navigate('home');
       }
