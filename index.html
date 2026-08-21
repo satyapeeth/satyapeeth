@@ -4,11 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SATYAPEETH — Odisha Board Online CBT & Learning Portal</title>
+  
+  <!-- Tailwind CSS & Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase App & Firestore SDKs (Compat v10) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <style>
     body { font-family: 'Inter', 'Noto Sans Oriya', sans-serif; -webkit-tap-highlight-color: transparent; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -20,10 +27,10 @@
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased custom-scrollbar selection:bg-amber-200">
 
-  <!-- Toast Notification Container -->
+  <!-- Toast Notification System -->
   <div id="toastContainer" class="fixed top-3 right-3 left-3 sm:left-auto z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Header -->
+  <!-- Global Header -->
   <header class="bg-indigo-950 text-white sticky top-0 z-40 border-b border-indigo-900 shadow-md">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2">
       <!-- Logo -->
@@ -37,7 +44,7 @@
         </div>
       </div>
 
-      <!-- Actions -->
+      <!-- Navigation & Auth Actions -->
       <div class="flex items-center gap-1.5 sm:gap-2">
         <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold animate-pulse">
           <i class="fa-solid fa-stopwatch"></i>
@@ -69,10 +76,10 @@
     </div>
   </header>
 
-  <!-- Dynamic App Root -->
+  <!-- App View Container -->
   <main id="app" class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6"></main>
 
-  <!-- Global Modal -->
+  <!-- Confirmation Modal -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white max-w-sm w-full rounded-2xl shadow-2xl border border-slate-100 p-5 text-center">
       <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-lg">
@@ -87,10 +94,10 @@
     </div>
   </div>
 
-  <!-- Footer -->
+  <!-- Footer with Social Links -->
   <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-xs text-center">
     <div class="max-w-7xl mx-auto px-4 space-y-3">
-      <div class="flex justify-center gap-4 text-sm">
+      <div class="flex justify-center gap-5 text-sm">
         <a href="https://youtube.com/@satyapeethofficial?si=CYEuHtru53hpw9HP" target="_blank" rel="noopener noreferrer" class="text-rose-400 hover:text-rose-300 transition flex items-center gap-1.5 font-bold">
           <i class="fa-brands fa-youtube text-base"></i> YouTube Channel
         </a>
@@ -103,56 +110,81 @@
   </footer>
 
   <script>
-    const ADMIN_WHATSAPP = "919000000000"; // Optional: Add your 10-digit phone number with 91 prefix
+    /**
+     * FIREBASE CONFIGURATION & REALTIME CLOUD DB
+     */
+    const firebaseConfig = {
+      apiKey: "AIzaSyClZPVVbeaz43l-SRYSRE0O504Lc4vEMLE",
+      authDomain: "satyapeeth-d1fe1.firebaseapp.com",
+      projectId: "satyapeeth-d1fe1",
+      storageBucket: "satyapeeth-d1fe1.firebasestorage.app",
+      messagingSenderId: "393666660094",
+      appId: "1:393666660094:web:6484724ab9035b38bd47af",
+      measurementId: "G-Y9WN2HDHRK"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const firestore = firebase.firestore();
 
     const DB_KEYS = {
-      STUDENTS: 'sp_students_db',
-      ADMISSIONS: 'sp_admissions_db',
-      REGISTRATIONS: 'sp_registrations_db',
-      CLASSES: 'sp_classes_db',
-      SUBJECTS: 'sp_subjects_db',
-      TOPICS: 'sp_topics_db',
-      NOTES: 'sp_notes_db',
-      QUESTIONS: 'sp_questions_db',
-      RESULTS: 'sp_results_db',
-      AUTH_STUDENT: 'sp_perm_student',
-      AUTH_ADMIN: 'sp_perm_admin'
+      AUTH_STUDENT: 'sp_cloud_student',
+      AUTH_ADMIN: 'sp_cloud_admin',
+      CLASSES: 'sp_classes_cache'
     };
 
     const SEED_CLASSES = ["10", "9", "8", "7", "6"];
 
-    const SEED_SUBJECTS = [
-      { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
-      { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)" },
-      { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)" },
-      { id: "sub_10_ls", class: "10", name: "Life Science (ଜୀବ ବିଜ୍ଞାନ)" },
-      { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)" },
-      { id: "sub_10_eng", class: "10", name: "English" },
-      { id: "sub_9_sci", class: "9", name: "Science (ବିଜ୍ଞାନ)" },
-      { id: "sub_9_mth", class: "9", name: "Mathematics (ଗଣିତ)" }
-    ];
-
-    const SEED_TOPICS = [
-      { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତୀୟ ଜାତୀୟ ଆନ୍ଦୋଳନରେ ଗାନ୍ଧିଜୀଙ୍କ ଆବିର୍ଭାବ", isDemo: true },
-      { id: "top_10_soc_2", class: "10", subjectId: "sub_10_soc", name: "ଅସହଯୋଗ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାର ଭୂମିକା", isDemo: false },
-      { id: "top_10_ps_1", class: "10", subjectId: "sub_10_ps", name: "ରାସାୟନିକ ପ୍ରତିକ୍ରିୟା ଓ ସମୀକରଣ", isDemo: true },
-      { id: "top_10_ls_1", class: "10", subjectId: "sub_10_ls", name: "ପୋଷଣ (Nutrition)", isDemo: true }
-    ];
-
-    const db = {
-      get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
-      set: (key, val) => localStorage.setItem(key, JSON.stringify(val)),
-      init: () => {
-        if (!localStorage.getItem(DB_KEYS.CLASSES)) db.set(DB_KEYS.CLASSES, SEED_CLASSES);
-        if (!localStorage.getItem(DB_KEYS.SUBJECTS)) db.set(DB_KEYS.SUBJECTS, SEED_SUBJECTS);
-        if (!localStorage.getItem(DB_KEYS.TOPICS)) db.set(DB_KEYS.TOPICS, SEED_TOPICS);
-        if (!localStorage.getItem(DB_KEYS.QUESTIONS)) db.set(DB_KEYS.QUESTIONS, []);
-        if (!localStorage.getItem(DB_KEYS.STUDENTS)) db.set(DB_KEYS.STUDENTS, []);
-        if (!localStorage.getItem(DB_KEYS.ADMISSIONS)) db.set(DB_KEYS.ADMISSIONS, []);
-        if (!localStorage.getItem(DB_KEYS.REGISTRATIONS)) db.set(DB_KEYS.REGISTRATIONS, []);
-      }
+    // In-memory Realtime Cloud Cache
+    let cloudState = {
+      students: [],
+      admissions: [],
+      registrations: [],
+      subjects: [
+        { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
+        { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)" },
+        { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)" },
+        { id: "sub_10_ls", class: "10", name: "Life Science (ଜୀବ ବିଜ୍ଞାନ)" },
+        { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)" },
+        { id: "sub_10_eng", class: "10", name: "English" }
+      ],
+      topics: [
+        { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତୀୟ ଜାତୀୟ ଆନ୍ଦୋଳନରେ ଗାନ୍ଧିଜୀଙ୍କ ଆବିର୍ଭାବ", isDemo: true },
+        { id: "top_10_soc_2", class: "10", subjectId: "sub_10_soc", name: "ଅସହଯୋଗ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାର ଭୂମିକା", isDemo: false },
+        { id: "top_10_ps_1", class: "10", subjectId: "sub_10_ps", name: "ରାସାୟନିକ ପ୍ରତିକ୍ରିୟା ଓ ସମୀକରଣ", isDemo: true }
+      ],
+      questions: [],
+      notes: []
     };
-    db.init();
+
+    // Initialize Realtime Listeners with Cloud Firestore
+    function initRealtimeSync() {
+      firestore.collection("students").onSnapshot(snapshot => {
+        cloudState.students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'students' });
+      });
+
+      firestore.collection("admissions").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        cloudState.admissions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'admissions' });
+      });
+
+      firestore.collection("registrations").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        cloudState.registrations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'registrations' });
+      });
+
+      firestore.collection("subjects").onSnapshot(snapshot => {
+        if (!snapshot.empty) cloudState.subjects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      });
+
+      firestore.collection("topics").onSnapshot(snapshot => {
+        if (!snapshot.empty) cloudState.topics = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      });
+
+      firestore.collection("questions").onSnapshot(snapshot => {
+        cloudState.questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      });
+    }
 
     function toast(title, msg, type = 'info') {
       const colors = {
@@ -190,6 +222,7 @@
       cancelBtn.onclick = cleanup;
     }
 
+    // Authentication Controller
     const auth = {
       getStudent: () => JSON.parse(localStorage.getItem(DB_KEYS.AUTH_STUDENT)),
       getAdmin: () => JSON.parse(localStorage.getItem(DB_KEYS.AUTH_ADMIN)),
@@ -204,7 +237,7 @@
         localStorage.removeItem(DB_KEYS.AUTH_ADMIN);
         localStorage.removeItem('sp_guest_flag');
         router.updateHeader();
-        toast('Logged Out', 'Session closed.', 'info');
+        toast('Logged Out', 'Session closed successfully.', 'info');
         router.navigate('home');
       }
     };
@@ -276,7 +309,7 @@
         const app = document.getElementById('app');
 
         if (viewName.startsWith('admin-dashboard') && !auth.getAdmin()) {
-          toast('Admin Area', 'Please login with Master Credentials.', 'error');
+          toast('Admin Only', 'Please login with Master Credentials.', 'error');
           return router.navigate('admin-auth');
         }
         if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'notes-view'].includes(viewName) && !auth.getStudent()) {
@@ -312,7 +345,6 @@
     const views = {
       home: () => `
         <div class="space-y-6">
-          <!-- Main Hero Banner -->
           <div class="bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-indigo-800 text-center sm:text-left">
             <span class="inline-block bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[11px] font-bold px-3 py-0.5 rounded-full uppercase">
               BSE Odisha Board Curriculum (Class 6 - 10)
@@ -336,36 +368,34 @@
             </div>
           </div>
 
-          <!-- Feature Cards Grid (Fills Home View) -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-stopwatch"></i>
               </div>
               <h3 class="font-bold text-slate-900 text-sm">Real CBT Mock Engine</h3>
-              <p class="text-xs text-slate-500 leading-relaxed">Exact timed exam environment without answers shown during test. Scorecard generated instantly upon completion.</p>
+              <p class="text-xs text-slate-500 leading-relaxed">Timed mock exams without answers revealed during the test. Detailed scorecards provided at the end.</p>
             </div>
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-bolt-lightning"></i>
               </div>
-              <h3 class="font-bold text-slate-900 text-sm">Instant Practice Mode</h3>
-              <p class="text-xs text-slate-500 leading-relaxed">Touch options to get immediate correctness feedback along with in-depth Odia & English concept clarification.</p>
+              <h3 class="font-bold text-slate-900 text-sm">Interactive Practice Mode</h3>
+              <p class="text-xs text-slate-500 leading-relaxed">Instant correct/incorrect feedback with bilingual Odia & English concept clarification.</p>
             </div>
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg font-bold">
-                <i class="fa-solid fa-book-open"></i>
+                <i class="fa-solid fa-cloud-arrow-up"></i>
               </div>
-              <h3 class="font-bold text-slate-900 text-sm">Bilingual Revision Notes</h3>
-              <p class="text-xs text-slate-500 leading-relaxed">Full theory revision notes and high-yield question summaries prepared strictly according to BSE textbooks.</p>
+              <h3 class="font-bold text-slate-900 text-sm">Cloud Realtime Sync</h3>
+              <p class="text-xs text-slate-500 leading-relaxed">Powered by Firebase Firestore. Mobile admissions and registrations sync directly with Admin.</p>
             </div>
           </div>
 
-          <!-- Official Social Channels Banner -->
           <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-5 sm:p-6 rounded-3xl border border-indigo-900/60 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="text-center sm:text-left space-y-1">
-              <h4 class="font-black text-base text-amber-400">Join Our Official Satyapeeth Channels</h4>
-              <p class="text-xs text-slate-300">Watch daily concept classes and get exam updates on YouTube & Instagram.</p>
+              <h4 class="font-black text-base text-amber-400">Join Official Satyapeeth Channels</h4>
+              <p class="text-xs text-slate-300">Watch daily lessons and get study material on our YouTube & Instagram.</p>
             </div>
             <div class="flex gap-2.5">
               <a href="https://youtube.com/@satyapeethofficial?si=CYEuHtru53hpw9HP" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
@@ -382,9 +412,9 @@
       registerFree: () => `
         <div class="max-w-md mx-auto bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-xl space-y-4">
           <div class="text-center">
-            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">Free Mock Registration</span>
+            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">Free Registration</span>
             <h2 class="text-xl font-black text-slate-900 mt-1">Student Mock Registration</h2>
-            <p class="text-[11px] text-slate-500">Apply for your verified mock test credentials.</p>
+            <p class="text-[11px] text-slate-500">Apply for your verified mock credentials.</p>
           </div>
           <form onsubmit="handleRegistrationSubmit(event)" class="space-y-3">
             <div>
@@ -411,8 +441,8 @@
               <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Email Address *</label>
               <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
             </div>
-            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
-              Submit & Notify Admin <i class="fa-brands fa-whatsapp ml-1 text-sm"></i>
+            <button type="submit" id="regSubmitBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
+              Submit to Cloud Server
             </button>
           </form>
         </div>
@@ -423,7 +453,7 @@
           <div class="text-center">
             <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full uppercase">Full Access</span>
             <h2 class="text-xl font-black text-slate-900 mt-1">Student Admission Form</h2>
-            <p class="text-[11px] text-slate-500">Access full chapter notes, e-books and mock tests.</p>
+            <p class="text-[11px] text-slate-500">Access complete notes and mock exams.</p>
           </div>
           <form onsubmit="handleAdmissionSubmit(event)" class="space-y-3">
             <div>
@@ -460,8 +490,8 @@
               <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">School Name *</label>
               <input type="text" id="admSchool" required placeholder="School Name" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs outline-none">
             </div>
-            <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-              Submit & Send to Admin <i class="fa-brands fa-whatsapp ml-1 text-sm"></i>
+            <button type="submit" id="admSubmitBtn" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+              Submit Cloud Admission
             </button>
           </form>
         </div>
@@ -472,7 +502,7 @@
           <div class="text-center">
             <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full uppercase">Student Portal</span>
             <h2 class="text-xl font-black text-slate-900 mt-1">Student Sign In</h2>
-            <p class="text-[11px] text-slate-500">Sign in with credentials approved by Admin.</p>
+            <p class="text-[11px] text-slate-500">Sign in with credentials approved by Satyapeeth Admin.</p>
           </div>
           <form onsubmit="handleStudentLogin(event)" class="space-y-3">
             <div>
@@ -515,7 +545,7 @@
                   <i class="fa-solid fa-book-open"></i>
                 </div>
                 <h3 class="text-base font-bold text-slate-900">Class ${student.class} Mock Tests</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">Attempt chapter-wise objective exams with bilingual explanations in CBT or Practice mode.</p>
+                <p class="text-xs text-slate-500 leading-relaxed">Attempt chapter-wise objective exams in CBT or Practice mode.</p>
                 <button onclick="router.navigate('subject-select')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">
                   Start Mock Tests &rarr;
                 </button>
@@ -538,7 +568,7 @@
 
       subjectSelect: () => {
         const student = auth.getStudent() || { class: "10" };
-        const subjects = db.get(DB_KEYS.SUBJECTS).filter(s => s.class === String(student.class));
+        const subjects = cloudState.subjects.filter(s => String(s.class) === String(student.class));
 
         return `
           <div class="space-y-4">
@@ -571,8 +601,8 @@
         const student = auth.getStudent() || { class: "10", type: "Guest" };
         const isGuest = auth.isGuest();
         const hasNotesAccess = student.type === 'Admission';
-        const subject = db.get(DB_KEYS.SUBJECTS).find(s => s.id === subjectId);
-        const topics = db.get(DB_KEYS.TOPICS).filter(t => t.subjectId === subjectId);
+        const subject = cloudState.subjects.find(s => s.id === subjectId);
+        const topics = cloudState.topics.filter(t => t.subjectId === subjectId);
 
         return `
           <div class="space-y-4">
@@ -583,7 +613,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               ${topics.length > 0 ? topics.map((top, idx) => {
-                const qCount = db.get(DB_KEYS.QUESTIONS).filter(q => q.topicId === top.id).length;
+                const qCount = cloudState.questions.filter(q => q.topicId === top.id).length;
                 const isLocked = isGuest && idx > 0;
 
                 return `
@@ -622,15 +652,15 @@
       },
 
       modeSelect: (subjectId, topicId) => {
-        const topic = db.get(DB_KEYS.TOPICS).find(t => t.id === topicId);
+        const topic = cloudState.topics.find(t => t.id === topicId);
         return `
           <div class="max-w-md mx-auto space-y-4">
             <button onclick="router.navigate('topic-select', { subjectId: '${subjectId}' })" class="text-xs text-indigo-600 font-bold hover:underline">
               &larr; Back to Chapters
             </button>
             <div class="bg-white p-4 rounded-2xl border text-center">
-              <h2 class="text-base font-black text-slate-900">${topic ? topic.name : 'Test'}</h2>
-              <p class="text-[11px] text-slate-500">Select Mode (Both modes contain the exact same updated questions)</p>
+              <h2 class="text-base font-black text-slate-900">${topic ? topic.name : 'Assessment'}</h2>
+              <p class="text-[11px] text-slate-500">Both modes contain identical updated questions.</p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-indigo-950 text-white p-5 rounded-2xl cursor-pointer hover:bg-indigo-900 transition text-center space-y-2">
@@ -679,8 +709,8 @@
       `,
 
       notesView: (topicId) => {
-        const topic = db.get(DB_KEYS.TOPICS).find(t => t.id === topicId);
-        const note = db.get(DB_KEYS.NOTES).find(n => n.topicId === topicId);
+        const topic = cloudState.topics.find(t => t.id === topicId);
+        const note = cloudState.notes.find(n => n.topicId === topicId);
         return `
           <div class="max-w-2xl mx-auto space-y-4">
             <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 font-bold hover:underline">&larr; Back</button>
@@ -719,17 +749,17 @@
       `,
 
       adminDashboard: (activeTab) => {
-        const admissions = db.get(DB_KEYS.ADMISSIONS);
-        const registrations = db.get(DB_KEYS.REGISTRATIONS);
-        const students = db.get(DB_KEYS.STUDENTS);
-        const questions = db.get(DB_KEYS.QUESTIONS);
+        const admissions = cloudState.admissions;
+        const registrations = cloudState.registrations;
+        const students = cloudState.students;
+        const questions = cloudState.questions;
 
         return `
           <div class="space-y-4">
             <div class="bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 space-y-3">
               <div class="flex justify-between items-center">
                 <div>
-                  <span class="text-[10px] bg-amber-500 text-indigo-950 font-black px-2 py-0.5 rounded uppercase">Master Controller</span>
+                  <span class="text-[10px] bg-amber-500 text-indigo-950 font-black px-2 py-0.5 rounded uppercase">Firebase Cloud Master</span>
                   <h2 class="text-base sm:text-lg font-black mt-1">Admin: Satyajeet Sahu</h2>
                 </div>
               </div>
@@ -748,7 +778,7 @@
 
       adminTabs: {
         'html-upload': () => {
-          const classes = db.get(DB_KEYS.CLASSES);
+          const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
           return `
             <div class="bg-white rounded-2xl border p-4 sm:p-6 space-y-4">
               <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Smart HTML Question Parser</h3>
@@ -794,7 +824,7 @@
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-                  Parse & Import Questions into Live Bank
+                  Parse & Upload into Cloud Bank
                 </button>
               </form>
             </div>
@@ -803,7 +833,7 @@
 
         admissions: ({ admissions }) => `
           <div class="bg-white rounded-2xl border p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900">Admission Applications (${admissions.length})</h3>
+            <h3 class="text-sm font-black text-slate-900">Cloud Admission Requests (${admissions.length})</h3>
             <div class="space-y-2">
               ${admissions.length > 0 ? admissions.map(a => `
                 <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-center gap-2">
@@ -816,14 +846,14 @@
                     <button onclick="approveStudent('adm', '${a.id}')" class="px-3 py-1.5 bg-amber-500 text-indigo-950 font-black rounded-lg text-xs">Approve</button>
                   ` : `<span class="text-[10px] text-slate-400">ID: ${a.assignedStudentId}</span>`}
                 </div>
-              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No admissions submitted yet.</p>'}
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No admissions in cloud yet.</p>'}
             </div>
           </div>
         `,
 
         registrations: ({ registrations }) => `
           <div class="bg-white rounded-2xl border p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900">Free Mock Registrations (${registrations.length})</h3>
+            <h3 class="text-sm font-black text-slate-900">Cloud Free Mock Registrations (${registrations.length})</h3>
             <div class="space-y-2">
               ${registrations.length > 0 ? registrations.map(r => `
                 <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-center gap-2">
@@ -836,14 +866,14 @@
                     <button onclick="approveStudent('reg', '${r.id}')" class="px-3 py-1.5 bg-emerald-600 text-white font-bold rounded-lg text-xs">Approve</button>
                   ` : `<span class="text-[10px] text-slate-400">ID: ${r.assignedStudentId}</span>`}
                 </div>
-              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No registrations submitted yet.</p>'}
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No registrations in cloud yet.</p>'}
             </div>
           </div>
         `,
 
         students: ({ students }) => `
           <div class="bg-white rounded-2xl border p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900">Approved Student Logins (${students.length})</h3>
+            <h3 class="text-sm font-black text-slate-900">Cloud Approved Student Logins (${students.length})</h3>
             <div class="space-y-2">
               ${students.length > 0 ? students.map(s => `
                 <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-center">
@@ -851,7 +881,7 @@
                     <h4 class="font-bold text-slate-900">${s.name} (Class ${s.class})</h4>
                     <p class="text-[10px] text-indigo-700 font-mono">ID: ${s.studentId} | Pass: <span class="bg-amber-100 px-1 py-0.5 rounded font-bold">${s.password}</span></p>
                   </div>
-                  <button onclick="deleteStudent('${s.studentId}')" class="text-rose-600 text-xs font-bold">Delete</button>
+                  <button onclick="deleteStudent('${s.id}')" class="text-rose-600 text-xs font-bold">Delete</button>
                 </div>
               `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No students enrolled yet.</p>'}
             </div>
@@ -860,7 +890,7 @@
 
         questions: ({ questions }) => `
           <div class="bg-white rounded-2xl border p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900">Total Questions (${questions.length})</h3>
+            <h3 class="text-sm font-black text-slate-900">Cloud Questions (${questions.length})</h3>
             <div class="space-y-2">
               ${questions.map((q, idx) => `
                 <div class="p-3 bg-slate-50 rounded-xl border text-xs flex justify-between items-start gap-2">
@@ -883,7 +913,7 @@
       if (!clsSelect) return;
       const cls = clsSelect.value;
       const subSelect = document.getElementById('impSubjectSelect');
-      const subjects = db.get(DB_KEYS.SUBJECTS).filter(s => s.class === String(cls));
+      const subjects = cloudState.subjects.filter(s => String(s.class) === String(cls));
 
       subSelect.innerHTML = subjects.length > 0 
         ? subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('') 
@@ -897,7 +927,7 @@
       const topSelect = document.getElementById('impTopicSelect');
       if (!subSelect || !topSelect) return;
       const subId = subSelect.value;
-      const topics = db.get(DB_KEYS.TOPICS).filter(t => t.subjectId === subId);
+      const topics = cloudState.topics.filter(t => t.subjectId === subId);
 
       topSelect.innerHTML = topics.length > 0 
         ? topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('') 
@@ -907,10 +937,10 @@
     function addNewClass() {
       const newCls = document.getElementById('impNewClass').value.trim();
       if (!newCls) return alert("Enter class number!");
-      const classes = db.get(DB_KEYS.CLASSES);
+      const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
       if (!classes.includes(newCls)) {
         classes.push(newCls);
-        db.set(DB_KEYS.CLASSES, classes);
+        localStorage.setItem(DB_KEYS.CLASSES, JSON.stringify(classes));
         toast("Class Added", `Class ${newCls} created.`, "success");
         router.navigate('admin-dashboard', { tab: 'html-upload' });
       }
@@ -921,16 +951,13 @@
       const newSubName = document.getElementById('impNewSubject').value.trim();
       if (!newSubName) return alert("Enter subject name!");
 
-      const subjects = db.get(DB_KEYS.SUBJECTS);
       const newSubId = "sub_" + cls + "_" + Date.now();
-      subjects.push({ id: newSubId, class: cls, name: newSubName });
-      db.set(DB_KEYS.SUBJECTS, subjects);
-
-      toast("Subject Added", `${newSubName} created.`, "success");
-      document.getElementById('impNewSubject').value = '';
-      updateImporterSubjects();
-      document.getElementById('impSubjectSelect').value = newSubId;
-      updateImporterTopics();
+      firestore.collection("subjects").doc(newSubId).set({ id: newSubId, class: cls, name: newSubName })
+        .then(() => {
+          toast("Subject Added", `${newSubName} created on cloud.`, "success");
+          document.getElementById('impNewSubject').value = '';
+          updateImporterSubjects();
+        });
     }
 
     function addNewTopic() {
@@ -939,15 +966,13 @@
       const newTopName = document.getElementById('impNewTopic').value.trim();
       if (!newTopName) return alert("Enter chapter name!");
 
-      const topics = db.get(DB_KEYS.TOPICS);
       const newTopId = "top_" + cls + "_" + Date.now();
-      topics.push({ id: newTopId, class: cls, subjectId: subId, name: newTopName, isDemo: false });
-      db.set(DB_KEYS.TOPICS, topics);
-
-      toast("Topic Created", `${newTopName} created.`, "success");
-      document.getElementById('impNewTopic').value = '';
-      updateImporterTopics();
-      document.getElementById('impTopicSelect').value = newTopId;
+      firestore.collection("topics").doc(newTopId).set({ id: newTopId, class: cls, subjectId: subId, name: newTopName, isDemo: false })
+        .then(() => {
+          toast("Topic Created", `${newTopName} created on cloud.`, "success");
+          document.getElementById('impNewTopic').value = '';
+          updateImporterTopics();
+        });
     }
 
     function handleHtmlImport(e) {
@@ -969,7 +994,6 @@
           const rawParsed = Function('"use strict";return (' + jsMatch[1] + ')')();
           rawParsed.forEach(q => {
             extractedQuestions.push({
-              id: "q_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
               class: cls,
               subjectId: subId,
               topicId: topId,
@@ -981,112 +1005,98 @@
               marks: 1
             });
           });
-        } else {
-          const rawParsed = JSON.parse(htmlCode);
-          if (Array.isArray(rawParsed)) {
-            rawParsed.forEach(q => {
-              extractedQuestions.push({
-                id: "q_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
-                class: cls,
-                subjectId: subId,
-                topicId: topId,
-                question: q.question || q.qEn,
-                questionOdia: q.questionOdia || q.qOr || "",
-                options: q.options,
-                correctAnswer: q.correctAnswer || q.ans,
-                explanation: q.explanation || q.expOr || "",
-                marks: 1
-              });
-            });
-          }
         }
 
         if (extractedQuestions.length === 0) throw new Error("No questionsData found in code.");
 
-        const allQuestions = db.get(DB_KEYS.QUESTIONS);
-        extractedQuestions.forEach(q => allQuestions.push(q));
-        db.set(DB_KEYS.QUESTIONS, allQuestions);
+        const batch = firestore.batch();
+        extractedQuestions.forEach(q => {
+          const docRef = firestore.collection("questions").doc();
+          batch.set(docRef, q);
+        });
 
-        toast("Success!", `Loaded ${extractedQuestions.length} questions into Portal.`, "success");
-        router.navigate('admin-dashboard', { tab: 'questions' });
+        batch.commit().then(() => {
+          toast("Success!", `Loaded ${extractedQuestions.length} questions into Cloud DB.`, "success");
+          router.navigate('admin-dashboard', { tab: 'questions' });
+        });
 
       } catch (err) {
         toast("Parse Error", err.message, "error");
       }
     }
 
+    // CLOUD DISPATCH: Free Registration
     function handleRegistrationSubmit(e) {
       e.preventDefault();
-      const name = document.getElementById('regName').value.trim();
-      const cls = document.getElementById('regClass').value;
-      const phone = document.getElementById('regPhone').value.trim();
-      const email = document.getElementById('regEmail').value.trim();
+      const btn = document.getElementById('regSubmitBtn');
+      btn.disabled = true;
+      btn.innerText = "Syncing with Cloud...";
 
       const newReg = {
-        id: "reg_" + Date.now(),
-        name,
-        class: cls,
-        phone,
-        email,
-        status: "Pending"
+        name: document.getElementById('regName').value.trim(),
+        class: document.getElementById('regClass').value,
+        phone: document.getElementById('regPhone').value.trim(),
+        email: document.getElementById('regEmail').value.trim(),
+        status: "Pending",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
-      const registrations = db.get(DB_KEYS.REGISTRATIONS);
-      registrations.unshift(newReg);
-      db.set(DB_KEYS.REGISTRATIONS, registrations);
 
-      // WhatsApp Direct Notification to Admin
-      const msg = `*NEW SATYAPEETH MOCK REGISTRATION*%0A👤 Name: ${name}%0A📚 Class: ${cls}%0A📱 Phone: ${phone}%0A✉️ Email: ${email}`;
-      window.open(`https://api.whatsapp.com/send?phone=${ADMIN_WHATSAPP}&text=${msg}`, '_blank');
-
-      toast('Submitted!', 'Registration submitted and forwarded to Admin WhatsApp.', 'success');
-      router.navigate('home');
+      firestore.collection("registrations").add(newReg)
+        .then(() => {
+          toast('Submitted!', 'Registration saved in Cloud & Admin notified.', 'success');
+          router.navigate('home');
+        })
+        .catch(err => {
+          toast('Sync Error', err.message, 'error');
+          btn.disabled = false;
+        });
     }
 
+    // CLOUD DISPATCH: Full Admission
     function handleAdmissionSubmit(e) {
       e.preventDefault();
-      const name = document.getElementById('admName').value.trim();
-      const guardian = document.getElementById('admGuardian').value.trim();
-      const cls = document.getElementById('admClass').value;
-      const phone = document.getElementById('admPhone').value.trim();
-      const email = document.getElementById('admEmail').value.trim();
-      const school = document.getElementById('admSchool').value.trim();
+      const btn = document.getElementById('admSubmitBtn');
+      btn.disabled = true;
+      btn.innerText = "Syncing with Cloud...";
 
       const newAdm = {
-        id: "adm_" + Date.now(),
-        name,
-        guardian,
-        class: cls,
-        phone,
-        email,
-        school,
-        status: "Pending"
+        name: document.getElementById('admName').value.trim(),
+        guardian: document.getElementById('admGuardian').value.trim(),
+        class: document.getElementById('admClass').value,
+        phone: document.getElementById('admPhone').value.trim(),
+        email: document.getElementById('admEmail').value.trim(),
+        school: document.getElementById('admSchool').value.trim(),
+        status: "Pending",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
-      const admissions = db.get(DB_KEYS.ADMISSIONS);
-      admissions.unshift(newAdm);
-      db.set(DB_KEYS.ADMISSIONS, admissions);
 
-      // WhatsApp Direct Notification to Admin
-      const msg = `*NEW SATYAPEETH FULL ADMISSION APPLICATION*%0A👤 Name: ${name}%0A👨‍👩‍👦 Guardian: ${guardian}%0A📚 Class: ${cls}%0A🏫 School: ${school}%0A📱 Phone: ${phone}%0A✉️ Email: ${email}`;
-      window.open(`https://api.whatsapp.com/send?phone=${ADMIN_WHATSAPP}&text=${msg}`, '_blank');
-
-      toast('Submitted!', 'Admission application submitted and forwarded to Admin WhatsApp.', 'success');
-      router.navigate('home');
+      firestore.collection("admissions").add(newAdm)
+        .then(() => {
+          toast('Submitted!', 'Admission application saved in Cloud & Admin notified.', 'success');
+          router.navigate('home');
+        })
+        .catch(err => {
+          toast('Sync Error', err.message, 'error');
+          btn.disabled = false;
+        });
     }
 
+    // STUDENT LOGIN: Authenticates directly against Cloud Firestore
     function handleStudentLogin(e) {
       e.preventDefault();
       const userInput = document.getElementById('loginUser').value.trim();
       const passInput = document.getElementById('loginPass').value.trim();
 
-      const students = db.get(DB_KEYS.STUDENTS);
-      const student = students.find(s => (s.phone === userInput || s.email === userInput || s.studentId === userInput) && s.password === passInput);
+      const student = cloudState.students.find(s => 
+        (s.phone === userInput || s.email === userInput || s.studentId === userInput) && s.password === passInput
+      );
 
       if (student) {
         auth.setStudent(student);
         toast('Welcome!', `Logged in as ${student.name}`, 'success');
         router.navigate('student-dashboard');
       } else {
-        toast('Failed', 'Incorrect mobile or password.', 'error');
+        toast('Login Failed', 'Account not found or not yet approved by Admin.', 'error');
       }
     }
 
@@ -1123,74 +1133,66 @@
       }
     }
 
-    function approveStudent(type, id) {
-      let record, studentType;
-      if (type === 'adm') {
-        const admissions = db.get(DB_KEYS.ADMISSIONS);
-        record = admissions.find(a => a.id === id);
-        record.status = "Approved";
-        db.set(DB_KEYS.ADMISSIONS, admissions);
-        studentType = "Admission";
-      } else {
-        const registrations = db.get(DB_KEYS.REGISTRATIONS);
-        record = registrations.find(r => r.id === id);
-        record.status = "Approved";
-        db.set(DB_KEYS.REGISTRATIONS, registrations);
-        studentType = "Registration";
-      }
+    function approveStudent(type, docId) {
+      const collection = type === 'adm' ? "admissions" : "registrations";
+      const record = type === 'adm' 
+        ? cloudState.admissions.find(a => a.id === docId)
+        : cloudState.registrations.find(r => r.id === docId);
 
       const studentId = "SP" + record.class + "-" + Math.floor(1000 + Math.random() * 9000);
       const password = "PASS" + Math.floor(1000 + Math.random() * 9000);
-      record.assignedStudentId = studentId;
 
-      const students = db.get(DB_KEYS.STUDENTS);
-      students.push({
+      // 1. Update Application Status in Cloud
+      firestore.collection(collection).doc(docId).update({
+        status: "Approved",
+        assignedStudentId: studentId
+      });
+
+      // 2. Create Enrolled Student in Cloud
+      firestore.collection("students").add({
         studentId,
         name: record.name,
         class: record.class,
         phone: record.phone,
         email: record.email,
         password: password,
-        type: studentType
-      });
-      db.set(DB_KEYS.STUDENTS, students);
-
-      toast('Approved', `ID: ${studentId} & Password: ${password}`, 'success');
-      router.navigate('admin-dashboard', { tab: type === 'adm' ? 'admissions' : 'registrations' });
-    }
-
-    function deleteStudent(studentId) {
-      confirmDialog('Delete Student', 'Remove this profile?', () => {
-        let students = db.get(DB_KEYS.STUDENTS).filter(s => s.studentId !== studentId);
-        db.set(DB_KEYS.STUDENTS, students);
-        toast('Deleted', 'Student removed.', 'info');
-        router.navigate('admin-dashboard', { tab: 'students' });
+        type: type === 'adm' ? "Admission" : "Registration",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        toast('Approved!', `Student ID: ${studentId} & Password: ${password} generated.`, 'success');
       });
     }
 
-    function deleteQuestion(qId) {
-      confirmDialog('Delete Question', 'Remove this question?', () => {
-        let questions = db.get(DB_KEYS.QUESTIONS).filter(q => q.id !== qId);
-        db.set(DB_KEYS.QUESTIONS, questions);
-        toast('Deleted', 'Question removed.', 'info');
-        router.navigate('admin-dashboard', { tab: 'questions' });
+    function deleteStudent(docId) {
+      confirmDialog('Delete Student', 'Remove this profile from cloud?', () => {
+        firestore.collection("students").doc(docId).delete().then(() => {
+          toast('Deleted', 'Student removed from cloud.', 'info');
+        });
+      });
+    }
+
+    function deleteQuestion(docId) {
+      confirmDialog('Delete Question', 'Remove this question from cloud?', () => {
+        firestore.collection("questions").doc(docId).delete().then(() => {
+          toast('Deleted', 'Question removed.', 'info');
+        });
       });
     }
 
     function startTestEngine(subjectId, topicId, mode) {
-      const subject = db.get(DB_KEYS.SUBJECTS).find(s => s.id === subjectId);
-      const topic = db.get(DB_KEYS.TOPICS).find(t => t.id === topicId);
-      let questions = db.get(DB_KEYS.QUESTIONS).filter(q => q.topicId === topicId);
+      const subject = cloudState.subjects.find(s => s.id === subjectId);
+      const topic = cloudState.topics.find(t => t.id === topicId);
+      let questions = cloudState.questions.filter(q => q.topicId === topicId);
 
       if (questions.length === 0) {
         questions = [
           {
             id: "q_demo_1",
-            question: "Sample Question",
-            questionOdia: "ପ୍ରଶ୍ନ ଉପଲବ୍ଧ ନାହିଁ । (No questions in this topic)",
-            options: { A: "A", B: "B", C: "C", D: "D" },
+            question: "Sample Assessment Question",
+            questionOdia: "ପ୍ରଶ୍ନ ଉପଲବ୍ଧ ନାହିଁ । (Upload questions from Admin Smart HTML Parser)",
+            options: { A: "Option A", B: "Option B", C: "Option C", D: "Option D" },
             correctAnswer: "A",
-            explanation: "Upload questions from Admin Smart HTML Parser."
+            explanation: "Questions uploaded via the Admin Parser will automatically show up here."
           }
         ];
       }
@@ -1276,7 +1278,7 @@
       if (activeExam.mode === 'practice' && activeExam.practiceRevealed[q.id]) {
         practiceBox.classList.remove('hidden');
         practiceBox.className = userPick === q.correctAnswer ? 'p-3 rounded-xl text-xs border border-emerald-200 bg-emerald-50 text-emerald-900' : 'p-3 rounded-xl text-xs border border-rose-200 bg-rose-50 text-rose-900';
-        practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct answer.'}</p>`;
+        practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct factual answer.'}</p>`;
       } else {
         practiceBox.classList.add('hidden');
       }
@@ -1321,7 +1323,9 @@
       router.navigate('result-screen', { resultData: { obtainedMarks, totalMarks, percentage } });
     }
 
+    // Initialize App & Realtime Cloud Data
     window.addEventListener('DOMContentLoaded', () => {
+      initRealtimeSync();
       router.navigate('home');
     });
   </script>
