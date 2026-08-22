@@ -180,9 +180,6 @@
   </footer>
 
   <script>
-    /**
-     * FIREBASE CONFIGURATION
-     */
     const firebaseConfig = {
       apiKey: "AIzaSyClZPVVbeaz43l-SRYSRE0O504Lc4vEMLE",
       authDomain: "satyapeeth-d1fe1.firebaseapp.com",
@@ -221,7 +218,6 @@
       document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400 text-xs sm:text-sm' : 'fa-solid fa-moon text-amber-400 text-xs sm:text-sm';
     }
 
-    // Dynamic State with Persistent Backup to prevent 0-0 on refresh
     let cloudState = {
       classes: JSON.parse(localStorage.getItem('sp_c_classes')) || ["10", "9", "8", "7", "6"],
       students: JSON.parse(localStorage.getItem('sp_c_students')) || [],
@@ -249,67 +245,88 @@
     function initRealtimeSync() {
       firestore.collection("settings").doc("security").onSnapshot(doc => {
         if (doc.exists && doc.data().password) cloudState.adminSettings.password = doc.data().password;
-      });
+      }, () => {});
 
       firestore.collection("settings").doc("classes").onSnapshot(doc => {
         if (doc.exists && doc.data().list) {
           cloudState.classes = doc.data().list;
           localStorage.setItem('sp_c_classes', JSON.stringify(cloudState.classes));
         }
-      });
+      }, () => {});
 
       firestore.collection("students").onSnapshot(snapshot => {
         cloudState.students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         localStorage.setItem('sp_c_students', JSON.stringify(cloudState.students));
-        if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'students' });
-      });
+        updateDashboardCounts();
+      }, () => {});
 
-      firestore.collection("admissions").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+      firestore.collection("admissions").onSnapshot(snapshot => {
         cloudState.admissions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         localStorage.setItem('sp_c_admissions', JSON.stringify(cloudState.admissions));
-        if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'admissions' });
-      });
+        updateDashboardCounts();
+      }, () => {});
 
-      firestore.collection("registrations").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+      firestore.collection("registrations").onSnapshot(snapshot => {
         cloudState.registrations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         localStorage.setItem('sp_c_registrations', JSON.stringify(cloudState.registrations));
-        if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'registrations' });
-      });
+        updateDashboardCounts();
+      }, () => {});
 
-      firestore.collection("results").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+      firestore.collection("results").onSnapshot(snapshot => {
         cloudState.results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         localStorage.setItem('sp_c_results', JSON.stringify(cloudState.results));
-        if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'results' });
-      });
+        updateDashboardCounts();
+      }, () => {});
 
       firestore.collection("subjects").onSnapshot(snapshot => {
         if (!snapshot.empty) {
           cloudState.subjects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           localStorage.setItem('sp_c_subjects', JSON.stringify(cloudState.subjects));
         }
-      });
+      }, () => {});
 
       firestore.collection("topics").onSnapshot(snapshot => {
         if (!snapshot.empty) {
           cloudState.topics = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           localStorage.setItem('sp_c_topics', JSON.stringify(cloudState.topics));
         }
-      });
+      }, () => {});
 
       firestore.collection("questions").onSnapshot(snapshot => {
         cloudState.questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         localStorage.setItem('sp_c_questions', JSON.stringify(cloudState.questions));
-      });
+        updateDashboardCounts();
+      }, () => {});
 
       firestore.collection("notes").onSnapshot(snapshot => {
         cloudState.notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         localStorage.setItem('sp_c_notes', JSON.stringify(cloudState.notes));
-      });
+        updateDashboardCounts();
+      }, () => {});
 
       firestore.collection("videos").onSnapshot(snapshot => {
         cloudState.videos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         localStorage.setItem('sp_c_videos', JSON.stringify(cloudState.videos));
-      });
+        updateDashboardCounts();
+      }, () => {});
+    }
+
+    function updateDashboardCounts() {
+      if (router.currentRoute.startsWith('admin-dashboard')) {
+        const activeTab = router.currentRouteParamTab || 'html-upload';
+        const tabContentEl = document.getElementById('adminTabContent');
+        if (tabContentEl && views.adminTabs[activeTab]) {
+          tabContentEl.innerHTML = views.adminTabs[activeTab]({
+            admissions: cloudState.admissions,
+            registrations: cloudState.registrations,
+            students: cloudState.students,
+            questions: cloudState.questions,
+            notes: cloudState.notes,
+            videos: cloudState.videos,
+            results: cloudState.results
+          });
+        }
+      }
     }
 
     function toast(title, msg, type = 'info') {
@@ -417,6 +434,7 @@
 
     const router = {
       currentRoute: 'home',
+      currentRouteParamTab: 'html-upload',
       updateHeader: () => {
         const student = auth.getStudent();
         const admin = auth.getAdmin();
@@ -481,6 +499,7 @@
 
       navigate: (viewName, params = {}) => {
         router.currentRoute = viewName;
+        router.currentRouteParamTab = params.tab || 'html-upload';
         router.updateHeader();
         const app = document.getElementById('app');
 
@@ -1192,14 +1211,16 @@
                 <button onclick="router.navigate('admin-dashboard', { tab: 'structure-mgr' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'structure-mgr' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-trash-can mr-1"></i> Remove Subject/Topic</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pdf mr-1"></i> PDF Notes (${notes.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'videos-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'videos-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-video mr-1"></i> Video Classes (${videos.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'results' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Results & Certificates (${results.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'results' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Results (${results.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Mocks (${registrations.filter(r => r.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Students (${students.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'security' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'security' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-lock mr-1"></i> Change Password</button>
               </div>
             </div>
-            ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes, videos, results })}
+            <div id="adminTabContent">
+              ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes, videos, results })}
+            </div>
           </div>
         `;
       },
@@ -1988,17 +2009,16 @@
       btn.innerText = "Verifying...";
 
       try {
-        const snapshot = await firestore.collection("students").where("password", "==", passInput).get();
-        let student = null;
-        snapshot.forEach(doc => {
-          const d = { id: doc.id, ...doc.data() };
-          if (d.phone === userInput || d.email === userInput || d.studentId === userInput) student = d;
-        });
+        let student = cloudState.students.find(s => 
+          (s.phone === userInput || s.email === userInput || s.studentId === userInput) && s.password === passInput
+        );
 
         if (!student) {
-          student = cloudState.students.find(s => 
-            (s.phone === userInput || s.email === userInput || s.studentId === userInput) && s.password === passInput
-          );
+          const snapshot = await firestore.collection("students").where("password", "==", passInput).get();
+          snapshot.forEach(doc => {
+            const d = { id: doc.id, ...doc.data() };
+            if (d.phone === userInput || d.email === userInput || d.studentId === userInput) student = d;
+          });
         }
 
         if (student) {
