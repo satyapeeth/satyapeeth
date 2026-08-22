@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SATYAPEETH — Odisha Board Online CBT & Smart Learning Portal</title>
+  <title>SATYAPEETH — BSE Odisha Online CBT & Learning Portal</title>
   
   <!-- Tailwind CSS & Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
 
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
@@ -38,6 +38,7 @@
   <style>
     body { font-family: 'Inter', 'Noto Sans Oriya', sans-serif; -webkit-tap-highlight-color: transparent; }
     .font-cinzel { font-family: 'Cinzel', serif; }
+    .font-signature { font-family: 'Playfair Display', serif; }
     .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -45,34 +46,40 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
+    /* Authentic Sambalpuri Geometric Ikat Border */
+    .sambalpuri-border {
+      border: 14px solid transparent;
+      border-image: repeating-linear-gradient(45deg, #881337 0, #881337 10px, #b45309 10px, #b45309 20px, #1e1b4b 20px, #1e1b4b 30px, #ffffff 30px, #ffffff 35px) 14;
+    }
+
     @media print {
       body * { visibility: hidden !important; }
       #printableCertificate, #printableCertificate * { visibility: visible !important; }
-      #printableCertificate { position: absolute; left: 0; top: 0; width: 100%; border: none !important; }
+      #printableCertificate { position: absolute; left: 0; top: 0; width: 100% !important; margin: 0 !important; }
     }
   </style>
 </head>
 <body class="h-full flex flex-col bg-white text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased custom-scrollbar transition-colors duration-200">
 
-  <!-- Toast Notification Container -->
+  <!-- Toast Container -->
   <div id="toastContainer" class="fixed top-3 right-3 left-3 sm:left-auto z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- PWA Bottom Install Alert Banner -->
-  <div id="pwaFloatingPrompt" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 max-w-md z-50 bg-indigo-950 text-white border-2 border-amber-400 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3 animate-bounce">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-amber-400 text-indigo-950 flex items-center justify-center font-black text-lg">
+  <!-- Permanent PWA Floating Alert for Mobile -->
+  <div id="pwaFloatingBanner" class="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-4 max-w-sm z-50 bg-indigo-950 text-white border-2 border-amber-400 p-3 rounded-2xl shadow-2xl flex items-center justify-between gap-2.5">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-amber-400 text-indigo-950 flex items-center justify-center font-black text-sm">
         SP
       </div>
       <div>
-        <h4 class="font-black text-xs sm:text-sm text-amber-300">Install Satyapeeth App</h4>
-        <p class="text-[10px] text-indigo-200">Fast CBT Mocks & PDF Revision Notes</p>
+        <h4 class="font-black text-xs text-amber-300">Install Satyapeeth App</h4>
+        <p class="text-[10px] text-indigo-200">Get offline CBT & instant notes.</p>
       </div>
     </div>
-    <div class="flex items-center gap-2">
-      <button onclick="installPWAApp()" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-indigo-950 font-black rounded-xl text-xs shadow transition">
+    <div class="flex items-center gap-1.5">
+      <button onclick="triggerPWAInstall()" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-indigo-950 font-black rounded-xl text-xs shadow transition">
         Install
       </button>
-      <button onclick="document.getElementById('pwaFloatingPrompt').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs px-1">
+      <button onclick="document.getElementById('pwaFloatingBanner').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs px-1">
         ✕
       </button>
     </div>
@@ -81,7 +88,6 @@
   <!-- Global Header -->
   <header class="bg-indigo-950 text-white sticky top-0 z-40 border-b border-indigo-900 shadow-md">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2">
-      <!-- Logo -->
       <div class="flex items-center gap-2 sm:gap-3 cursor-pointer select-none" onclick="router.navigate('home')">
         <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-indigo-950 font-black text-sm sm:text-xl shadow-inner">
           SP
@@ -92,13 +98,12 @@
         </div>
       </div>
 
-      <!-- Theme, Parent, Auth Controls -->
       <div class="flex items-center gap-1.5 sm:gap-2">
         <button onclick="toggleTheme()" id="themeToggleBtn" class="p-1.5 sm:p-2 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-700 text-amber-400 transition" title="Toggle Theme">
           <i id="themeIcon" class="fa-solid fa-moon text-xs sm:text-sm"></i>
         </button>
 
-        <button id="pwaHeaderBtn" onclick="installPWAApp()" class="hidden text-xs bg-amber-500 hover:bg-amber-400 text-indigo-950 px-2 sm:px-2.5 py-1.5 rounded-lg font-black transition flex items-center gap-1">
+        <button onclick="triggerPWAInstall()" id="pwaHeaderBtn" class="text-xs bg-amber-500 hover:bg-amber-400 text-indigo-950 px-2 sm:px-2.5 py-1.5 rounded-lg font-black transition flex items-center gap-1">
           <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Install</span>
         </button>
 
@@ -135,10 +140,10 @@
     </div>
   </header>
 
-  <!-- App View Container -->
+  <!-- App Main View -->
   <main id="app" class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6"></main>
 
-  <!-- Global Confirm Modal -->
+  <!-- Confirm Dialog Modal -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 max-w-sm w-full rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-5 text-center">
       <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3 text-lg">
@@ -187,14 +192,12 @@
     const ADMIN_PHONE = "919556576071";
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_persistent_student_v4',
-      AUTH_ADMIN: 'sp_persistent_admin_v4',
-      AUTH_PARENT: 'sp_persistent_parent_v4',
-      CLASSES: 'sp_classes_cache_v4',
+      AUTH_STUDENT: 'sp_persistent_student_final',
+      AUTH_ADMIN: 'sp_persistent_admin_final',
+      AUTH_PARENT: 'sp_persistent_parent_final',
       THEME: 'sp_theme_pref'
     };
 
-    // Dark/Light Theme Switcher
     function initTheme() {
       const savedTheme = localStorage.getItem(DB_KEYS.THEME) || 'light';
       if (savedTheme === 'dark') {
@@ -212,7 +215,6 @@
       document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400 text-xs sm:text-sm' : 'fa-solid fa-moon text-amber-400 text-xs sm:text-sm';
     }
 
-    // In-memory Cloud Cache
     let cloudState = {
       classes: ["10", "9", "8", "7", "6"],
       students: [],
@@ -220,22 +222,22 @@
       registrations: [],
       results: [],
       subjects: [
-        { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)", isFree: true },
-        { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)", isFree: false },
-        { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)", isFree: false },
-        { id: "sub_10_ls", class: "10", name: "Life Science (ଜୀବ ବିଜ୍ଞାନ)", isFree: false },
-        { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)", isFree: false },
-        { id: "sub_10_eng", class: "10", name: "English", isFree: false }
+        { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
+        { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)" },
+        { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)" },
+        { id: "sub_10_ls", class: "10", name: "Life Science (ଜୀବ ବିଜ୍ଞାନ)" },
+        { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)" },
+        { id: "sub_10_eng", class: "10", name: "English" }
       ],
       topics: [
-        { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତରେ ଅସହଯୋଗ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାରେ ଏହାର ପ୍ରଭାବ", isFree: true },
-        { id: "top_10_soc_2", class: "10", subjectId: "sub_10_soc", name: "ଭାରତ (ଆକାର ଓ ଅବସ୍ଥିତି)", isFree: false }
+        { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତରେ ଅସହଯୋଗ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାରେ ଏହାର ପ୍ରଭାବ" },
+        { id: "top_10_soc_2", class: "10", subjectId: "sub_10_soc", name: "ଭାରତ (ଆକାର ଓ ଅବସ୍ଥିତି)" }
       ],
       questions: [],
-      notes: []
+      notes: [],
+      videos: []
     };
 
-    // Initialize Realtime Cloud Sync
     function initRealtimeSync() {
       firestore.collection("settings").doc("classes").onSnapshot(doc => {
         if (doc.exists && doc.data().list) {
@@ -278,6 +280,10 @@
       firestore.collection("notes").onSnapshot(snapshot => {
         cloudState.notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       });
+
+      firestore.collection("videos").onSnapshot(snapshot => {
+        cloudState.videos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      });
     }
 
     function toast(title, msg, type = 'info') {
@@ -316,19 +322,17 @@
       cancelBtn.onclick = cleanup;
     }
 
-    // Direct WhatsApp Alert Trigger
     function sendWhatsAppNotification(type, payload) {
       let text = "";
       if (type === 'registration') {
-        text = `🔔 *New Mock Registration (Satyapeeth)*%0A%0A👤 *Student:* ${payload.name}%0A📚 *Class:* ${payload.class}%0A📱 *Parent Phone:* ${payload.phone}%0A📧 *Email:* ${payload.email}`;
+        text = `🔔 *New Mock Registration (Satyapeeth)*%0A%0A👤 *Student:* ${payload.name}%0A👨‍👩‍👦 *Parent:* ${payload.parentName}%0A📚 *Class:* ${payload.class}%0A📱 *Parent Phone:* ${payload.phone}%0A📧 *Email:* ${payload.email}`;
       } else if (type === 'admission') {
-        text = `🌟 *New Full Admission Application (Satyapeeth)*%0A%0A👤 *Student:* ${payload.name}%0A👨‍👩‍👦 *Guardian:* ${payload.guardian}%0A📚 *Class:* ${payload.class}%0A📱 *Parent Phone:* ${payload.phone}%0A🏫 *School:* ${payload.school}`;
+        text = `🌟 *New Full Admission Application (Satyapeeth)*%0A%0A👤 *Student:* ${payload.name}%0A👨‍👩‍👦 *Parent/Guardian:* ${payload.guardian}%0A📚 *Class:* ${payload.class}%0A📱 *Parent Phone:* ${payload.phone}%0A🏫 *School:* ${payload.school}`;
       }
       const url = `https://api.whatsapp.com/send?phone=${ADMIN_PHONE}&text=${text}`;
       window.open(url, '_blank');
     }
 
-    // Persistent Authentication (Never auto-logouts)
     const auth = {
       getStudent: () => {
         try { return JSON.parse(localStorage.getItem(DB_KEYS.AUTH_STUDENT)); } catch (e) { return null; }
@@ -347,7 +351,7 @@
       setAdmin: (data) => localStorage.setItem(DB_KEYS.AUTH_ADMIN, JSON.stringify(data)),
       setParent: (data) => localStorage.setItem(DB_KEYS.AUTH_PARENT, JSON.stringify(data)),
       logout: () => {
-        confirmDialog('Log Out', 'Are you sure you want to log out from Satyapeeth?', () => {
+        confirmDialog('Log Out', 'Are you sure you want to log out?', () => {
           localStorage.removeItem(DB_KEYS.AUTH_STUDENT);
           localStorage.removeItem(DB_KEYS.AUTH_ADMIN);
           localStorage.removeItem(DB_KEYS.AUTH_PARENT);
@@ -440,7 +444,7 @@
           toast('Admin Only', 'Please login with Master Credentials.', 'error');
           return router.navigate('admin-auth');
         }
-        if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'notes-view'].includes(viewName) && !auth.getStudent()) {
+        if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'notes-view', 'video-view'].includes(viewName) && !auth.getStudent()) {
           toast('Login Required', 'Please sign in to continue.', 'warning');
           return router.navigate('login');
         }
@@ -458,6 +462,7 @@
           case 'test-screen': app.innerHTML = views.testScreen(); renderQuestion(); break;
           case 'result-screen': app.innerHTML = views.resultScreen(params.resultData); break;
           case 'notes-view': app.innerHTML = views.notesView(params.topicId); break;
+          case 'video-view': app.innerHTML = views.videoView(params.topicId); break;
           case 'admin-auth': app.innerHTML = views.adminAuth(); break;
           case 'admin-dashboard':
             app.innerHTML = views.adminDashboard(params.tab || 'html-upload');
@@ -467,6 +472,8 @@
               setTimeout(updateSingleQSubjects, 50);
             } else if ((params.tab || 'html-upload') === 'notes-admin') {
               setTimeout(updateNotesSubjects, 50);
+            } else if ((params.tab || 'html-upload') === 'videos-admin') {
+              setTimeout(updateVideosSubjects, 50);
             }
             break;
           default: app.innerHTML = views.home();
@@ -486,7 +493,7 @@
               Satyapeeth Online CBT & Smart Learning Portal
             </h1>
             <p class="text-indigo-200 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed">
-              Official chapter-wise practice tests with clean bilingual fonts, Odia & English explanations, PDF notes, video classes, and 85%+ academic certificates.
+              Official chapter-wise practice tests with clean bilingual fonts, PDF notes, YouTube video classes, and 85%+ Sambalpuri border certificates.
             </p>
             <div class="mt-5 flex flex-wrap gap-2.5 justify-center sm:justify-start">
               <button onclick="router.navigate('admission')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black px-4 py-2.5 rounded-xl shadow text-xs">
@@ -509,22 +516,22 @@
               <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-award"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">85%+ Official Certificate</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Score 85% or higher in any mock test to earn an authorized Satyapeeth digital achievement certificate.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">85%+ Sambalpuri Certificate</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Score 85% or higher in any mock test to earn an authorized Sambalpuri patterned digital achievement certificate.</p>
             </div>
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-file-pdf"></i>
               </div>
               <h3 class="font-bold text-slate-900 dark:text-white text-sm">PDF Notes & Video Lessons</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">View embedded chapter PDF notes and watch topic-wise video classes directly inside your student room.</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">View embedded chapter PDF notes and watch topic-wise video classes directly inside your student portal.</p>
             </div>
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-chart-line"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Real-time Progress Tracker</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Parents and Admins can monitor student attempt counts, marks, and weekly study consistency.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Parent Marksheet Tracker</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Parents can log in with their phone number to check their child's marks and view earned certificates.</p>
             </div>
           </div>
         </div>
@@ -543,6 +550,10 @@
               <div>
                 <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Student Full Name *</label>
                 <input type="text" id="regName" required placeholder="e.g. Subham Dash" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-emerald-600 text-slate-900 dark:text-white">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent / Guardian Name *</label>
+                <input type="text" id="regParentName" required placeholder="Father/Mother Name" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-emerald-600 text-slate-900 dark:text-white">
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <div>
@@ -801,6 +812,7 @@
               ${topics.length > 0 ? topics.map((top, idx) => {
                 const qCount = cloudState.questions.filter(q => q.topicId === top.id).length;
                 const hasNote = cloudState.notes.some(n => n.topicId === top.id);
+                const hasVideo = cloudState.videos.some(v => v.topicId === top.id);
                 const isLocked = !hasFullAccess && idx > 0;
 
                 return `
@@ -814,7 +826,8 @@
                           <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">${top.name}</h4>
                           <div class="flex items-center gap-2 mt-0.5">
                             <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">${qCount} Questions</span>
-                            ${hasNote ? '<span class="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded font-bold">PDF/Video Ready</span>' : ''}
+                            ${hasNote ? '<span class="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded font-bold">PDF Ready</span>' : ''}
+                            ${hasVideo ? '<span class="text-[9px] bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 px-1.5 py-0.2 rounded font-bold">Video Ready</span>' : ''}
                           </div>
                         </div>
                       </div>
@@ -826,7 +839,10 @@
                         Mock Test
                       </button>
                       <button onclick="${hasFullAccess ? `router.navigate('notes-view', { topicId: '${top.id}' })` : `showNotesLockPrompt()`}" class="flex-1 py-1.5 ${hasFullAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'} text-xs rounded-xl transition">
-                        PDF/Class ${!hasFullAccess ? '🔒' : ''}
+                        PDF Notes ${!hasFullAccess ? '🔒' : ''}
+                      </button>
+                      <button onclick="${hasFullAccess ? `router.navigate('video-view', { topicId: '${top.id}' })` : `showNotesLockPrompt()`}" class="flex-1 py-1.5 ${hasFullAccess ? 'bg-rose-600 hover:bg-rose-500 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'} text-xs rounded-xl transition">
+                        Video Class ${!hasFullAccess ? '🔒' : ''}
                       </button>
                     </div>
                   </div>
@@ -850,7 +866,7 @@
             </button>
             <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
               <h2 class="text-base font-black text-slate-900 dark:text-white">${topic ? topic.name : 'Assessment'}</h2>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">Target 85%+ to earn your Satyapeeth Certificate.</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Target 85%+ to earn your Sambalpuri border certificate.</p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-indigo-950 text-white p-5 rounded-2xl cursor-pointer hover:bg-indigo-900 transition text-center space-y-2 border border-indigo-900 shadow">
@@ -876,7 +892,6 @@
           </div>
 
           <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
-            <!-- Dynamic Non-Duplicating Question Box -->
             <div class="space-y-1.5 border-b border-slate-100 dark:border-slate-800 pb-4">
               <h3 id="testQOr" class="text-base sm:text-lg font-bold text-indigo-950 dark:text-amber-300 leading-relaxed font-sans"></h3>
               <h4 id="testQEn" class="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed hidden"></h4>
@@ -911,13 +926,13 @@
             ${isEligible ? `
               <div class="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-900/60 space-y-2">
                 <h4 class="font-black text-amber-800 dark:text-amber-300 text-sm">🎉 Outstanding Excellence (85%+)!</h4>
-                <p class="text-xs text-amber-700 dark:text-amber-400">You have earned the official Satyapeeth Academic Certificate.</p>
+                <p class="text-xs text-amber-700 dark:text-amber-400">You have unlocked the official Satyapeeth Sambalpuri Certificate.</p>
                 <button onclick="openCertificateModal('${res.id}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-                  View & Print Certificate
+                  View & Download Sambalpuri Certificate
                 </button>
               </div>
             ` : `
-              <p class="text-xs text-slate-500">Target 85% or higher to unlock the Satyapeeth Certificate of Achievement.</p>
+              <p class="text-xs text-slate-500">Target 85% or higher to unlock the Satyapeeth Sambalpuri Certificate of Achievement.</p>
             `}
 
             <button onclick="router.navigate('student-dashboard')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow">
@@ -937,8 +952,8 @@
             <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
               <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div>
-                  <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 px-2 py-0.5 rounded uppercase">Verified Content</span>
-                  <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">${topic ? topic.name : 'Chapter Notes & Video'}</h2>
+                  <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 px-2 py-0.5 rounded uppercase">Official PDF Notes</span>
+                  <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">${topic ? topic.name : 'Chapter Notes'}</h2>
                 </div>
                 ${note && note.pdfUrl ? `
                   <a href="${note.pdfUrl}" target="_blank" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1.5">
@@ -947,25 +962,41 @@
                 ` : ''}
               </div>
 
-              ${note && note.videoUrl ? `
-                <div class="space-y-2">
-                  <h4 class="font-bold text-xs text-slate-700 dark:text-slate-300"><i class="fa-brands fa-youtube text-rose-600 mr-1"></i> Chapter Video Class:</h4>
-                  <div class="aspect-video w-full rounded-2xl overflow-hidden shadow">
-                    <iframe class="w-full h-full" src="${note.videoUrl.includes('watch?v=') ? note.videoUrl.replace('watch?v=', 'embed/') : note.videoUrl}" allowfullscreen></iframe>
-                  </div>
-                </div>
-              ` : ''}
-
               ${note && note.pdfUrl ? `
-                <div class="space-y-2">
-                  <h4 class="font-bold text-xs text-slate-700 dark:text-slate-300"><i class="fa-solid fa-file-pdf text-amber-500 mr-1"></i> Interactive PDF Viewer:</h4>
-                  <div class="w-full h-[550px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                    <iframe src="${note.pdfUrl.includes('drive.google.com') ? note.pdfUrl.replace('/view', '/preview') : note.pdfUrl}" class="w-full h-full border-0"></iframe>
-                  </div>
+                <div class="w-full h-[550px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-inner">
+                  <iframe src="${note.pdfUrl.includes('drive.google.com') ? note.pdfUrl.replace('/view', '/preview') : note.pdfUrl}" class="w-full h-full border-0"></iframe>
                 </div>
               ` : `
                 <div class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-950/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
-                  ${note && note.content ? note.content : 'Notes and video lectures for this chapter will be uploaded soon by Admin.'}
+                  ${note && note.content ? note.content : 'PDF notes for this chapter will be uploaded soon by Admin.'}
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      },
+
+      videoView: (topicId) => {
+        const topic = cloudState.topics.find(t => t.id === topicId);
+        const video = cloudState.videos.find(v => v.topicId === topicId);
+
+        return `
+          <div class="max-w-4xl mx-auto space-y-4">
+            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">&larr; Back to Subjects</button>
+            <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+              <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
+                <span class="text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400 px-2 py-0.5 rounded uppercase">YouTube Video Lesson</span>
+                <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">${topic ? topic.name : 'Chapter Video Class'}</h2>
+              </div>
+
+              ${video && video.videoUrl ? `
+                <div class="aspect-video w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800">
+                  <iframe class="w-full h-full" src="${video.videoUrl.includes('watch?v=') ? video.videoUrl.replace('watch?v=', 'embed/') : video.videoUrl}" allowfullscreen></iframe>
+                </div>
+                ${video.description ? `<p class="text-xs text-slate-600 dark:text-slate-300 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">${video.description}</p>` : ''}
+              ` : `
+                <div class="text-xs text-slate-400 text-center py-12 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200 dark:border-slate-800">
+                  Video class for this chapter will be uploaded soon by Admin.
                 </div>
               `}
             </div>
@@ -1003,6 +1034,7 @@
         const students = cloudState.students;
         const questions = cloudState.questions;
         const notes = cloudState.notes;
+        const videos = cloudState.videos;
         const results = cloudState.results;
 
         return `
@@ -1015,18 +1047,18 @@
                 </div>
               </div>
               <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code mr-1"></i> HTML / Raw Parser</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code mr-1"></i> HTML Parser</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'single-q' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'single-q' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-plus mr-1"></i> Add Single Q</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pdf mr-1"></i> PDF & Video Manager (${notes.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'analysis' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'analysis' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-chart-line mr-1"></i> Study Analytics</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'results' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Results (${results.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pdf mr-1"></i> PDF Notes (${notes.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'videos-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'videos-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-video mr-1"></i> Video Classes (${videos.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'results' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Results & Certificates (${results.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Mocks (${registrations.filter(r => r.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Students (${students.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'questions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'questions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Questions (${questions.length})</button>
               </div>
             </div>
-            ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes, results })}
+            ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes, videos, results })}
           </div>
         `;
       },
@@ -1074,7 +1106,7 @@
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">4. Paste HTML Code OR Direct Plain Text</label>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">4. Paste HTML Code OR Plain Text Format</label>
                   <textarea id="impHtmlCode" required rows="7" placeholder="Paste full HTML code with questionsData OR plain format (Q1... A... B... Ans...)" class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border border-slate-800"></textarea>
                 </div>
 
@@ -1165,109 +1197,101 @@
           const classes = cloudState.classes;
           return `
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
-              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">PDF Notes & Video Class Uploader</h3>
-              
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Dedicated PDF Notes Manager</h3>
               <form onsubmit="handleNoteSave(event)" class="space-y-3">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class</label>
-                    <select id="noteClassSelect" onchange="updateNotesSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                    <select id="noteClassSelect" onchange="updateNotesSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
                       ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
                     </select>
                   </div>
                   <div>
                     <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Subject</label>
-                    <select id="noteSubjectSelect" onchange="updateNotesTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                    <select id="noteSubjectSelect" onchange="updateNotesTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
                   </div>
                   <div>
                     <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter / Topic</label>
-                    <select id="noteTopicSelect" onchange="loadExistingNote()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                    <select id="noteTopicSelect" onchange="loadExistingNote()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
                   </div>
                 </div>
 
                 <div>
                   <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Google Drive / Direct PDF URL</label>
-                  <input type="url" id="notePdfUrlInput" placeholder="https://drive.google.com/file/d/.../view?usp=sharing" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white">
-                </div>
-
-                <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">YouTube Video Class Link (Optional)</label>
-                  <input type="url" id="noteVideoUrlInput" placeholder="https://www.youtube.com/watch?v=..." class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white">
+                  <input type="url" id="notePdfUrlInput" required placeholder="https://drive.google.com/file/d/.../view?usp=sharing" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
                 </div>
 
                 <div>
                   <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Key Revision Points / Summary</label>
-                  <textarea id="noteContentInput" rows="4" placeholder="Chapter summary..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
+                  <textarea id="noteContentInput" rows="4" placeholder="Chapter summary..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-                  Publish Media & Notes to Cloud
+                  Publish PDF Notes to Cloud
                 </button>
               </form>
             </div>
           `;
         },
 
-        analysis: ({ students, results }) => {
+        'videos-admin': () => {
+          const classes = cloudState.classes;
           return `
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-4">
-              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Student Study Analysis & Weekly Activity</h3>
-              
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div class="p-3 bg-indigo-50 dark:bg-indigo-950/50 rounded-xl border border-indigo-200 dark:border-indigo-900">
-                  <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase">Total Enrolled</span>
-                  <h4 class="text-xl font-black text-slate-900 dark:text-white">${students.length}</h4>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Dedicated Video Classes Manager</h3>
+              <form onsubmit="handleVideoSave(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class</label>
+                    <select id="videoClassSelect" onchange="updateVideosSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Subject</label>
+                    <select id="videoSubjectSelect" onchange="updateVideosTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter / Topic</label>
+                    <select id="videoTopicSelect" onchange="loadExistingVideo()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
                 </div>
-                <div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl border border-emerald-200 dark:border-emerald-900">
-                  <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Total Tests</span>
-                  <h4 class="text-xl font-black text-slate-900 dark:text-white">${results.length}</h4>
-                </div>
-                <div class="p-3 bg-amber-50 dark:bg-amber-950/50 rounded-xl border border-amber-200 dark:border-amber-900">
-                  <span class="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase">85%+ Achievers</span>
-                  <h4 class="text-xl font-black text-slate-900 dark:text-white">${results.filter(r => r.percentage >= 85).length}</h4>
-                </div>
-                <div class="p-3 bg-rose-50 dark:bg-rose-950/50 rounded-xl border border-rose-200 dark:border-rose-900">
-                  <span class="text-[10px] text-rose-600 dark:text-rose-400 font-bold uppercase">Weekly Active</span>
-                  <h4 class="text-xl font-black text-slate-900 dark:text-white">${students.length > 0 ? Math.ceil(students.length * 0.85) : 0}</h4>
-                </div>
-              </div>
 
-              <div class="space-y-2 pt-2">
-                <h4 class="font-bold text-xs text-slate-700 dark:text-slate-300">Enrolled Student Performance Breakdown:</h4>
-                ${students.map(s => {
-                  const sResults = results.filter(r => r.studentPhone === s.phone || r.studentName === s.name);
-                  const avg = sResults.length > 0 ? Math.round(sResults.reduce((acc, r) => acc + r.percentage, 0) / sResults.length) : 0;
-                  return `
-                    <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
-                      <div>
-                        <h5 class="font-bold text-slate-900 dark:text-white">${s.name} (Class ${s.class})</h5>
-                        <p class="text-[10px] text-slate-500">ID: ${s.studentId} | Phone: ${s.phone}</p>
-                      </div>
-                      <div class="text-right">
-                        <span class="font-black ${avg >= 85 ? 'text-amber-500' : 'text-indigo-600 dark:text-indigo-400'}">${avg}% Avg Score</span>
-                        <p class="text-[9px] text-emerald-600 font-bold">Active This Week ●</p>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">YouTube Video URL</label>
+                  <input type="url" id="videoUrlInput" required placeholder="https://www.youtube.com/watch?v=..." class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Video Lesson Description</label>
+                  <textarea id="videoDescInput" rows="3" placeholder="Key topics covered in this video..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow">
+                  Publish Video Class to Cloud
+                </button>
+              </form>
             </div>
           `;
         },
 
         results: ({ results }) => `
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900 dark:text-white">Realtime Mock Marksheets (${results.length})</h3>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Realtime Mock Results & Certificates (${results.length})</h3>
             <div class="space-y-2">
               ${results.length > 0 ? results.map(r => `
                 <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center gap-2">
                   <div>
                     <h4 class="font-bold text-slate-900 dark:text-white">${r.studentName} (Class ${r.studentClass})</h4>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400">${r.topicName} | Score: <strong class="text-indigo-600 dark:text-indigo-400">${r.obtainedMarks} / ${r.totalMarks}</strong> (${r.percentage}%)</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Parent: <strong>${r.parentName}</strong> | ${r.topicName} | Score: <strong class="text-indigo-600 dark:text-indigo-400">${r.obtainedMarks} / ${r.totalMarks}</strong> (${r.percentage}%)</p>
                   </div>
-                  ${r.percentage >= 85 ? `
-                    <button onclick="openCertificateModal('${r.id}')" class="px-2.5 py-1 bg-amber-500 text-indigo-950 font-bold rounded-lg text-[10px]">Certificate</button>
-                  ` : `<span class="text-[10px] text-slate-400">Completed</span>`}
+                  <div class="flex gap-2">
+                    ${r.percentage >= 85 ? `
+                      <button onclick="openCertificateModal('${r.id}')" class="px-2.5 py-1 bg-amber-500 text-indigo-950 font-bold rounded-lg text-[10px] shadow">
+                        <i class="fa-solid fa-award mr-1"></i> Certificate
+                      </button>
+                    ` : `<span class="text-[10px] text-slate-400 font-bold">Below 85%</span>`}
+                  </div>
                 </div>
               `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No test submissions yet.</p>'}
             </div>
@@ -1282,7 +1306,7 @@
                 <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center gap-2">
                   <div>
                     <h4 class="font-bold text-slate-900 dark:text-white">${a.name} (Class ${a.class})</h4>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Phone: ${a.phone} | Guardian: ${a.guardian}</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Parent: ${a.guardian} | Phone: ${a.phone}</p>
                     <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${a.status === 'Approved' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'}">${a.status}</span>
                   </div>
                   ${a.status === 'Pending' ? `
@@ -1302,7 +1326,7 @@
                 <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center gap-2">
                   <div>
                     <h4 class="font-bold text-slate-900 dark:text-white">${r.name} (Class ${r.class})</h4>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Phone: ${r.phone}</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Parent: ${r.parentName || 'Parent'} | Phone: ${r.phone}</p>
                     <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${r.status === 'Approved' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'}">${r.status}</span>
                   </div>
                   ${r.status === 'Pending' ? `
@@ -1333,7 +1357,7 @@
 
         questions: ({ questions }) => `
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Questions (${questions.length})</h3>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Questions Bank (${questions.length})</h3>
             <div class="space-y-2">
               ${questions.map((q, idx) => `
                 <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-start gap-2">
@@ -1351,7 +1375,6 @@
       }
     };
 
-    // Helper functions for Selectors
     function updateImporterSubjects() {
       const clsSelect = document.getElementById('impClassSelect');
       if (!clsSelect) return;
@@ -1415,7 +1438,6 @@
       const topId = topSelect.value;
       const existing = cloudState.notes.find(n => n.topicId === topId);
       document.getElementById('notePdfUrlInput').value = existing ? existing.pdfUrl || '' : '';
-      document.getElementById('noteVideoUrlInput').value = existing ? existing.videoUrl || '' : '';
       document.getElementById('noteContentInput').value = existing ? existing.content || '' : '';
     }
 
@@ -1423,7 +1445,6 @@
       e.preventDefault();
       const topId = document.getElementById('noteTopicSelect').value;
       const pdfUrl = document.getElementById('notePdfUrlInput').value.trim();
-      const videoUrl = document.getElementById('noteVideoUrlInput').value.trim();
       const content = document.getElementById('noteContentInput').value.trim();
 
       if (!topId) return alert("Select Chapter first!");
@@ -1431,11 +1452,53 @@
       firestore.collection("notes").doc(topId).set({
         topicId: topId,
         pdfUrl: pdfUrl,
-        videoUrl: videoUrl,
         content: content,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-        toast("Notes & Video Saved!", "Media content updated on cloud server.", "success");
+        toast("Notes Saved!", "PDF notes updated on cloud server.", "success");
+      });
+    }
+
+    function updateVideosSubjects() {
+      const cls = document.getElementById('videoClassSelect').value;
+      const subSelect = document.getElementById('videoSubjectSelect');
+      const subjects = cloudState.subjects.filter(s => String(s.class) === String(cls));
+      subSelect.innerHTML = subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      updateVideosTopics();
+    }
+
+    function updateVideosTopics() {
+      const subId = document.getElementById('videoSubjectSelect').value;
+      const topSelect = document.getElementById('videoTopicSelect');
+      const topics = cloudState.topics.filter(t => t.subjectId === subId);
+      topSelect.innerHTML = topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      loadExistingVideo();
+    }
+
+    function loadExistingVideo() {
+      const topSelect = document.getElementById('videoTopicSelect');
+      if (!topSelect) return;
+      const topId = topSelect.value;
+      const existing = cloudState.videos.find(v => v.topicId === topId);
+      document.getElementById('videoUrlInput').value = existing ? existing.videoUrl || '' : '';
+      document.getElementById('videoDescInput').value = existing ? existing.description || '' : '';
+    }
+
+    function handleVideoSave(e) {
+      e.preventDefault();
+      const topId = document.getElementById('videoTopicSelect').value;
+      const videoUrl = document.getElementById('videoUrlInput').value.trim();
+      const description = document.getElementById('videoDescInput').value.trim();
+
+      if (!topId) return alert("Select Chapter first!");
+
+      firestore.collection("videos").doc(topId).set({
+        topicId: topId,
+        videoUrl: videoUrl,
+        description: description,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        toast("Video Saved!", "Video class updated on cloud server.", "success");
       });
     }
 
@@ -1518,7 +1581,6 @@
         });
     }
 
-    // Hybrid Parser: Works on both JSON Code & Plain Text Format
     function handleHtmlImport(e) {
       e.preventDefault();
       const cls = document.getElementById('impClassSelect').value;
@@ -1530,7 +1592,6 @@
 
       let extractedQuestions = [];
 
-      // 1. Check if questionsData JSON array exists
       const jsMatch = rawInput.match(/questionsData\s*=\s*(\[[\s\S]*?\]);/);
       if (jsMatch && jsMatch[1]) {
         try {
@@ -1553,7 +1614,6 @@
         }
       }
 
-      // 2. Plain Text Block Parsing
       if (extractedQuestions.length === 0) {
         const blocks = rawInput.split(/\n\s*\n/);
         blocks.forEach(block => {
@@ -1623,6 +1683,7 @@
 
       const newReg = {
         name: document.getElementById('regName').value.trim(),
+        parentName: document.getElementById('regParentName').value.trim(),
         class: document.getElementById('regClass').value,
         phone: document.getElementById('regPhone').value.trim(),
         email: document.getElementById('regEmail').value.trim(),
@@ -1747,7 +1808,7 @@
       firestore.collection("students").add({
         studentId,
         name: record.name,
-        guardian: record.guardian || "Guardian",
+        guardian: record.guardian || record.parentName || "Parent",
         class: record.class,
         phone: record.phone,
         email: record.email,
@@ -1825,7 +1886,6 @@
       }, 1000);
     }
 
-    // Single-rendering question logic to completely eliminate duplicates
     function renderQuestion() {
       const q = activeExam.questions[activeExam.currentIndex];
       const isLast = activeExam.currentIndex === activeExam.questions.length - 1;
@@ -1841,7 +1901,6 @@
       const mainText = q.questionOdia || q.question;
       qOrBox.innerText = `Q${activeExam.currentIndex + 1}. ${mainText}`;
 
-      // Only display English subtitle if it exists AND is distinct from Odia text
       if (q.question && q.questionOdia && q.question.trim() !== q.questionOdia.trim()) {
         qEnBox.innerText = q.question;
         qEnBox.classList.remove('hidden');
@@ -1936,14 +1995,14 @@
         studentClass: student.class,
         studentPhone: student.phone || '',
         parentPhone: student.phone || '',
-        parentName: student.guardian || 'Guardian',
+        parentName: student.guardian || student.parentName || 'Parent',
         studentEmail: student.email || '',
         subjectName: activeExam.subject ? activeExam.subject.name : 'All Subjects',
         topicName: activeExam.topic ? activeExam.topic.name : 'Chapter Test',
         obtainedMarks,
         totalMarks,
         percentage,
-        certificateId: "SP-CERT-" + Date.now().toString().slice(-6),
+        certificateId: "SP-SAMBALPURI-" + Date.now().toString().slice(-6),
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
@@ -1953,59 +2012,59 @@
       });
     }
 
-    // Dynamic 85%+ Certificate Modal
+    // Dynamic 85%+ Sambalpuri Ikat Border Certificate
     function openCertificateModal(resultId) {
       const res = cloudState.results.find(r => r.id === resultId);
       if (!res) return;
 
       const certHtml = `
         <div id="certModalBackdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 overflow-y-auto">
-          <div class="max-w-xl w-full bg-[#fdfdfb] text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-amber-400 relative space-y-5" id="printableCertificate">
+          <div class="max-w-2xl w-full bg-[#fdfbf7] text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl sambalpuri-border relative space-y-5" id="printableCertificate">
             
-            <div class="border-2 border-indigo-950 p-5 rounded-2xl relative space-y-4">
-              <div class="flex justify-between items-center">
-                <div class="w-8 h-8 rounded-lg bg-indigo-950 text-amber-400 flex items-center justify-center font-cinzel font-black text-sm">
+            <div class="border-2 border-dashed border-amber-800/40 p-5 rounded-2xl relative space-y-4 bg-white/90">
+              <div class="flex justify-between items-center border-b border-amber-900/20 pb-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-950 text-amber-400 flex items-center justify-center font-cinzel font-black text-base shadow">
                   SP
                 </div>
                 <div class="text-center">
                   <h2 class="font-cinzel text-xl sm:text-2xl font-black tracking-widest text-indigo-950">SATYAPEETH</h2>
-                  <p class="text-[10px] uppercase font-bold tracking-widest text-amber-700">Certificate of Achievement</p>
+                  <p class="text-[10px] uppercase font-extrabold tracking-widest text-amber-800">Certificate of Academic Excellence</p>
                 </div>
-                <i class="fa-solid fa-award text-2xl text-amber-500"></i>
+                <i class="fa-solid fa-award text-3xl text-amber-600"></i>
               </div>
 
               <div class="text-center space-y-2 py-3">
-                <p class="text-xs italic text-slate-600">This certificate is proudly presented to</p>
-                <h3 class="text-xl sm:text-2xl font-black text-indigo-950 border-b-2 border-amber-400 pb-1 inline-block uppercase tracking-wide">
+                <p class="text-xs italic text-slate-600 font-serif">This prestigious credential is proudly conferred upon</p>
+                <h3 class="text-2xl sm:text-3xl font-black text-indigo-950 border-b-2 border-amber-600 pb-1 inline-block uppercase tracking-wider">
                   ${res.studentName}
                 </h3>
-                <p class="text-xs text-slate-700 leading-relaxed max-w-sm mx-auto">
-                  For successfully demonstrating academic excellence in <br><strong class="text-indigo-950">${res.topicName}</strong> with an outstanding score of <strong>${res.percentage}%</strong>.
+                <p class="text-xs sm:text-sm text-slate-700 leading-relaxed max-w-md mx-auto pt-1 font-medium">
+                  For achieving outstanding performance of <strong class="text-rose-700 font-bold">${res.percentage}%</strong> in <strong class="text-indigo-950 font-bold">${res.topicName}</strong> (Class ${res.studentClass || '10'}).
                 </p>
               </div>
 
-              <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-600 border-t border-slate-200 pt-3">
-                <p><strong>Parent Name:</strong> ${res.parentName}</p>
-                <p><strong>Email ID:</strong> ${res.studentEmail}</p>
-                <p><strong>Date:</strong> ${res.date}</p>
+              <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-700 border-t border-amber-900/20 pt-3 bg-amber-50/50 p-2.5 rounded-xl">
+                <p><strong>Parent / Guardian:</strong> ${res.parentName || 'Parent'}</p>
+                <p><strong>Student Email:</strong> ${res.studentEmail || 'Registered'}</p>
+                <p><strong>Award Date:</strong> ${res.date}</p>
                 <p><strong>Certificate ID:</strong> <span class="font-mono text-indigo-950 font-bold">${res.certificateId}</span></p>
               </div>
 
               <div class="flex justify-between items-end pt-4">
-                <div class="text-left text-[9px] text-slate-400">
-                  <p>BSE Odisha Curriculum</p>
-                  <p>Verified Academic Credential</p>
+                <div class="text-left text-[9px] text-slate-500">
+                  <p>BSE Odisha State Board Curriculum</p>
+                  <p>Verified Sambalpuri Heritage Academic Award</p>
                 </div>
                 <div class="text-right">
-                  <div class="font-serif italic font-bold text-xs text-indigo-950 border-b border-slate-400 pb-0.5">Satyajeet Sahu</div>
-                  <p class="text-[9px] uppercase tracking-wider font-bold text-slate-600">Authorized Signature</p>
+                  <div class="font-signature italic font-bold text-sm text-indigo-950 border-b border-slate-500 pb-0.5 px-3">Satyajeet Sahu</div>
+                  <p class="text-[9px] uppercase tracking-wider font-bold text-slate-600 mt-0.5">Authorized Signature</p>
                 </div>
               </div>
             </div>
 
             <div class="flex gap-2 print:hidden">
               <button onclick="window.print()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-print"></i> Print / Download
+                <i class="fa-solid fa-print"></i> Print / Save PDF
               </button>
               <button onclick="document.getElementById('certModalBackdrop').remove()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl text-xs transition">
                 Close
@@ -2019,34 +2078,27 @@
       document.body.insertAdjacentHTML('beforeend', certHtml);
     }
 
-    // PWA Install Handlers
+    // PWA Install Trigger
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      const pwaBtn = document.getElementById('pwaHeaderBtn');
-      const pwaPrompt = document.getElementById('pwaFloatingPrompt');
-      if (pwaBtn) pwaBtn.classList.remove('hidden');
-      if (pwaPrompt) pwaPrompt.classList.remove('hidden');
     });
 
-    function installPWAApp() {
+    function triggerPWAInstall() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
-            toast('App Installed!', 'Satyapeeth installed on your device.', 'success');
+            toast('App Installed!', 'Satyapeeth installed on your home screen.', 'success');
           }
           deferredPrompt = null;
-          document.getElementById('pwaFloatingPrompt').classList.add('hidden');
-          document.getElementById('pwaHeaderBtn').classList.add('hidden');
         });
       } else {
-        toast('Install App', 'Open browser menu (⋮) and click "Add to Home screen" or "Install App".', 'info');
+        toast('Install App', 'Tap browser menu (⋮) and choose "Install App" or "Add to Home screen".', 'info');
       }
     }
 
-    // App Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
       initRealtimeSync();
