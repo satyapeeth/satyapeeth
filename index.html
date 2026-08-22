@@ -38,7 +38,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
-    /* Fixed App Layout - Disabling unneeded pinch-zoom */
     html, body {
       touch-action: pan-x pan-y;
       -webkit-touch-callout: none;
@@ -60,7 +59,6 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    /* Authentic Sambalpuri Geometric Border */
     .sambalpuri-border {
       border: 14px solid transparent;
       border-image: repeating-linear-gradient(45deg, #881337 0, #881337 10px, #b45309 10px, #b45309 20px, #1e1b4b 20px, #1e1b4b 30px, #ffffff 30px, #ffffff 35px) 14;
@@ -99,7 +97,7 @@
           <i id="themeIcon" class="fa-solid fa-moon text-xs sm:text-sm"></i>
         </button>
 
-        <!-- 1. Install App Button (Always Prominent at Top) -->
+        <!-- 1. Install App Button -->
         <button onclick="triggerPWAInstall()" id="pwaHeaderBtn" class="text-xs sm:text-sm bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-indigo-950 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-black transition shadow flex items-center gap-1.5 animate-pulse">
           <i class="fa-solid fa-download"></i> <span>Install App</span>
         </button>
@@ -200,9 +198,9 @@
     const ADMIN_PHONE = "919556576071";
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_auth_student_prod',
-      AUTH_ADMIN: 'sp_auth_admin_prod',
-      AUTH_PARENT: 'sp_auth_parent_prod',
+      AUTH_STUDENT: 'sp_auth_student_master',
+      AUTH_ADMIN: 'sp_auth_admin_master',
+      AUTH_PARENT: 'sp_auth_parent_master',
       THEME: 'sp_theme_pref'
     };
 
@@ -223,13 +221,14 @@
       document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400 text-xs sm:text-sm' : 'fa-solid fa-moon text-amber-400 text-xs sm:text-sm';
     }
 
+    // Dynamic State with Persistent Backup to prevent 0-0 on refresh
     let cloudState = {
-      classes: ["10", "9", "8", "7", "6"],
-      students: [],
-      admissions: [],
-      registrations: [],
-      results: [],
-      subjects: [
+      classes: JSON.parse(localStorage.getItem('sp_c_classes')) || ["10", "9", "8", "7", "6"],
+      students: JSON.parse(localStorage.getItem('sp_c_students')) || [],
+      admissions: JSON.parse(localStorage.getItem('sp_c_admissions')) || [],
+      registrations: JSON.parse(localStorage.getItem('sp_c_registrations')) || [],
+      results: JSON.parse(localStorage.getItem('sp_c_results')) || [],
+      subjects: JSON.parse(localStorage.getItem('sp_c_subjects')) || [
         { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
         { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)" },
         { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)" },
@@ -237,60 +236,79 @@
         { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)" },
         { id: "sub_10_eng", class: "10", name: "English" }
       ],
-      topics: [
-        { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତରେ ଅସହଯୋଗ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାରେ ଏହାର ପ୍ରଭାବ" },
+      topics: JSON.parse(localStorage.getItem('sp_c_topics')) || [
+        { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତରେ ଆଇନ ଅମାନ୍ୟ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାରେ ଏହାର ପ୍ରଭାବ" },
         { id: "top_10_soc_2", class: "10", subjectId: "sub_10_soc", name: "ଭାରତ (ଆକାର ଓ ଅବସ୍ଥିତି)" }
       ],
-      questions: [],
-      notes: [],
-      videos: []
+      questions: JSON.parse(localStorage.getItem('sp_c_questions')) || [],
+      notes: JSON.parse(localStorage.getItem('sp_c_notes')) || [],
+      videos: JSON.parse(localStorage.getItem('sp_c_videos')) || [],
+      adminSettings: { password: "Kalyani@123" }
     };
 
     function initRealtimeSync() {
+      firestore.collection("settings").doc("security").onSnapshot(doc => {
+        if (doc.exists && doc.data().password) cloudState.adminSettings.password = doc.data().password;
+      });
+
       firestore.collection("settings").doc("classes").onSnapshot(doc => {
         if (doc.exists && doc.data().list) {
           cloudState.classes = doc.data().list;
+          localStorage.setItem('sp_c_classes', JSON.stringify(cloudState.classes));
         }
       });
 
       firestore.collection("students").onSnapshot(snapshot => {
         cloudState.students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('sp_c_students', JSON.stringify(cloudState.students));
         if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'students' });
       });
 
       firestore.collection("admissions").orderBy("timestamp", "desc").onSnapshot(snapshot => {
         cloudState.admissions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('sp_c_admissions', JSON.stringify(cloudState.admissions));
         if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'admissions' });
       });
 
       firestore.collection("registrations").orderBy("timestamp", "desc").onSnapshot(snapshot => {
         cloudState.registrations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('sp_c_registrations', JSON.stringify(cloudState.registrations));
         if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'registrations' });
       });
 
       firestore.collection("results").orderBy("timestamp", "desc").onSnapshot(snapshot => {
         cloudState.results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('sp_c_results', JSON.stringify(cloudState.results));
         if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'results' });
       });
 
       firestore.collection("subjects").onSnapshot(snapshot => {
-        if (!snapshot.empty) cloudState.subjects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (!snapshot.empty) {
+          cloudState.subjects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          localStorage.setItem('sp_c_subjects', JSON.stringify(cloudState.subjects));
+        }
       });
 
       firestore.collection("topics").onSnapshot(snapshot => {
-        if (!snapshot.empty) cloudState.topics = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (!snapshot.empty) {
+          cloudState.topics = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          localStorage.setItem('sp_c_topics', JSON.stringify(cloudState.topics));
+        }
       });
 
       firestore.collection("questions").onSnapshot(snapshot => {
         cloudState.questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('sp_c_questions', JSON.stringify(cloudState.questions));
       });
 
       firestore.collection("notes").onSnapshot(snapshot => {
         cloudState.notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('sp_c_notes', JSON.stringify(cloudState.notes));
       });
 
       firestore.collection("videos").onSnapshot(snapshot => {
         cloudState.videos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('sp_c_videos', JSON.stringify(cloudState.videos));
       });
     }
 
@@ -339,6 +357,20 @@
       }
       const url = `https://api.whatsapp.com/send?phone=${ADMIN_PHONE}&text=${text}`;
       window.open(url, '_blank');
+    }
+
+    function shareSatyapeethApp() {
+      const shareData = {
+        title: 'Satyapeeth — BSE Odisha Learning App',
+        text: 'Best online CBT Mock Tests, Video Classes, and PDF Notes for BSE Odisha students.',
+        url: window.location.origin
+      };
+      if (navigator.share) {
+        navigator.share(shareData);
+      } else {
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent('Join Satyapeeth for Class 6-10 BSE Odisha Online Mock Tests, PDF Notes & Certificates: ' + window.location.origin)}`;
+        window.open(waUrl, '_blank');
+      }
     }
 
     const auth = {
@@ -456,7 +488,7 @@
           toast('Admin Only', 'Please login with Master Credentials.', 'error');
           return router.navigate('admin-auth');
         }
-        if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'notes-view', 'video-view'].includes(viewName) && !auth.getStudent()) {
+        if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'notes-hub', 'notes-view', 'video-view'].includes(viewName) && !auth.getStudent()) {
           toast('Login Required', 'Please sign in to continue.', 'warning');
           return router.navigate('login');
         }
@@ -466,9 +498,11 @@
           case 'register-free': app.innerHTML = views.registerFree(); break;
           case 'admission': app.innerHTML = views.admission(); break;
           case 'login': app.innerHTML = views.login(); break;
+          case 'forgot-pass': app.innerHTML = views.forgotPassword(); break;
           case 'parent-portal': app.innerHTML = views.parentPortal(); break;
           case 'student-dashboard': app.innerHTML = views.studentDashboard(); break;
           case 'subject-select': app.innerHTML = views.subjectSelect(); break;
+          case 'notes-hub': app.innerHTML = views.notesHub(); break;
           case 'topic-select': app.innerHTML = views.topicSelect(params.subjectId); break;
           case 'mode-select': app.innerHTML = views.modeSelect(params.subjectId, params.topicId); break;
           case 'test-screen': app.innerHTML = views.testScreen(); renderQuestion(); break;
@@ -478,15 +512,11 @@
           case 'admin-auth': app.innerHTML = views.adminAuth(); break;
           case 'admin-dashboard':
             app.innerHTML = views.adminDashboard(params.tab || 'html-upload');
-            if ((params.tab || 'html-upload') === 'html-upload') {
-              setTimeout(updateImporterSubjects, 50);
-            } else if ((params.tab || 'html-upload') === 'single-q') {
-              setTimeout(updateSingleQSubjects, 50);
-            } else if ((params.tab || 'html-upload') === 'notes-admin') {
-              setTimeout(updateNotesSubjects, 50);
-            } else if ((params.tab || 'html-upload') === 'videos-admin') {
-              setTimeout(updateVideosSubjects, 50);
-            }
+            if ((params.tab || 'html-upload') === 'html-upload') setTimeout(updateImporterSubjects, 50);
+            else if ((params.tab || 'html-upload') === 'single-q') setTimeout(updateSingleQSubjects, 50);
+            else if ((params.tab || 'html-upload') === 'notes-admin') setTimeout(updateNotesSubjects, 50);
+            else if ((params.tab || 'html-upload') === 'videos-admin') setTimeout(updateVideosSubjects, 50);
+            else if ((params.tab || 'html-upload') === 'structure-mgr') setTimeout(renderStructureManager, 50);
             break;
           default: app.innerHTML = views.home();
         }
@@ -517,8 +547,8 @@
               <button onclick="router.navigate('parent-portal')" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-4 py-2.5 rounded-xl shadow text-xs">
                 <i class="fa-solid fa-users mr-1"></i> Parent Portal
               </button>
-              <button onclick="guestLogin()" class="bg-indigo-900/80 border border-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs">
-                Guest Demo
+              <button onclick="shareSatyapeethApp()" class="bg-emerald-500 hover:bg-emerald-400 text-indigo-950 font-black px-4 py-2.5 rounded-xl shadow text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-share-nodes"></i> Share App
               </button>
             </div>
           </div>
@@ -536,14 +566,14 @@
                 <i class="fa-solid fa-file-pdf"></i>
               </div>
               <h3 class="font-bold text-slate-900 dark:text-white text-sm">PDF Notes & Video Lessons</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">View embedded chapter PDF notes and watch topic-wise video classes directly inside your student portal.</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">View embedded chapter PDF notes and watch topic-wise video classes directly inside your student room.</p>
             </div>
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-chart-line"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Parent Marksheet Tracker</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Parents can log in with their phone number to check their child's marks and view earned certificates.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Monthly Grand CBT Test</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Attempt monthly full syllabus state-level assessment to evaluate your board exam rank.</p>
             </div>
           </div>
         </div>
@@ -639,6 +669,60 @@
         `;
       },
 
+      login: () => `
+        <div class="max-w-sm mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-5">
+          <div class="text-center">
+            <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 rounded-full uppercase">Student Portal</span>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Sign In</h2>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Sign in with credentials approved by Satyapeeth Admin.</p>
+          </div>
+          <form onsubmit="handleStudentLogin(event)" class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Mobile / Student ID</label>
+              <input type="text" id="loginUser" required placeholder="Enter Mobile Number or ID" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-600 text-slate-900 dark:text-white">
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase">Password</label>
+                <button type="button" onclick="router.navigate('forgot-pass')" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Forgot Password?</button>
+              </div>
+              <input type="password" id="loginPass" required placeholder="Enter Password" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-600 text-slate-900 dark:text-white">
+            </div>
+            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition shadow">
+              Authenticate & Open Portal
+            </button>
+          </form>
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+            <button onclick="guestLogin()" class="text-amber-600 dark:text-amber-400 font-bold text-xs hover:underline">Use Free Guest Demo</button>
+          </div>
+        </div>
+      `,
+
+      forgotPassword: () => `
+        <div class="max-w-sm mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+          <div class="text-center">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto text-lg font-bold mb-2">
+              <i class="fa-solid fa-key"></i>
+            </div>
+            <h2 class="text-lg font-black text-slate-900 dark:text-white">Recover Password</h2>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Enter your registered mobile number to retrieve your credentials.</p>
+          </div>
+          <form onsubmit="handleForgotPassword(event)" class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Registered Mobile Number</label>
+              <input type="tel" id="forgotPhoneInput" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-amber-500 text-slate-900 dark:text-white">
+            </div>
+            <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+              Find My Password
+            </button>
+          </form>
+          <div id="forgotResultBox" class="hidden p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-center text-xs space-y-2"></div>
+          <div class="pt-2 text-center">
+            <button onclick="router.navigate('login')" class="text-indigo-600 dark:text-indigo-400 font-bold text-xs hover:underline">&larr; Back to Login</button>
+          </div>
+        </div>
+      `,
+
       parentPortal: () => {
         const parent = auth.getParent();
         if (parent) {
@@ -698,32 +782,6 @@
         `;
       },
 
-      login: () => `
-        <div class="max-w-sm mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-5">
-          <div class="text-center">
-            <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 rounded-full uppercase">Student Portal</span>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Sign In</h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Sign in with credentials approved by Satyapeeth Admin.</p>
-          </div>
-          <form onsubmit="handleStudentLogin(event)" class="space-y-3">
-            <div>
-              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Mobile / Student ID</label>
-              <input type="text" id="loginUser" required placeholder="Enter Mobile Number or ID" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-600 text-slate-900 dark:text-white">
-            </div>
-            <div>
-              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Password</label>
-              <input type="password" id="loginPass" required placeholder="Enter Password" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-600 text-slate-900 dark:text-white">
-            </div>
-            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition shadow">
-              Authenticate & Open Portal
-            </button>
-          </form>
-          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
-            <button onclick="guestLogin()" class="text-amber-600 dark:text-amber-400 font-bold text-xs hover:underline">Use Free Guest Demo</button>
-          </div>
-        </div>
-      `,
-
       studentDashboard: () => {
         const student = auth.getStudent() || { name: "Guest Student", class: "10", studentId: "GST-DEMO", type: "Guest" };
         const hasFullAccess = student.type === 'Admission';
@@ -739,14 +797,31 @@
                 <h2 class="text-xl sm:text-2xl font-black mt-1">Namaste, ${student.name}</h2>
                 <p class="text-[11px] text-indigo-200">Class ${student.class} | Student ID: <span class="font-mono text-amber-300 font-bold">${student.studentId}</span></p>
               </div>
-              <div class="text-right">
+              <div class="text-right flex items-center gap-2">
                 <span class="text-xs bg-indigo-800/80 border border-indigo-700 px-3 py-1.5 rounded-xl font-bold">
                   Tests Taken: ${myResults.length}
                 </span>
               </div>
             </div>
 
+            <!-- Monthly Grand CBT Test Banner -->
+            <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-indigo-950 p-4 sm:p-5 rounded-2xl shadow flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-950 text-amber-400 flex items-center justify-center font-black text-lg">
+                  <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <div>
+                  <h3 class="font-black text-sm sm:text-base">Class ${student.class} Monthly Grand CBT Exam</h3>
+                  <p class="text-xs opacity-90 font-medium">Attempt the combined full-syllabus test to evaluate state-level rank.</p>
+                </div>
+              </div>
+              <button onclick="startMonthlyMegaTest('${student.class}')" class="px-4 py-2 bg-indigo-950 text-white hover:bg-indigo-900 font-black rounded-xl text-xs shadow whitespace-nowrap">
+                Start Monthly Test &rarr;
+              </button>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Card 1: Mock Tests Selection -->
               <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
                 <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl font-bold">
                   <i class="fa-solid fa-book-open"></i>
@@ -758,13 +833,14 @@
                 </button>
               </div>
 
+              <!-- Card 2: Dedicated Notes & Classes Library -->
               <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
                 <div class="w-10 h-10 rounded-xl ${hasFullAccess ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} flex items-center justify-center text-xl font-bold">
                   <i class="fa-solid fa-file-pdf"></i>
                 </div>
                 <h3 class="text-base font-bold text-slate-900 dark:text-white">PDF Notes & Video Lessons</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Official PDF notes, formulas, and video lectures curated for Odisha Board examination.</p>
-                <button onclick="${hasFullAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-2.5 ${hasFullAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold'} rounded-xl text-xs transition">
+                <button onclick="${hasFullAccess ? `router.navigate('notes-hub')` : `showNotesLockPrompt()`}" class="w-full py-2.5 ${hasFullAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold'} rounded-xl text-xs transition">
                   ${hasFullAccess ? 'View Notes & Classes' : 'Unlock All Notes 🔒'} &rarr;
                 </button>
               </div>
@@ -782,7 +858,7 @@
             <button onclick="router.navigate('student-dashboard')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
               &larr; Back to Dashboard
             </button>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white">Class ${student.class} Subjects</h2>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white">Class ${student.class} Mock Test Subjects</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               ${subjects.map((sub, idx) => {
@@ -799,6 +875,58 @@
                       </div>
                     </div>
                     <i class="fa-solid ${isLocked ? 'fa-lock text-amber-500' : 'fa-chevron-right text-slate-300'} text-xs"></i>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      },
+
+      notesHub: () => {
+        const student = auth.getStudent() || { class: "10", type: "Guest" };
+        const subjects = cloudState.subjects.filter(s => String(s.class) === String(student.class));
+
+        return `
+          <div class="space-y-4">
+            <button onclick="router.navigate('student-dashboard')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
+              &larr; Back to Dashboard
+            </button>
+            <div>
+              <span class="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold px-2 py-0.5 rounded uppercase">Content Library</span>
+              <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Class ${student.class} PDF Notes & Video Lectures</h2>
+            </div>
+
+            <div class="space-y-4">
+              ${subjects.map(sub => {
+                const subTopics = cloudState.topics.filter(t => t.subjectId === sub.id);
+                return `
+                  <div class="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                    <h3 class="font-black text-sm sm:text-base text-indigo-950 dark:text-amber-400 flex items-center gap-2">
+                      <i class="fa-solid fa-folder-open text-amber-500"></i> ${sub.name}
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      ${subTopics.map(t => {
+                        const note = cloudState.notes.find(n => n.topicId === t.id);
+                        const video = cloudState.videos.find(v => v.topicId === t.id);
+                        return `
+                          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center gap-2 text-xs">
+                            <div class="truncate max-w-[180px] sm:max-w-[220px]">
+                              <h4 class="font-bold text-slate-900 dark:text-white truncate">${t.name}</h4>
+                              <p class="text-[10px] text-slate-500">Chapter Media Available</p>
+                            </div>
+                            <div class="flex gap-1.5 shrink-0">
+                              <button onclick="router.navigate('notes-view', { topicId: '${t.id}' })" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold rounded-lg text-[10px] flex items-center gap-1 shadow">
+                                <i class="fa-solid fa-file-pdf"></i> PDF
+                              </button>
+                              <button onclick="router.navigate('video-view', { topicId: '${t.id}' })" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-[10px] flex items-center gap-1 shadow">
+                                <i class="fa-brands fa-youtube"></i> Class
+                              </button>
+                            </div>
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
                   </div>
                 `;
               }).join('')}
@@ -960,7 +1088,7 @@
 
         return `
           <div class="max-w-4xl mx-auto space-y-4">
-            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">&larr; Back to Subjects</button>
+            <button onclick="router.navigate('notes-hub')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">&larr; Back to Library</button>
             <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
               <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div>
@@ -994,7 +1122,7 @@
 
         return `
           <div class="max-w-4xl mx-auto space-y-4">
-            <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">&larr; Back to Subjects</button>
+            <button onclick="router.navigate('notes-hub')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">&larr; Back to Library</button>
             <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
               <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
                 <span class="text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400 px-2 py-0.5 rounded uppercase">YouTube Video Lesson</span>
@@ -1061,13 +1189,14 @@
               <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                 <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code mr-1"></i> HTML Parser</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'single-q' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'single-q' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-plus mr-1"></i> Add Single Q</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'structure-mgr' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'structure-mgr' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-trash-can mr-1"></i> Remove Subject/Topic</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pdf mr-1"></i> PDF Notes (${notes.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'videos-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'videos-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-video mr-1"></i> Video Classes (${videos.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'results' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Results & Certificates (${results.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Mocks (${registrations.filter(r => r.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Students (${students.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'questions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'questions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Questions (${questions.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'security' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'security' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-lock mr-1"></i> Change Password</button>
               </div>
             </div>
             ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes, videos, results })}
@@ -1130,6 +1259,33 @@
           `;
         },
 
+        'structure-mgr': () => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Remove / Delete Subject or Topics</h3>
+            <p class="text-xs text-slate-500">Easily remove any redundant subject or chapter from student rooms.</p>
+            <div id="structureManagerBox" class="space-y-3"></div>
+          </div>
+        `,
+
+        'security': () => `
+          <div class="max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Change Admin Master Password</h3>
+            <form onsubmit="handleAdminPasswordChange(event)" class="space-y-3">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Current Password</label>
+                <input type="password" id="currAdminPass" required placeholder="••••••••" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white outline-none">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">New Password</label>
+                <input type="password" id="newAdminPass" required placeholder="Enter new password" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white outline-none">
+              </div>
+              <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow">
+                Update Admin Password
+              </button>
+            </form>
+          </div>
+        `,
+
         'single-q': () => {
           const classes = cloudState.classes;
           return `
@@ -1155,11 +1311,11 @@
 
                 <div>
                   <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Main Question (Odia / English)</label>
-                  <input type="text" id="sqQOr" required placeholder="Type Main Question (e.g. ଭାରତର ଦକ୍ଷିଣତମ ବିନ୍ଦୁ କେଉଁଟି?)" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                  <input type="text" id="sqQOr" required placeholder="Type Main Question" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
                 </div>
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Secondary Translation (English - Optional)</label>
-                  <input type="text" id="sqQEn" placeholder="Optional English translation subtitle" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Secondary Translation (Optional)</label>
+                  <input type="text" id="sqQEn" placeholder="Optional translation subtitle" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -1276,7 +1432,7 @@
 
                 <div>
                   <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Video Lesson Description</label>
-                  <textarea id="videoDescInput" rows="3" placeholder="Key topics covered in this video..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
+                  <textarea id="videoDescInput" rows="3" placeholder="Key topics covered..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow">
@@ -1365,27 +1521,105 @@
               `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No students enrolled yet.</p>'}
             </div>
           </div>
-        `,
+        `
+      }
+    };
 
-        questions: ({ questions }) => `
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
-            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Questions Bank (${questions.length})</h3>
-            <div class="space-y-2">
-              ${questions.map((q, idx) => `
-                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-start gap-2">
-                  <div>
-                    <span class="bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 font-bold px-1.5 py-0.2 rounded text-[9px]">Class ${q.class}</span>
-                    <h4 class="font-bold text-slate-900 dark:text-white mt-1">${idx + 1}. ${q.questionOdia || q.question}</h4>
-                    <p class="text-emerald-700 dark:text-emerald-400 font-bold mt-0.5">Key: Option ${q.correctAnswer}</p>
-                  </div>
-                  <button onclick="deleteQuestion('${q.id}')" class="text-rose-600 text-xs font-bold hover:underline">Delete</button>
+    function renderStructureManager() {
+      const box = document.getElementById('structureManagerBox');
+      if (!box) return;
+
+      box.innerHTML = cloudState.subjects.map(s => {
+        const tops = cloudState.topics.filter(t => t.subjectId === s.id);
+        return `
+          <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <div class="flex justify-between items-center">
+              <h4 class="font-bold text-xs text-indigo-950 dark:text-amber-300">[Class ${s.class}] ${s.name}</h4>
+              <button onclick="deleteSubject('${s.id}')" class="text-rose-600 hover:text-rose-700 font-bold text-xs"><i class="fa-solid fa-trash mr-1"></i> Delete Subject</button>
+            </div>
+            <div class="pl-3 border-l-2 border-slate-200 dark:border-slate-700 space-y-1.5">
+              ${tops.map(t => `
+                <div class="flex justify-between items-center text-[11px] text-slate-700 dark:text-slate-300">
+                  <span>• ${t.name}</span>
+                  <button onclick="deleteTopic('${t.id}')" class="text-rose-500 hover:underline font-bold text-[10px]">Remove Chapter</button>
                 </div>
               `).join('')}
             </div>
           </div>
-        `
+        `;
+      }).join('');
+    }
+
+    function deleteSubject(subId) {
+      confirmDialog('Delete Subject', 'Are you sure you want to remove this subject and its chapters?', () => {
+        firestore.collection("subjects").doc(subId).delete().then(() => {
+          cloudState.subjects = cloudState.subjects.filter(s => s.id !== subId);
+          localStorage.setItem('sp_c_subjects', JSON.stringify(cloudState.subjects));
+          toast('Removed', 'Subject deleted from cloud database.', 'info');
+          renderStructureManager();
+        });
+      });
+    }
+
+    function deleteTopic(topId) {
+      confirmDialog('Remove Chapter', 'Are you sure you want to delete this chapter?', () => {
+        firestore.collection("topics").doc(topId).delete().then(() => {
+          cloudState.topics = cloudState.topics.filter(t => t.id !== topId);
+          localStorage.setItem('sp_c_topics', JSON.stringify(cloudState.topics));
+          toast('Removed', 'Chapter removed.', 'info');
+          renderStructureManager();
+        });
+      });
+    }
+
+    function handleAdminPasswordChange(e) {
+      e.preventDefault();
+      const curr = document.getElementById('currAdminPass').value.trim();
+      const newP = document.getElementById('newAdminPass').value.trim();
+
+      if (curr !== cloudState.adminSettings.password) {
+        return toast('Error', 'Current password incorrect!', 'error');
       }
-    };
+
+      firestore.collection("settings").doc("security").set({ password: newP }, { merge: true })
+        .then(() => {
+          cloudState.adminSettings.password = newP;
+          toast('Success', 'Admin Master Password updated successfully!', 'success');
+          document.getElementById('currAdminPass').value = '';
+          document.getElementById('newAdminPass').value = '';
+        });
+    }
+
+    async function handleForgotPassword(e) {
+      e.preventDefault();
+      const phone = document.getElementById('forgotPhoneInput').value.trim();
+      const resBox = document.getElementById('forgotResultBox');
+      
+      resBox.classList.remove('hidden');
+      resBox.innerHTML = '<span class="text-indigo-600 font-bold">Checking Cloud Database...</span>';
+
+      try {
+        const snapshot = await firestore.collection("students").where("phone", "==", phone).get();
+        if (!snapshot.empty) {
+          const doc = snapshot.docs[0].data();
+          resBox.innerHTML = `
+            <div class="p-2 bg-emerald-50 dark:bg-emerald-950/60 rounded-lg border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300">
+              <p class="font-bold">Student Name: ${doc.name}</p>
+              <p>Student ID: <strong class="font-mono">${doc.studentId}</strong></p>
+              <p>Password: <strong class="bg-amber-100 dark:bg-amber-950 text-indigo-950 dark:text-amber-300 px-1.5 py-0.5 rounded font-mono">${doc.password}</strong></p>
+            </div>
+          `;
+        } else {
+          resBox.innerHTML = `
+            <div class="text-rose-600 font-bold">
+              No account found with this phone number. Please contact Admin or Apply for Admission.
+            </div>
+          `;
+        }
+      } catch (err) {
+        resBox.innerHTML = '<span class="text-rose-600">Connection error. Please retry.</span>';
+      }
+    }
 
     function updateImporterSubjects() {
       const clsSelect = document.getElementById('impClassSelect');
@@ -1744,21 +1978,41 @@
         });
     }
 
-    function handleStudentLogin(e) {
+    async function handleStudentLogin(e) {
       e.preventDefault();
       const userInput = document.getElementById('loginUser').value.trim();
       const passInput = document.getElementById('loginPass').value.trim();
+      const btn = e.target.querySelector('button[type="submit"]');
 
-      const student = cloudState.students.find(s => 
-        (s.phone === userInput || s.email === userInput || s.studentId === userInput) && s.password === passInput
-      );
+      btn.disabled = true;
+      btn.innerText = "Verifying...";
 
-      if (student) {
-        auth.setStudent(student);
-        toast('Welcome Back!', `Logged in as ${student.name}`, 'success');
-        router.navigate('student-dashboard');
-      } else {
-        toast('Login Failed', 'Credentials not found or not approved by Admin.', 'error');
+      try {
+        const snapshot = await firestore.collection("students").where("password", "==", passInput).get();
+        let student = null;
+        snapshot.forEach(doc => {
+          const d = { id: doc.id, ...doc.data() };
+          if (d.phone === userInput || d.email === userInput || d.studentId === userInput) student = d;
+        });
+
+        if (!student) {
+          student = cloudState.students.find(s => 
+            (s.phone === userInput || s.email === userInput || s.studentId === userInput) && s.password === passInput
+          );
+        }
+
+        if (student) {
+          auth.setStudent(student);
+          toast('Welcome Back!', `Logged in as ${student.name}`, 'success');
+          router.navigate('student-dashboard');
+        } else {
+          toast('Login Failed', 'Credentials not found or account not approved.', 'error');
+        }
+      } catch (err) {
+        toast('Connection Error', 'Please check internet and retry.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Authenticate & Open Portal";
       }
     }
 
@@ -1794,7 +2048,7 @@
       const user = document.getElementById('adminUserId').value.trim().toLowerCase();
       const pass = document.getElementById('adminPassword').value.trim();
 
-      if ((user === "satyajeets308" || user === "satyajeet308") && pass === "Kalyani@123") {
+      if ((user === "satyajeets308" || user === "satyajeet308") && (pass === cloudState.adminSettings.password || pass === "Kalyani@123")) {
         auth.setAdmin({ user: "Satyajeet Sahu", role: "superadmin" });
         toast('Admin Unlocked', 'Welcome Satyajeet Sahu!', 'success');
         router.navigate('admin-dashboard', { tab: 'html-upload' });
@@ -1838,10 +2092,27 @@
       });
     }
 
-    function deleteQuestion(docId) {
-      confirmDialog('Delete Question', 'Remove this question from cloud?', () => {
-        firestore.collection("questions").doc(docId).delete().then(() => toast('Deleted', 'Question removed.', 'info'));
-      });
+    function startMonthlyMegaTest(targetClass) {
+      const classQuestions = cloudState.questions.filter(q => String(q.class) === String(targetClass));
+      if (classQuestions.length === 0) {
+        return alert("No questions uploaded yet for Monthly Mega Mock Test!");
+      }
+
+      activeExam = {
+        mode: 'exam',
+        subject: { name: `Class ${targetClass} Monthly CBT Exam` },
+        topic: { name: "Full Syllabus Grand Assessment" },
+        questions: classQuestions.slice(0, 50),
+        currentIndex: 0,
+        answers: {},
+        practiceRevealed: {},
+        timeLeft: 1800
+      };
+
+      const navTimer = document.getElementById('navTimerBadge');
+      navTimer.classList.remove('hidden');
+      startTimer();
+      router.navigate('test-screen');
     }
 
     function startTestEngine(subjectId, topicId, mode) {
@@ -1853,11 +2124,11 @@
         questions = [
           {
             id: "q_demo_1",
-            question: "What is the total length of India's land boundary?",
-            questionOdia: "ଭାରତର ସମୁଦାୟ ସ୍ଥଳସୀମାର ଲମ୍ବ କେତେ?",
-            options: { A: "୭,୫୧୬.୬ କି.ମି.", B: "୧୫,୨୦୦ କି.ମି.", C: "୩,୨୧୪ କି.ମି.", D: "୨,୯୩୩ କି.ମି." },
+            question: "",
+            questionOdia: "୧୯୨୯ ଲାହୋର କଂଗ୍ରେସ ଅଧିବେଶନରେ କିଏ ଅଧ୍ୟକ୍ଷତା କରିଥିଲେ?",
+            options: { A: "ମହାତ୍ମା ଗାନ୍ଧୀ", B: "ଜବାହରଲାଲ୍ ନେହେରୁ", C: "ସୁଭାଷ ବୋଷ", D: "ଗୋପବନ୍ଧୁ ଦାସ" },
             correctAnswer: "B",
-            explanation: "ଭାରତର ସମୁଦାୟ ସ୍ଥଳସୀମାର ଦୈର୍ଘ୍ୟ ପ୍ରାୟ ୧୫,୨୦୦ କିଲୋମିଟର।"
+            explanation: "ଲାହୋର ଅଧିବେଶନରେ ଯୁବନେତା ଜବାହରଲାଲ୍ ନେହେରୁ ସଭାପତିତ୍ୱ କରିଥିଲେ।"
           }
         ];
       }
@@ -1923,7 +2194,7 @@
 
       const container = document.getElementById('testOptionsBox');
       container.innerHTML = '';
-      const userPick = activeExam.answers[q.id];
+      const userPick = activeExam.answers[q.id || activeExam.currentIndex];
 
       Object.entries(q.options).forEach(([key, val]) => {
         const btn = document.createElement('button');
@@ -1934,7 +2205,7 @@
             ? "border-indigo-600 bg-indigo-600 text-white font-bold shadow" 
             : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-indigo-400";
         } else {
-          if (activeExam.practiceRevealed[q.id]) {
+          if (activeExam.practiceRevealed[q.id || activeExam.currentIndex]) {
             if (key === q.correctAnswer) {
               btnClasses += "border-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-bold";
             } else if (userPick === key) {
@@ -1949,17 +2220,17 @@
 
         btn.className = btnClasses;
         btn.innerHTML = `<span class="font-bold mr-2.5 text-sm">${key}.</span> <span class="flex-1">${val}</span>`;
-        btn.onclick = () => selectOption(q.id, key);
+        btn.onclick = () => selectOption(q.id || activeExam.currentIndex, key);
         container.appendChild(btn);
       });
 
       const practiceBox = document.getElementById('testPracticeBox');
-      if (activeExam.mode === 'practice' && activeExam.practiceRevealed[q.id]) {
+      if (activeExam.mode === 'practice' && activeExam.practiceRevealed[q.id || activeExam.currentIndex]) {
         practiceBox.classList.remove('hidden');
         practiceBox.className = userPick === q.correctAnswer 
           ? 'p-4 rounded-2xl text-xs sm:text-sm border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200' 
           : 'p-4 rounded-2xl text-xs sm:text-sm border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200';
-        practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct syllabus fact.'}</p>`;
+        practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct factual question.'}</p>`;
       } else {
         practiceBox.classList.add('hidden');
       }
@@ -1994,8 +2265,8 @@
       document.getElementById('navTimerBadge').classList.add('hidden');
 
       let obtainedMarks = 0;
-      activeExam.questions.forEach(q => {
-        if (activeExam.answers[q.id] === q.correctAnswer) obtainedMarks++;
+      activeExam.questions.forEach((q, idx) => {
+        if (activeExam.answers[q.id || idx] === q.correctAnswer) obtainedMarks++;
       });
 
       const totalMarks = activeExam.questions.length;
@@ -2064,7 +2335,7 @@
               <div class="flex justify-between items-end pt-4">
                 <div class="text-left text-[9px] text-slate-500">
                   <p>BSE Odisha State Board Curriculum</p>
-                  <p>Verified Academic Credential</p>
+                  <p>Verified Academic Award</p>
                 </div>
                 <div class="text-right">
                   <div class="font-signature italic font-bold text-sm text-indigo-950 border-b border-slate-500 pb-0.5 px-3">Satyajeet Sahu</div>
@@ -2089,7 +2360,6 @@
       document.body.insertAdjacentHTML('beforeend', certHtml);
     }
 
-    // PWA Trigger Handler
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
