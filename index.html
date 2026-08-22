@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SATYAPEETH — BSE Odisha Online CBT & Learning Portal</title>
   
+  <!-- Custom Logo & Favicons -->
+  <link rel="icon" type="image/png" href="./logo.png">
+  <link rel="apple-touch-icon" href="./logo.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e1b4b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <!-- Tailwind CSS & Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -24,19 +33,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
 
-  <!-- PWA Meta Tags -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e1b4b">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <!-- Firebase SDKs (Compat v10) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
-    body { font-family: 'Inter', 'Noto Sans Oriya', sans-serif; -webkit-tap-highlight-color: transparent; }
+    /* Fixed App Layout - Disabling unneeded pinch-zoom */
+    html, body {
+      touch-action: pan-x pan-y;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      font-family: 'Inter', 'Noto Sans Oriya', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    input, textarea, select {
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
     .font-cinzel { font-family: 'Cinzel', serif; }
     .font-signature { font-family: 'Playfair Display', serif; }
     .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -46,7 +60,7 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    /* Authentic Sambalpuri Geometric Ikat Border */
+    /* Authentic Sambalpuri Geometric Border */
     .sambalpuri-border {
       border: 14px solid transparent;
       border-image: repeating-linear-gradient(45deg, #881337 0, #881337 10px, #b45309 10px, #b45309 20px, #1e1b4b 20px, #1e1b4b 30px, #ffffff 30px, #ffffff 35px) 14;
@@ -64,76 +78,70 @@
   <!-- Toast Container -->
   <div id="toastContainer" class="fixed top-3 right-3 left-3 sm:left-auto z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Permanent PWA Floating Alert for Mobile -->
-  <div id="pwaFloatingBanner" class="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-4 max-w-sm z-50 bg-indigo-950 text-white border-2 border-amber-400 p-3 rounded-2xl shadow-2xl flex items-center justify-between gap-2.5">
-    <div class="flex items-center gap-2.5">
-      <div class="w-9 h-9 rounded-xl bg-amber-400 text-indigo-950 flex items-center justify-center font-black text-sm">
-        SP
-      </div>
-      <div>
-        <h4 class="font-black text-xs text-amber-300">Install Satyapeeth App</h4>
-        <p class="text-[10px] text-indigo-200">Get offline CBT & instant notes.</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-1.5">
-      <button onclick="triggerPWAInstall()" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-indigo-950 font-black rounded-xl text-xs shadow transition">
-        Install
-      </button>
-      <button onclick="document.getElementById('pwaFloatingBanner').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs px-1">
-        ✕
-      </button>
-    </div>
-  </div>
-
   <!-- Global Header -->
   <header class="bg-indigo-950 text-white sticky top-0 z-40 border-b border-indigo-900 shadow-md">
-    <div class="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2 sm:gap-3 cursor-pointer select-none" onclick="router.navigate('home')">
-        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-indigo-950 font-black text-sm sm:text-xl shadow-inner">
-          SP
-        </div>
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-2">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-2.5 cursor-pointer select-none" onclick="router.navigate('home')">
+        <img src="./logo.png" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/2997/2997295.png';" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover shadow border border-amber-400/40">
         <div>
           <span class="text-base sm:text-xl font-black tracking-wider text-amber-400">SATYAPEETH</span>
-          <span class="hidden md:inline-block text-[10px] text-indigo-200 uppercase tracking-widest font-semibold ml-2 border-l border-indigo-700 pl-2">Odisha Board Prep</span>
+          <span class="hidden md:inline-block text-[10px] text-indigo-200 uppercase tracking-widest font-semibold ml-2 border-l border-indigo-700 pl-2">BSE Odisha Board</span>
         </div>
       </div>
 
-      <div class="flex items-center gap-1.5 sm:gap-2">
-        <button onclick="toggleTheme()" id="themeToggleBtn" class="p-1.5 sm:p-2 rounded-xl bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-700 text-amber-400 transition" title="Toggle Theme">
+      <!-- Action & Navigation Controls -->
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+        
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" id="themeToggleBtn" class="p-2 sm:p-2.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-amber-400 transition" title="Toggle Theme">
           <i id="themeIcon" class="fa-solid fa-moon text-xs sm:text-sm"></i>
         </button>
 
-        <button onclick="triggerPWAInstall()" id="pwaHeaderBtn" class="text-xs bg-amber-500 hover:bg-amber-400 text-indigo-950 px-2 sm:px-2.5 py-1.5 rounded-lg font-black transition flex items-center gap-1">
-          <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Install</span>
+        <!-- 1. Install App Button (Always Prominent at Top) -->
+        <button onclick="triggerPWAInstall()" id="pwaHeaderBtn" class="text-xs sm:text-sm bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-indigo-950 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-black transition shadow flex items-center gap-1.5 animate-pulse">
+          <i class="fa-solid fa-download"></i> <span>Install App</span>
         </button>
 
-        <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2 py-1 rounded-lg text-xs font-mono font-bold animate-pulse">
+        <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold animate-pulse">
           <i class="fa-solid fa-stopwatch"></i>
           <span id="navTimerVal">00:00</span>
         </div>
 
-        <div id="navUserBadge" class="hidden flex items-center gap-1.5 bg-indigo-900 border border-indigo-700 px-2.5 py-1 rounded-lg text-xs">
+        <div id="navUserBadge" class="hidden flex items-center gap-1.5 bg-indigo-900 border border-indigo-700 px-3 py-1.5 rounded-xl text-xs">
           <i class="fa-solid fa-user-graduate text-amber-400 text-xs"></i>
           <span id="navUserName" class="font-bold text-white text-xs truncate max-w-[80px] sm:max-w-[130px]"></span>
           <span id="navUserType" class="px-1.5 py-0.5 rounded text-[9px] font-extrabold hidden sm:inline-block"></span>
         </div>
 
-        <button id="navParentBtn" onclick="router.navigate('parent-portal')" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2 sm:px-2.5 py-1.5 rounded-lg font-bold text-slate-200 transition">
-          <i class="fa-solid fa-users text-teal-400 mr-1"></i> Parent
-        </button>
-        <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs bg-indigo-800 hover:bg-indigo-700 border border-indigo-600 px-2.5 sm:px-3 py-1.5 rounded-lg font-bold text-white transition">
+        <!-- 2. Student Login -->
+        <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs sm:text-sm bg-indigo-700 hover:bg-indigo-600 border border-indigo-500 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-bold text-white transition shadow-sm">
           Login
         </button>
-        <button id="navRegBtn" onclick="router.navigate('register-free')" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition">
-          Register
-        </button>
-        <button id="navAdmBtn" onclick="router.navigate('admission')" class="text-xs bg-amber-500 hover:bg-amber-400 text-indigo-950 px-2.5 sm:px-3 py-1.5 rounded-lg font-extrabold transition">
+
+        <!-- 3. Admission -->
+        <button id="navAdmBtn" onclick="router.navigate('admission')" class="text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-indigo-950 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-black transition shadow-sm">
           Admission
         </button>
-        <button id="navLogoutBtn" onclick="auth.logout()" class="hidden text-xs bg-slate-800 hover:bg-rose-900 border border-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg font-bold transition" title="Log Out">
+
+        <!-- 4. Registration -->
+        <button id="navRegBtn" onclick="router.navigate('register-free')" class="text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-bold transition shadow-sm">
+          Register
+        </button>
+
+        <!-- 5. Parent Login -->
+        <button id="navParentBtn" onclick="router.navigate('parent-portal')" class="text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl font-bold text-slate-200 transition shadow-sm">
+          <i class="fa-solid fa-users text-teal-400 mr-1"></i> Parent
+        </button>
+
+        <!-- Logout Button -->
+        <button id="navLogoutBtn" onclick="auth.logout()" class="hidden text-xs sm:text-sm bg-rose-950 hover:bg-rose-900 border border-rose-700 text-rose-200 hover:text-white px-3 py-1.5 sm:py-2 rounded-xl font-bold transition" title="Log Out">
           <i class="fa-solid fa-power-off"></i>
         </button>
-        <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2 py-1.5 rounded-lg transition" title="Admin Room">
+
+        <!-- 6. Admin Login -->
+        <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs sm:text-sm bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 hover:text-white px-2.5 py-1.5 sm:py-2 rounded-xl transition" title="Admin Room">
           <i class="fa-solid fa-shield-halved"></i>
         </button>
       </div>
@@ -192,9 +200,9 @@
     const ADMIN_PHONE = "919556576071";
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_persistent_student_final',
-      AUTH_ADMIN: 'sp_persistent_admin_final',
-      AUTH_PARENT: 'sp_persistent_parent_final',
+      AUTH_STUDENT: 'sp_auth_student_prod',
+      AUTH_ADMIN: 'sp_auth_admin_prod',
+      AUTH_PARENT: 'sp_auth_parent_prod',
       THEME: 'sp_theme_pref'
     };
 
@@ -351,7 +359,7 @@
       setAdmin: (data) => localStorage.setItem(DB_KEYS.AUTH_ADMIN, JSON.stringify(data)),
       setParent: (data) => localStorage.setItem(DB_KEYS.AUTH_PARENT, JSON.stringify(data)),
       logout: () => {
-        confirmDialog('Log Out', 'Are you sure you want to log out?', () => {
+        confirmDialog('Log Out', 'Are you sure you want to log out from Satyapeeth?', () => {
           localStorage.removeItem(DB_KEYS.AUTH_STUDENT);
           localStorage.removeItem(DB_KEYS.AUTH_ADMIN);
           localStorage.removeItem(DB_KEYS.AUTH_PARENT);
@@ -386,6 +394,7 @@
         const loginBtn = document.getElementById('navLoginBtn');
         const regBtn = document.getElementById('navRegBtn');
         const admBtn = document.getElementById('navAdmBtn');
+        const parentBtn = document.getElementById('navParentBtn');
         const logoutBtn = document.getElementById('navLogoutBtn');
 
         if (student) {
@@ -405,6 +414,7 @@
           loginBtn.classList.add('hidden');
           regBtn.classList.add('hidden');
           admBtn.classList.add('hidden');
+          parentBtn.classList.add('hidden');
           logoutBtn.classList.remove('hidden');
         } else if (parent) {
           navUser.classList.remove('hidden');
@@ -425,12 +435,14 @@
           loginBtn.classList.add('hidden');
           regBtn.classList.add('hidden');
           admBtn.classList.add('hidden');
+          parentBtn.classList.add('hidden');
           logoutBtn.classList.remove('hidden');
         } else {
           navUser.classList.add('hidden');
           loginBtn.classList.remove('hidden');
           regBtn.classList.remove('hidden');
           admBtn.classList.remove('hidden');
+          parentBtn.classList.remove('hidden');
           logoutBtn.classList.add('hidden');
         }
       },
@@ -493,7 +505,7 @@
               Satyapeeth Online CBT & Smart Learning Portal
             </h1>
             <p class="text-indigo-200 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed">
-              Official chapter-wise practice tests with clean bilingual fonts, PDF notes, YouTube video classes, and 85%+ Sambalpuri border certificates.
+              Official chapter-wise practice tests with clean bilingual fonts, PDF notes, YouTube video classes, and 85%+ certificates.
             </p>
             <div class="mt-5 flex flex-wrap gap-2.5 justify-center sm:justify-start">
               <button onclick="router.navigate('admission')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black px-4 py-2.5 rounded-xl shadow text-xs">
@@ -516,8 +528,8 @@
               <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-award"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">85%+ Sambalpuri Certificate</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Score 85% or higher in any mock test to earn an authorized Sambalpuri patterned digital achievement certificate.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">85%+ Official Certificate</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Score 85% or higher in any mock test to earn an authorized Satyapeeth digital achievement certificate.</p>
             </div>
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold">
@@ -866,7 +878,7 @@
             </button>
             <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
               <h2 class="text-base font-black text-slate-900 dark:text-white">${topic ? topic.name : 'Assessment'}</h2>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">Target 85%+ to earn your Sambalpuri border certificate.</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Target 85%+ to earn your certificate.</p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-indigo-950 text-white p-5 rounded-2xl cursor-pointer hover:bg-indigo-900 transition text-center space-y-2 border border-indigo-900 shadow">
@@ -926,13 +938,13 @@
             ${isEligible ? `
               <div class="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-900/60 space-y-2">
                 <h4 class="font-black text-amber-800 dark:text-amber-300 text-sm">🎉 Outstanding Excellence (85%+)!</h4>
-                <p class="text-xs text-amber-700 dark:text-amber-400">You have unlocked the official Satyapeeth Sambalpuri Certificate.</p>
+                <p class="text-xs text-amber-700 dark:text-amber-400">You have unlocked the official Satyapeeth Certificate.</p>
                 <button onclick="openCertificateModal('${res.id}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-                  View & Download Sambalpuri Certificate
+                  View & Download Certificate
                 </button>
               </div>
             ` : `
-              <p class="text-xs text-slate-500">Target 85% or higher to unlock the Satyapeeth Sambalpuri Certificate of Achievement.</p>
+              <p class="text-xs text-slate-500">Target 85% or higher to unlock the Satyapeeth Certificate of Achievement.</p>
             `}
 
             <button onclick="router.navigate('student-dashboard')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow">
@@ -2002,7 +2014,7 @@
         obtainedMarks,
         totalMarks,
         percentage,
-        certificateId: "SP-SAMBALPURI-" + Date.now().toString().slice(-6),
+        certificateId: "SP-CERT-" + Date.now().toString().slice(-6),
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
@@ -2012,7 +2024,6 @@
       });
     }
 
-    // Dynamic 85%+ Sambalpuri Ikat Border Certificate
     function openCertificateModal(resultId) {
       const res = cloudState.results.find(r => r.id === resultId);
       if (!res) return;
@@ -2039,7 +2050,7 @@
                   ${res.studentName}
                 </h3>
                 <p class="text-xs sm:text-sm text-slate-700 leading-relaxed max-w-md mx-auto pt-1 font-medium">
-                  For achieving outstanding performance of <strong class="text-rose-700 font-bold">${res.percentage}%</strong> in <strong class="text-indigo-950 font-bold">${res.topicName}</strong> (Class ${res.studentClass || '10'}).
+                  For achieving outstanding academic performance of <strong class="text-rose-700 font-bold">${res.percentage}%</strong> in <strong class="text-indigo-950 font-bold">${res.topicName}</strong> (Class ${res.studentClass || '10'}).
                 </p>
               </div>
 
@@ -2053,7 +2064,7 @@
               <div class="flex justify-between items-end pt-4">
                 <div class="text-left text-[9px] text-slate-500">
                   <p>BSE Odisha State Board Curriculum</p>
-                  <p>Verified Sambalpuri Heritage Academic Award</p>
+                  <p>Verified Academic Credential</p>
                 </div>
                 <div class="text-right">
                   <div class="font-signature italic font-bold text-sm text-indigo-950 border-b border-slate-500 pb-0.5 px-3">Satyajeet Sahu</div>
@@ -2078,7 +2089,7 @@
       document.body.insertAdjacentHTML('beforeend', certHtml);
     }
 
-    // PWA Install Trigger
+    // PWA Trigger Handler
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -2090,12 +2101,12 @@
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
-            toast('App Installed!', 'Satyapeeth installed on your home screen.', 'success');
+            toast('App Installed!', 'Satyapeeth added to your phone screen.', 'success');
           }
           deferredPrompt = null;
         });
       } else {
-        toast('Install App', 'Tap browser menu (⋮) and choose "Install App" or "Add to Home screen".', 'info');
+        toast('Install App', 'Tap browser 3-dots (⋮) and click "Add to Home screen" or "Install App".', 'info');
       }
     }
 
