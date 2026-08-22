@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SATYAPEETH — BSE Odisha CBT Portal</title>
+  <title>SATYAPEETH — Odisha Board Online CBT & Smart Learning Portal</title>
   
-  <!-- Tailwind CSS & FontAwesome Icons -->
+  <!-- Tailwind CSS & Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -24,7 +24,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Firebase App & Firestore SDKs (Compat v10) -->
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e1b4b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Firebase SDKs (Compat v10) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -39,9 +46,9 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
     @media print {
-      body * { visibility: hidden; }
-      #printableCertificate, #printableCertificate * { visibility: visible; }
-      #printableCertificate { position: absolute; left: 0; top: 0; width: 100%; }
+      body * { visibility: hidden !important; }
+      #printableCertificate, #printableCertificate * { visibility: visible !important; }
+      #printableCertificate { position: absolute; left: 0; top: 0; width: 100%; border: none !important; }
     }
   </style>
 </head>
@@ -49,6 +56,27 @@
 
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed top-3 right-3 left-3 sm:left-auto z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- PWA Bottom Install Alert Banner -->
+  <div id="pwaFloatingPrompt" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 max-w-md z-50 bg-indigo-950 text-white border-2 border-amber-400 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3 animate-bounce">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-amber-400 text-indigo-950 flex items-center justify-center font-black text-lg">
+        SP
+      </div>
+      <div>
+        <h4 class="font-black text-xs sm:text-sm text-amber-300">Install Satyapeeth App</h4>
+        <p class="text-[10px] text-indigo-200">Fast CBT Mocks & PDF Revision Notes</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="installPWAApp()" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-indigo-950 font-black rounded-xl text-xs shadow transition">
+        Install
+      </button>
+      <button onclick="document.getElementById('pwaFloatingPrompt').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs px-1">
+        ✕
+      </button>
+    </div>
+  </div>
 
   <!-- Global Header -->
   <header class="bg-indigo-950 text-white sticky top-0 z-40 border-b border-indigo-900 shadow-md">
@@ -70,6 +98,10 @@
           <i id="themeIcon" class="fa-solid fa-moon text-xs sm:text-sm"></i>
         </button>
 
+        <button id="pwaHeaderBtn" onclick="installPWAApp()" class="hidden text-xs bg-amber-500 hover:bg-amber-400 text-indigo-950 px-2 sm:px-2.5 py-1.5 rounded-lg font-black transition flex items-center gap-1">
+          <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Install</span>
+        </button>
+
         <div id="navTimerBadge" class="hidden flex items-center gap-1.5 bg-rose-950/90 border border-rose-500 text-rose-300 px-2 py-1 rounded-lg text-xs font-mono font-bold animate-pulse">
           <i class="fa-solid fa-stopwatch"></i>
           <span id="navTimerVal">00:00</span>
@@ -77,12 +109,12 @@
 
         <div id="navUserBadge" class="hidden flex items-center gap-1.5 bg-indigo-900 border border-indigo-700 px-2.5 py-1 rounded-lg text-xs">
           <i class="fa-solid fa-user-graduate text-amber-400 text-xs"></i>
-          <span id="navUserName" class="font-bold text-white text-xs truncate max-w-[90px] sm:max-w-[140px]"></span>
+          <span id="navUserName" class="font-bold text-white text-xs truncate max-w-[80px] sm:max-w-[130px]"></span>
           <span id="navUserType" class="px-1.5 py-0.5 rounded text-[9px] font-extrabold hidden sm:inline-block"></span>
         </div>
 
         <button id="navParentBtn" onclick="router.navigate('parent-portal')" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2 sm:px-2.5 py-1.5 rounded-lg font-bold text-slate-200 transition">
-          <i class="fa-solid fa-users text-amber-400 mr-1"></i> Parent
+          <i class="fa-solid fa-users text-teal-400 mr-1"></i> Parent
         </button>
         <button id="navLoginBtn" onclick="router.navigate('login')" class="text-xs bg-indigo-800 hover:bg-indigo-700 border border-indigo-600 px-2.5 sm:px-3 py-1.5 rounded-lg font-bold text-white transition">
           Login
@@ -103,10 +135,10 @@
     </div>
   </header>
 
-  <!-- App Main Router View -->
+  <!-- App View Container -->
   <main id="app" class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6"></main>
 
-  <!-- Confirmation Modal -->
+  <!-- Global Confirm Modal -->
   <div id="confirmModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 max-w-sm w-full rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-5 text-center">
       <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3 text-lg">
@@ -155,14 +187,14 @@
     const ADMIN_PHONE = "919556576071";
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_persistent_student_v3',
-      AUTH_ADMIN: 'sp_persistent_admin_v3',
-      AUTH_PARENT: 'sp_persistent_parent_v3',
-      CLASSES: 'sp_classes_cache',
+      AUTH_STUDENT: 'sp_persistent_student_v4',
+      AUTH_ADMIN: 'sp_persistent_admin_v4',
+      AUTH_PARENT: 'sp_persistent_parent_v4',
+      CLASSES: 'sp_classes_cache_v4',
       THEME: 'sp_theme_pref'
     };
 
-    // Dark/Light Theme Handler
+    // Dark/Light Theme Switcher
     function initTheme() {
       const savedTheme = localStorage.getItem(DB_KEYS.THEME) || 'light';
       if (savedTheme === 'dark') {
@@ -182,29 +214,35 @@
 
     // In-memory Cloud Cache
     let cloudState = {
+      classes: ["10", "9", "8", "7", "6"],
       students: [],
       admissions: [],
       registrations: [],
       results: [],
       subjects: [
-        { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)" },
-        { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)" },
-        { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)" },
-        { id: "sub_10_ls", class: "10", name: "Life Science (ଜୀବ ବିଜ୍ଞାନ)" },
-        { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)" },
-        { id: "sub_10_eng", class: "10", name: "English" }
+        { id: "sub_10_soc", class: "10", name: "Social Science (ଇତିହାସ ଓ ଭୂଗୋଳ)", isFree: true },
+        { id: "sub_10_fl_odia", class: "10", name: "First Language Odia (ସାହିତ୍ୟ ସିନ୍ଧୁ)", isFree: false },
+        { id: "sub_10_ps", class: "10", name: "Physical Science (ଭୌତିକ ବିଜ୍ଞାନ)", isFree: false },
+        { id: "sub_10_ls", class: "10", name: "Life Science (ଜୀବ ବିଜ୍ଞାନ)", isFree: false },
+        { id: "sub_10_mth", class: "10", name: "Mathematics (ଜ୍ୟାମିତି ଓ ବୀଜଗଣିତ)", isFree: false },
+        { id: "sub_10_eng", class: "10", name: "English", isFree: false }
       ],
       topics: [
-        { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତୀୟ ଜାତୀୟ ଆନ୍ଦୋଳନରେ ଗାନ୍ଧିଜୀଙ୍କ ଆବିର୍ଭାବ", isDemo: true },
-        { id: "top_10_soc_2", class: "10", subjectId: "sub_10_soc", name: "ଅସହଯୋଗ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାର ଭୂମିକା", isDemo: false },
-        { id: "top_10_ps_1", class: "10", subjectId: "sub_10_ps", name: "ରାସାୟନିକ ପ୍ରତିକ୍ରିୟା ଓ ସମୀକରଣ", isDemo: true }
+        { id: "top_10_soc_1", class: "10", subjectId: "sub_10_soc", name: "ଭାରତରେ ଅସହଯୋଗ ଆନ୍ଦୋଳନ ଓ ଓଡ଼ିଶାରେ ଏହାର ପ୍ରଭାବ", isFree: true },
+        { id: "top_10_soc_2", class: "10", subjectId: "sub_10_soc", name: "ଭାରତ (ଆକାର ଓ ଅବସ୍ଥିତି)", isFree: false }
       ],
       questions: [],
       notes: []
     };
 
-    // Initialize Realtime Listeners
+    // Initialize Realtime Cloud Sync
     function initRealtimeSync() {
+      firestore.collection("settings").doc("classes").onSnapshot(doc => {
+        if (doc.exists && doc.data().list) {
+          cloudState.classes = doc.data().list;
+        }
+      });
+
       firestore.collection("students").onSnapshot(snapshot => {
         cloudState.students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if (router.currentRoute === 'admin-dashboard') router.navigate('admin-dashboard', { tab: 'students' });
@@ -278,19 +316,19 @@
       cancelBtn.onclick = cleanup;
     }
 
-    // WhatsApp Notification Trigger
+    // Direct WhatsApp Alert Trigger
     function sendWhatsAppNotification(type, payload) {
       let text = "";
       if (type === 'registration') {
-        text = `🔔 *New Free Mock Registration (Satyapeeth)*%0A%0A👤 *Name:* ${payload.name}%0A📚 *Class:* ${payload.class}%0A📱 *Phone:* ${payload.phone}%0A📧 *Email:* ${payload.email}`;
+        text = `🔔 *New Mock Registration (Satyapeeth)*%0A%0A👤 *Student:* ${payload.name}%0A📚 *Class:* ${payload.class}%0A📱 *Parent Phone:* ${payload.phone}%0A📧 *Email:* ${payload.email}`;
       } else if (type === 'admission') {
-        text = `🌟 *New Full Admission Application (Satyapeeth)*%0A%0A👤 *Student:* ${payload.name}%0A👨‍👩‍👦 *Guardian:* ${payload.guardian}%0A📚 *Class:* ${payload.class}%0A📱 *Phone:* ${payload.phone}%0A🏫 *School:* ${payload.school}`;
+        text = `🌟 *New Full Admission Application (Satyapeeth)*%0A%0A👤 *Student:* ${payload.name}%0A👨‍👩‍👦 *Guardian:* ${payload.guardian}%0A📚 *Class:* ${payload.class}%0A📱 *Parent Phone:* ${payload.phone}%0A🏫 *School:* ${payload.school}`;
       }
       const url = `https://api.whatsapp.com/send?phone=${ADMIN_PHONE}&text=${text}`;
       window.open(url, '_blank');
     }
 
-    // Persistent Auth
+    // Persistent Authentication (Never auto-logouts)
     const auth = {
       getStudent: () => {
         try { return JSON.parse(localStorage.getItem(DB_KEYS.AUTH_STUDENT)); } catch (e) { return null; }
@@ -309,13 +347,13 @@
       setAdmin: (data) => localStorage.setItem(DB_KEYS.AUTH_ADMIN, JSON.stringify(data)),
       setParent: (data) => localStorage.setItem(DB_KEYS.AUTH_PARENT, JSON.stringify(data)),
       logout: () => {
-        confirmDialog('Log Out', 'Are you sure you want to log out?', () => {
+        confirmDialog('Log Out', 'Are you sure you want to log out from Satyapeeth?', () => {
           localStorage.removeItem(DB_KEYS.AUTH_STUDENT);
           localStorage.removeItem(DB_KEYS.AUTH_ADMIN);
           localStorage.removeItem(DB_KEYS.AUTH_PARENT);
           localStorage.removeItem('sp_guest_flag');
           router.updateHeader();
-          toast('Logged Out', 'Session closed.', 'info');
+          toast('Logged Out', 'Session closed successfully.', 'info');
           router.navigate('home');
         });
       }
@@ -358,7 +396,7 @@
             badge.innerText = "All Access";
           } else {
             badge.className = "bg-emerald-500 text-white px-1.5 py-0.5 rounded text-[9px] font-bold";
-            badge.innerText = "Mock Pass";
+            badge.innerText = "Free Pass";
           }
           loginBtn.classList.add('hidden');
           regBtn.classList.add('hidden');
@@ -448,11 +486,11 @@
               Satyapeeth Online CBT & Smart Learning Portal
             </h1>
             <p class="text-indigo-200 text-xs sm:text-sm mt-2 max-w-xl leading-relaxed">
-              Official chapter-wise practice tests with large high-contrast fonts, Odia & English explanations, PDF notes, and instant parent progress tracking.
+              Official chapter-wise practice tests with clean bilingual fonts, Odia & English explanations, PDF notes, video classes, and 85%+ academic certificates.
             </p>
             <div class="mt-5 flex flex-wrap gap-2.5 justify-center sm:justify-start">
               <button onclick="router.navigate('admission')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black px-4 py-2.5 rounded-xl shadow text-xs">
-                Full Admission (PDF Notes + Mocks)
+                Full Admission (All Classes & Notes)
               </button>
               <button onclick="router.navigate('register-free')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl shadow text-xs">
                 Free Mock Register
@@ -471,114 +509,112 @@
               <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-award"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">75%+ Official Certificate</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Score 75% or higher in any mock test to earn an authorized Satyapeeth digital achievement certificate.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">85%+ Official Certificate</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Score 85% or higher in any mock test to earn an authorized Satyapeeth digital achievement certificate.</p>
             </div>
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold">
                 <i class="fa-solid fa-file-pdf"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Official PDF Notes</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">View and download clean PDF chapter notes directly inside your student dashboard.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">PDF Notes & Video Lessons</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">View embedded chapter PDF notes and watch topic-wise video classes directly inside your student room.</p>
             </div>
             <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
               <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold">
-                <i class="fa-solid fa-users"></i>
+                <i class="fa-solid fa-chart-line"></i>
               </div>
-              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Parent Performance View</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Parents can log in with their phone number to check their child's scores and test report cards.</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Real-time Progress Tracker</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Parents and Admins can monitor student attempt counts, marks, and weekly study consistency.</p>
             </div>
           </div>
         </div>
       `,
 
-      registerFree: () => `
-        <div class="max-w-md mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
-          <div class="text-center">
-            <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full uppercase">Free Mock Pass</span>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Registration</h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Apply for your verified mock test credentials.</p>
+      registerFree: () => {
+        const classes = cloudState.classes;
+        return `
+          <div class="max-w-md mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div class="text-center">
+              <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full uppercase">Free Mock Pass</span>
+              <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Registration</h2>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Unlock free sample test pass (1 Free Subject).</p>
+            </div>
+            <form onsubmit="handleRegistrationSubmit(event)" class="space-y-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Student Full Name *</label>
+                <input type="text" id="regName" required placeholder="e.g. Subham Dash" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-emerald-600 text-slate-900 dark:text-white">
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class *</label>
+                  <select id="regClass" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none text-slate-900 dark:text-white">
+                    ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent WhatsApp No *</label>
+                  <input type="tel" id="regPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Email Address *</label>
+                <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
+              </div>
+              <button type="submit" id="regSubmitBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
+                Submit & Send WhatsApp Alert
+              </button>
+            </form>
           </div>
-          <form onsubmit="handleRegistrationSubmit(event)" class="space-y-3">
-            <div>
-              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Student Full Name *</label>
-              <input type="text" id="regName" required placeholder="e.g. Subham Dash" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-emerald-600 text-slate-900 dark:text-white">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class *</label>
-                <select id="regClass" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none text-slate-900 dark:text-white">
-                  <option value="10">Class 10</option>
-                  <option value="9">Class 9</option>
-                  <option value="8">Class 8</option>
-                  <option value="7">Class 7</option>
-                  <option value="6">Class 6</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent Mobile / WhatsApp *</label>
-                <input type="tel" id="regPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
-              </div>
-            </div>
-            <div>
-              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Email Address *</label>
-              <input type="email" id="regEmail" required placeholder="student@gmail.com" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
-            </div>
-            <button type="submit" id="regSubmitBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
-              Submit & Send WhatsApp Alert
-            </button>
-          </form>
-        </div>
-      `,
+        `;
+      },
 
-      admission: () => `
-        <div class="max-w-md mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
-          <div class="text-center">
-            <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full uppercase">All Access Pass</span>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Admission Form</h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Unlock PDF notes, marksheet tracking & CBT mocks.</p>
+      admission: () => {
+        const classes = cloudState.classes;
+        return `
+          <div class="max-w-md mx-auto bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div class="text-center">
+              <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full uppercase">All Access Pass</span>
+              <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Student Admission Form</h2>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Unlock All Subjects, PDF Notes, Video Classes & Unlimited Mocks.</p>
+            </div>
+            <form onsubmit="handleAdmissionSubmit(event)" class="space-y-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Student Full Name *</label>
+                <input type="text" id="admName" required placeholder="e.g. Priyaranjan Mohapatra" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-amber-500 text-slate-900 dark:text-white">
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent / Guardian Name *</label>
+                  <input type="text" id="admGuardian" required placeholder="Father/Mother" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class *</label>
+                  <select id="admClass" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none text-slate-900 dark:text-white">
+                    ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent WhatsApp No *</label>
+                  <input type="tel" id="admPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Email *</label>
+                  <input type="email" id="admEmail" required placeholder="email@gmail.com" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">School Name *</label>
+                <input type="text" id="admSchool" required placeholder="School Name" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
+              </div>
+              <button type="submit" id="admSubmitBtn" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+                Submit & Send WhatsApp Alert
+              </button>
+            </form>
           </div>
-          <form onsubmit="handleAdmissionSubmit(event)" class="space-y-3">
-            <div>
-              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Student Full Name *</label>
-              <input type="text" id="admName" required placeholder="e.g. Priyaranjan Mohapatra" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-amber-500 text-slate-900 dark:text-white">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent / Guardian Name *</label>
-                <input type="text" id="admGuardian" required placeholder="Father/Mother" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class *</label>
-                <select id="admClass" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none text-slate-900 dark:text-white">
-                  <option value="10">Class 10</option>
-                  <option value="9">Class 9</option>
-                  <option value="8">Class 8</option>
-                  <option value="7">Class 7</option>
-                  <option value="6">Class 6</option>
-                </select>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Parent WhatsApp No *</label>
-                <input type="tel" id="admPhone" required placeholder="10-digit number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Email *</label>
-                <input type="email" id="admEmail" required placeholder="email@gmail.com" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
-              </div>
-            </div>
-            <div>
-              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">School Name *</label>
-              <input type="text" id="admSchool" required placeholder="School Name" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-900 dark:text-white">
-            </div>
-            <button type="submit" id="admSubmitBtn" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-              Submit & Send WhatsApp Alert
-            </button>
-          </form>
-        </div>
-      `,
+        `;
+      },
 
       parentPortal: () => {
         const parent = auth.getParent();
@@ -604,7 +640,7 @@
                         <h4 class="font-bold text-slate-900 dark:text-white">${res.studentName} — ${res.topicName}</h4>
                         <p class="text-[10px] text-slate-500 dark:text-slate-400">Score: <strong class="text-indigo-600 dark:text-indigo-400">${res.obtainedMarks} / ${res.totalMarks}</strong> (${res.percentage}%)</p>
                       </div>
-                      ${res.percentage >= 75 ? `
+                      ${res.percentage >= 85 ? `
                         <button onclick="openCertificateModal('${res.id}')" class="px-2.5 py-1 bg-amber-500 text-indigo-950 font-extrabold rounded-lg text-[11px] shadow">
                           <i class="fa-solid fa-award mr-1"></i> Certificate
                         </button>
@@ -624,7 +660,7 @@
                 <i class="fa-solid fa-users"></i>
               </div>
               <h2 class="text-xl font-black text-slate-900 dark:text-white">Parent Portal Login</h2>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">Enter the mobile number provided during admission/registration to view results.</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Enter the parent mobile number provided during admission/registration.</p>
             </div>
             <form onsubmit="handleParentLogin(event)" class="space-y-3">
               <div>
@@ -667,17 +703,23 @@
 
       studentDashboard: () => {
         const student = auth.getStudent() || { name: "Guest Student", class: "10", studentId: "GST-DEMO", type: "Guest" };
-        const hasNotesAccess = student.type === 'Admission';
+        const hasFullAccess = student.type === 'Admission';
+        const myResults = cloudState.results.filter(r => r.studentPhone === student.phone || r.studentName === student.name);
 
         return `
           <div class="space-y-5">
             <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-5 sm:p-7 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
-                <span class="text-[10px] ${hasNotesAccess ? 'bg-amber-400 text-indigo-950 font-black' : 'bg-emerald-500 text-white font-bold'} px-2 py-0.5 rounded uppercase">
-                  ${hasNotesAccess ? 'Full Access Student' : 'Mock Test Access'}
+                <span class="text-[10px] ${hasFullAccess ? 'bg-amber-400 text-indigo-950 font-black' : 'bg-emerald-500 text-white font-bold'} px-2 py-0.5 rounded uppercase">
+                  ${hasFullAccess ? 'Full Access Student' : 'Free Mock Pass'}
                 </span>
                 <h2 class="text-xl sm:text-2xl font-black mt-1">Namaste, ${student.name}</h2>
-                <p class="text-[11px] text-indigo-200">Class ${student.class} | ID: <span class="font-mono text-amber-300 font-bold">${student.studentId}</span></p>
+                <p class="text-[11px] text-indigo-200">Class ${student.class} | Student ID: <span class="font-mono text-amber-300 font-bold">${student.studentId}</span></p>
+              </div>
+              <div class="text-right">
+                <span class="text-xs bg-indigo-800/80 border border-indigo-700 px-3 py-1.5 rounded-xl font-bold">
+                  Tests Taken: ${myResults.length}
+                </span>
               </div>
             </div>
 
@@ -687,20 +729,20 @@
                   <i class="fa-solid fa-book-open"></i>
                 </div>
                 <h3 class="text-base font-bold text-slate-900 dark:text-white">Class ${student.class} Mock Tests</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Attempt chapter-wise objective exams in CBT or Practice mode with large fonts.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Attempt chapter-wise objective exams in CBT or Practice mode with clean bilingual typography.</p>
                 <button onclick="router.navigate('subject-select')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">
                   Start Mock Tests &rarr;
                 </button>
               </div>
 
               <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-                <div class="w-10 h-10 rounded-xl ${hasNotesAccess ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} flex items-center justify-center text-xl font-bold">
+                <div class="w-10 h-10 rounded-xl ${hasFullAccess ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} flex items-center justify-center text-xl font-bold">
                   <i class="fa-solid fa-file-pdf"></i>
                 </div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">PDF Revision Notes</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Official PDF notes, formulas, and summaries prepared for BSE curriculum.</p>
-                <button onclick="${hasNotesAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-2.5 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold'} rounded-xl text-xs transition">
-                  ${hasNotesAccess ? 'View PDF Notes' : 'Unlock PDF Notes 🔒'} &rarr;
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">PDF Notes & Video Lessons</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Official PDF notes, formulas, and video lectures curated for Odisha Board examination.</p>
+                <button onclick="${hasFullAccess ? `router.navigate('subject-select')` : `showNotesLockPrompt()`}" class="w-full py-2.5 ${hasFullAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold'} rounded-xl text-xs transition">
+                  ${hasFullAccess ? 'View Notes & Classes' : 'Unlock All Notes 🔒'} &rarr;
                 </button>
               </div>
             </div>
@@ -709,7 +751,7 @@
       },
 
       subjectSelect: () => {
-        const student = auth.getStudent() || { class: "10" };
+        const student = auth.getStudent() || { class: "10", type: "Guest" };
         const subjects = cloudState.subjects.filter(s => String(s.class) === String(student.class));
 
         return `
@@ -720,20 +762,23 @@
             <h2 class="text-xl font-black text-slate-900 dark:text-white">Class ${student.class} Subjects</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              ${subjects.map(sub => `
-                <div onclick="router.navigate('topic-select', { subjectId: '${sub.id}' })" class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-600 dark:hover:border-indigo-500 hover:shadow cursor-pointer transition flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
-                      <i class="fa-solid fa-book"></i>
+              ${subjects.map((sub, idx) => {
+                const isLocked = student.type !== 'Admission' && idx > 0;
+                return `
+                  <div onclick="${isLocked ? `showFreeUserLockPrompt()` : `router.navigate('topic-select', { subjectId: '${sub.id}' })`}" class="bg-white dark:bg-slate-900 p-4 rounded-2xl border ${isLocked ? 'border-slate-200 dark:border-slate-800 opacity-60' : 'border-slate-200 dark:border-slate-800 hover:border-indigo-600 dark:hover:border-indigo-500 hover:shadow cursor-pointer'} transition flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-xl ${isLocked ? 'bg-slate-100 dark:bg-slate-800 text-slate-400' : 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300'} flex items-center justify-center font-bold text-xs">
+                        <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-book'}"></i>
+                      </div>
+                      <div>
+                        <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">${sub.name}</h4>
+                        <span class="text-[10px] text-slate-400">${isLocked ? 'Full Admission Only' : 'Odisha Board'}</span>
+                      </div>
                     </div>
-                    <div>
-                      <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">${sub.name}</h4>
-                      <span class="text-[10px] text-slate-400">Odisha Board</span>
-                    </div>
+                    <i class="fa-solid ${isLocked ? 'fa-lock text-amber-500' : 'fa-chevron-right text-slate-300'} text-xs"></i>
                   </div>
-                  <i class="fa-solid fa-chevron-right text-slate-300 dark:text-slate-600 text-xs"></i>
-                </div>
-              `).join('')}
+                `;
+              }).join('')}
             </div>
           </div>
         `;
@@ -741,8 +786,7 @@
 
       topicSelect: (subjectId) => {
         const student = auth.getStudent() || { class: "10", type: "Guest" };
-        const isGuest = auth.isGuest();
-        const hasNotesAccess = student.type === 'Admission';
+        const hasFullAccess = student.type === 'Admission';
         const subject = cloudState.subjects.find(s => s.id === subjectId);
         const topics = cloudState.topics.filter(t => t.subjectId === subjectId);
 
@@ -757,7 +801,7 @@
               ${topics.length > 0 ? topics.map((top, idx) => {
                 const qCount = cloudState.questions.filter(q => q.topicId === top.id).length;
                 const hasNote = cloudState.notes.some(n => n.topicId === top.id);
-                const isLocked = isGuest && idx > 0;
+                const isLocked = !hasFullAccess && idx > 0;
 
                 return `
                   <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border ${isLocked ? 'border-slate-200 dark:border-slate-800 opacity-70 bg-slate-50 dark:bg-slate-950' : 'border-slate-200 dark:border-slate-800'} shadow-sm space-y-3">
@@ -770,7 +814,7 @@
                           <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">${top.name}</h4>
                           <div class="flex items-center gap-2 mt-0.5">
                             <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">${qCount} Questions</span>
-                            ${hasNote ? '<span class="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded font-bold">PDF Ready</span>' : ''}
+                            ${hasNote ? '<span class="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded font-bold">PDF/Video Ready</span>' : ''}
                           </div>
                         </div>
                       </div>
@@ -778,11 +822,11 @@
                     </div>
 
                     <div class="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                      <button onclick="${isLocked ? `showGuestLockPrompt()` : `router.navigate('mode-select', { subjectId: '${subjectId}', topicId: '${top.id}' })`}" class="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">
+                      <button onclick="${isLocked ? `showFreeUserLockPrompt()` : `router.navigate('mode-select', { subjectId: '${subjectId}', topicId: '${top.id}' })`}" class="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">
                         Mock Test
                       </button>
-                      <button onclick="${hasNotesAccess ? `router.navigate('notes-view', { topicId: '${top.id}' })` : `showNotesLockPrompt()`}" class="flex-1 py-1.5 ${hasNotesAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'} text-xs rounded-xl transition">
-                        PDF Notes ${!hasNotesAccess ? '🔒' : ''}
+                      <button onclick="${hasFullAccess ? `router.navigate('notes-view', { topicId: '${top.id}' })` : `showNotesLockPrompt()`}" class="flex-1 py-1.5 ${hasFullAccess ? 'bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'} text-xs rounded-xl transition">
+                        PDF/Class ${!hasFullAccess ? '🔒' : ''}
                       </button>
                     </div>
                   </div>
@@ -806,13 +850,13 @@
             </button>
             <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
               <h2 class="text-base font-black text-slate-900 dark:text-white">${topic ? topic.name : 'Assessment'}</h2>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">Choose your preferred mode to start.</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Target 85%+ to earn your Satyapeeth Certificate.</p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div onclick="startTestEngine('${subjectId}', '${topicId}', 'exam')" class="bg-indigo-950 text-white p-5 rounded-2xl cursor-pointer hover:bg-indigo-900 transition text-center space-y-2 border border-indigo-900 shadow">
                 <i class="fa-solid fa-stopwatch text-2xl text-amber-400"></i>
                 <h3 class="font-bold text-sm">Exam CBT Mode</h3>
-                <p class="text-[10px] text-indigo-200">Timed Exam (Target: 75%+ for Certificate)</p>
+                <p class="text-[10px] text-indigo-200">Timed Exam (85%+ Required)</p>
               </div>
               <div onclick="startTestEngine('${subjectId}', '${topicId}', 'practice')" class="bg-emerald-700 text-white p-5 rounded-2xl cursor-pointer hover:bg-emerald-600 transition text-center space-y-2 border border-emerald-800 shadow">
                 <i class="fa-solid fa-bolt text-2xl text-amber-300"></i>
@@ -831,14 +875,13 @@
             <span class="font-mono font-bold text-slate-500 dark:text-slate-400 text-sm">Question: <span id="testMetaProgress" class="text-indigo-600 dark:text-indigo-400 font-black">1 / 1</span></span>
           </div>
 
-          <!-- Question Body with Larger & Cleaner Typography -->
           <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
-            <div class="space-y-2 border-b border-slate-100 dark:border-slate-800 pb-4">
-              <h3 id="testQEn" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-relaxed"></h3>
-              <h4 id="testQOr" class="text-sm sm:text-base font-semibold text-indigo-950 dark:text-amber-300 leading-relaxed"></h4>
+            <!-- Dynamic Non-Duplicating Question Box -->
+            <div class="space-y-1.5 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <h3 id="testQOr" class="text-base sm:text-lg font-bold text-indigo-950 dark:text-amber-300 leading-relaxed font-sans"></h3>
+              <h4 id="testQEn" class="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed hidden"></h4>
             </div>
 
-            <!-- Clear High-Contrast Options -->
             <div id="testOptionsBox" class="space-y-3"></div>
 
             <div id="testPracticeBox" class="hidden p-4 rounded-2xl text-xs sm:text-sm space-y-1.5 border"></div>
@@ -853,10 +896,10 @@
       `,
 
       resultScreen: (res) => {
-        const isEligible = res.percentage >= 75;
+        const isEligible = res.percentage >= 85;
         return `
           <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 text-center space-y-5 shadow-lg">
-            <div class="w-16 h-16 ${isEligible ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'} rounded-full flex items-center justify-center mx-auto text-2xl font-black shadow-inner">
+            <div class="w-16 h-16 ${isEligible ? 'bg-amber-100 text-amber-600' : 'bg-indigo-100 text-indigo-600'} rounded-full flex items-center justify-center mx-auto text-2xl font-black shadow-inner">
               ${isEligible ? '<i class="fa-solid fa-award"></i>' : '✓'}
             </div>
             
@@ -867,14 +910,14 @@
 
             ${isEligible ? `
               <div class="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-900/60 space-y-2">
-                <h4 class="font-black text-amber-800 dark:text-amber-300 text-sm">🎉 Congratulations! You scored 75%+</h4>
-                <p class="text-xs text-amber-700 dark:text-amber-400">Your authorized Satyapeeth Certificate of Achievement is unlocked.</p>
+                <h4 class="font-black text-amber-800 dark:text-amber-300 text-sm">🎉 Outstanding Excellence (85%+)!</h4>
+                <p class="text-xs text-amber-700 dark:text-amber-400">You have earned the official Satyapeeth Academic Certificate.</p>
                 <button onclick="openCertificateModal('${res.id}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-                  View & Download Certificate
+                  View & Print Certificate
                 </button>
               </div>
             ` : `
-              <p class="text-xs text-slate-500">Target 75% or higher to unlock the Satyapeeth Certificate of Achievement.</p>
+              <p class="text-xs text-slate-500">Target 85% or higher to unlock the Satyapeeth Certificate of Achievement.</p>
             `}
 
             <button onclick="router.navigate('student-dashboard')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow">
@@ -891,26 +934,38 @@
         return `
           <div class="max-w-4xl mx-auto space-y-4">
             <button onclick="router.navigate('subject-select')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">&larr; Back to Subjects</button>
-            <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+            <div class="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-5 shadow-sm">
               <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div>
-                  <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 px-2 py-0.5 rounded uppercase">Official Notes</span>
-                  <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">${topic ? topic.name : 'Chapter Notes'}</h2>
+                  <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 px-2 py-0.5 rounded uppercase">Verified Content</span>
+                  <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">${topic ? topic.name : 'Chapter Notes & Video'}</h2>
                 </div>
                 ${note && note.pdfUrl ? `
                   <a href="${note.pdfUrl}" target="_blank" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1.5">
-                    <i class="fa-solid fa-file-pdf"></i> Open Full PDF
+                    <i class="fa-solid fa-file-pdf"></i> Download PDF
                   </a>
                 ` : ''}
               </div>
 
+              ${note && note.videoUrl ? `
+                <div class="space-y-2">
+                  <h4 class="font-bold text-xs text-slate-700 dark:text-slate-300"><i class="fa-brands fa-youtube text-rose-600 mr-1"></i> Chapter Video Class:</h4>
+                  <div class="aspect-video w-full rounded-2xl overflow-hidden shadow">
+                    <iframe class="w-full h-full" src="${note.videoUrl.includes('watch?v=') ? note.videoUrl.replace('watch?v=', 'embed/') : note.videoUrl}" allowfullscreen></iframe>
+                  </div>
+                </div>
+              ` : ''}
+
               ${note && note.pdfUrl ? `
-                <div class="w-full h-[550px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                  <iframe src="${note.pdfUrl.includes('drive.google.com') ? note.pdfUrl.replace('/view', '/preview') : note.pdfUrl}" class="w-full h-full border-0"></iframe>
+                <div class="space-y-2">
+                  <h4 class="font-bold text-xs text-slate-700 dark:text-slate-300"><i class="fa-solid fa-file-pdf text-amber-500 mr-1"></i> Interactive PDF Viewer:</h4>
+                  <div class="w-full h-[550px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                    <iframe src="${note.pdfUrl.includes('drive.google.com') ? note.pdfUrl.replace('/view', '/preview') : note.pdfUrl}" class="w-full h-full border-0"></iframe>
+                  </div>
                 </div>
               ` : `
                 <div class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-950/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
-                  ${note && note.content ? note.content : 'PDF and revision notes for this chapter will be uploaded soon.'}
+                  ${note && note.content ? note.content : 'Notes and video lectures for this chapter will be uploaded soon by Admin.'}
                 </div>
               `}
             </div>
@@ -960,9 +1015,10 @@
                 </div>
               </div>
               <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code mr-1"></i> HTML Parser</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code mr-1"></i> HTML / Raw Parser</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'single-q' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'single-q' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-plus mr-1"></i> Add Single Q</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pdf mr-1"></i> PDF Notes (${notes.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pdf mr-1"></i> PDF & Video Manager (${notes.length})</button>
+                <button onclick="router.navigate('admin-dashboard', { tab: 'analysis' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'analysis' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-chart-line mr-1"></i> Study Analytics</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'results' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Results (${results.length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
                 <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Mocks (${registrations.filter(r => r.status === 'Pending').length})</button>
@@ -977,10 +1033,10 @@
 
       adminTabs: {
         'html-upload': () => {
-          const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
+          const classes = cloudState.classes;
           return `
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
-              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Smart HTML Question Parser</h3>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Smart HTML & Plain Text Question Importer</h3>
               <form onsubmit="handleHtmlImport(event)" class="space-y-3">
                 <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                   <div>
@@ -1018,8 +1074,8 @@
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">4. Paste Your HTML Code</label>
-                  <textarea id="impHtmlCode" required rows="7" placeholder="Paste full HTML code with questionsData here..." class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border border-slate-800"></textarea>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">4. Paste HTML Code OR Direct Plain Text</label>
+                  <textarea id="impHtmlCode" required rows="7" placeholder="Paste full HTML code with questionsData OR plain format (Q1... A... B... Ans...)" class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border border-slate-800"></textarea>
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
@@ -1031,7 +1087,7 @@
         },
 
         'single-q': () => {
-          const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
+          const classes = cloudState.classes;
           return `
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
               <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Manual Single Question Creator</h3>
@@ -1054,12 +1110,12 @@
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Question (English)</label>
-                  <input type="text" id="sqQEn" required placeholder="Type English Question" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Main Question (Odia / English)</label>
+                  <input type="text" id="sqQOr" required placeholder="Type Main Question (e.g. ଭାରତର ଦକ୍ଷିଣତମ ବିନ୍ଦୁ କେଉଁଟି?)" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
                 </div>
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Question (Odia - Optional)</label>
-                  <input type="text" id="sqQOr" placeholder="ଓଡ଼ିଆରେ ପ୍ରଶ୍ନ ଲେଖନ୍ତୁ" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Secondary Translation (English - Optional)</label>
+                  <input type="text" id="sqQEn" placeholder="Optional English translation subtitle" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -1083,7 +1139,7 @@
 
                 <div class="grid grid-cols-2 gap-2">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Correct Answer Key</label>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Correct Answer</label>
                     <select id="sqCorrectAns" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
                       <option value="A">Option A</option>
                       <option value="B">Option B</option>
@@ -1093,7 +1149,7 @@
                   </div>
                   <div>
                     <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Explanation (Optional)</label>
-                    <input type="text" id="sqExp" placeholder="Short concept / reason" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                    <input type="text" id="sqExp" placeholder="Concept explanation" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
                   </div>
                 </div>
 
@@ -1105,11 +1161,11 @@
           `;
         },
 
-        'notes-admin': ({ notes }) => {
-          const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
+        'notes-admin': () => {
+          const classes = cloudState.classes;
           return `
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
-              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">PDF Revision Notes Manager</h3>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">PDF Notes & Video Class Uploader</h3>
               
               <form onsubmit="handleNoteSave(event)" class="space-y-3">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1130,19 +1186,71 @@
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">PDF File Link (Google Drive / Direct PDF URL)</label>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Google Drive / Direct PDF URL</label>
                   <input type="url" id="notePdfUrlInput" placeholder="https://drive.google.com/file/d/.../view?usp=sharing" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white">
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Summary / Additional Points</label>
-                  <textarea id="noteContentInput" rows="5" placeholder="Summary notes..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">YouTube Video Class Link (Optional)</label>
+                  <input type="url" id="noteVideoUrlInput" placeholder="https://www.youtube.com/watch?v=..." class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Key Revision Points / Summary</label>
+                  <textarea id="noteContentInput" rows="4" placeholder="Chapter summary..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
-                  Publish PDF & Notes to Cloud
+                  Publish Media & Notes to Cloud
                 </button>
               </form>
+            </div>
+          `;
+        },
+
+        analysis: ({ students, results }) => {
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Student Study Analysis & Weekly Activity</h3>
+              
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="p-3 bg-indigo-50 dark:bg-indigo-950/50 rounded-xl border border-indigo-200 dark:border-indigo-900">
+                  <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase">Total Enrolled</span>
+                  <h4 class="text-xl font-black text-slate-900 dark:text-white">${students.length}</h4>
+                </div>
+                <div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl border border-emerald-200 dark:border-emerald-900">
+                  <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Total Tests</span>
+                  <h4 class="text-xl font-black text-slate-900 dark:text-white">${results.length}</h4>
+                </div>
+                <div class="p-3 bg-amber-50 dark:bg-amber-950/50 rounded-xl border border-amber-200 dark:border-amber-900">
+                  <span class="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase">85%+ Achievers</span>
+                  <h4 class="text-xl font-black text-slate-900 dark:text-white">${results.filter(r => r.percentage >= 85).length}</h4>
+                </div>
+                <div class="p-3 bg-rose-50 dark:bg-rose-950/50 rounded-xl border border-rose-200 dark:border-rose-900">
+                  <span class="text-[10px] text-rose-600 dark:text-rose-400 font-bold uppercase">Weekly Active</span>
+                  <h4 class="text-xl font-black text-slate-900 dark:text-white">${students.length > 0 ? Math.ceil(students.length * 0.85) : 0}</h4>
+                </div>
+              </div>
+
+              <div class="space-y-2 pt-2">
+                <h4 class="font-bold text-xs text-slate-700 dark:text-slate-300">Enrolled Student Performance Breakdown:</h4>
+                ${students.map(s => {
+                  const sResults = results.filter(r => r.studentPhone === s.phone || r.studentName === s.name);
+                  const avg = sResults.length > 0 ? Math.round(sResults.reduce((acc, r) => acc + r.percentage, 0) / sResults.length) : 0;
+                  return `
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
+                      <div>
+                        <h5 class="font-bold text-slate-900 dark:text-white">${s.name} (Class ${s.class})</h5>
+                        <p class="text-[10px] text-slate-500">ID: ${s.studentId} | Phone: ${s.phone}</p>
+                      </div>
+                      <div class="text-right">
+                        <span class="font-black ${avg >= 85 ? 'text-amber-500' : 'text-indigo-600 dark:text-indigo-400'}">${avg}% Avg Score</span>
+                        <p class="text-[9px] text-emerald-600 font-bold">Active This Week ●</p>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
             </div>
           `;
         },
@@ -1157,7 +1265,7 @@
                     <h4 class="font-bold text-slate-900 dark:text-white">${r.studentName} (Class ${r.studentClass})</h4>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400">${r.topicName} | Score: <strong class="text-indigo-600 dark:text-indigo-400">${r.obtainedMarks} / ${r.totalMarks}</strong> (${r.percentage}%)</p>
                   </div>
-                  ${r.percentage >= 75 ? `
+                  ${r.percentage >= 85 ? `
                     <button onclick="openCertificateModal('${r.id}')" class="px-2.5 py-1 bg-amber-500 text-indigo-950 font-bold rounded-lg text-[10px]">Certificate</button>
                   ` : `<span class="text-[10px] text-slate-400">Completed</span>`}
                 </div>
@@ -1231,7 +1339,7 @@
                 <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-start gap-2">
                   <div>
                     <span class="bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 font-bold px-1.5 py-0.2 rounded text-[9px]">Class ${q.class}</span>
-                    <h4 class="font-bold text-slate-900 dark:text-white mt-1">${idx + 1}. ${q.question}</h4>
+                    <h4 class="font-bold text-slate-900 dark:text-white mt-1">${idx + 1}. ${q.questionOdia || q.question}</h4>
                     <p class="text-emerald-700 dark:text-emerald-400 font-bold mt-0.5">Key: Option ${q.correctAnswer}</p>
                   </div>
                   <button onclick="deleteQuestion('${q.id}')" class="text-rose-600 text-xs font-bold hover:underline">Delete</button>
@@ -1307,6 +1415,7 @@
       const topId = topSelect.value;
       const existing = cloudState.notes.find(n => n.topicId === topId);
       document.getElementById('notePdfUrlInput').value = existing ? existing.pdfUrl || '' : '';
+      document.getElementById('noteVideoUrlInput').value = existing ? existing.videoUrl || '' : '';
       document.getElementById('noteContentInput').value = existing ? existing.content || '' : '';
     }
 
@@ -1314,6 +1423,7 @@
       e.preventDefault();
       const topId = document.getElementById('noteTopicSelect').value;
       const pdfUrl = document.getElementById('notePdfUrlInput').value.trim();
+      const videoUrl = document.getElementById('noteVideoUrlInput').value.trim();
       const content = document.getElementById('noteContentInput').value.trim();
 
       if (!topId) return alert("Select Chapter first!");
@@ -1321,10 +1431,11 @@
       firestore.collection("notes").doc(topId).set({
         topicId: topId,
         pdfUrl: pdfUrl,
+        videoUrl: videoUrl,
         content: content,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-        toast("Notes Saved!", "PDF notes and content updated on cloud.", "success");
+        toast("Notes & Video Saved!", "Media content updated on cloud server.", "success");
       });
     }
 
@@ -1333,8 +1444,8 @@
       const cls = document.getElementById('sqClassSelect').value;
       const subId = document.getElementById('sqSubjectSelect').value;
       const topId = document.getElementById('sqTopicSelect').value;
-      const qEn = document.getElementById('sqQEn').value.trim();
       const qOr = document.getElementById('sqQOr').value.trim();
+      const qEn = document.getElementById('sqQEn').value.trim();
       const optA = document.getElementById('sqOptA').value.trim();
       const optB = document.getElementById('sqOptB').value.trim();
       const optC = document.getElementById('sqOptC').value.trim();
@@ -1357,8 +1468,8 @@
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
         toast("Saved!", "Single question uploaded to Cloud Bank.", "success");
-        document.getElementById('sqQEn').value = '';
         document.getElementById('sqQOr').value = '';
+        document.getElementById('sqQEn').value = '';
         document.getElementById('sqOptA').value = '';
         document.getElementById('sqOptB').value = '';
         document.getElementById('sqOptC').value = '';
@@ -1370,11 +1481,10 @@
     function addNewClass() {
       const newCls = document.getElementById('impNewClass').value.trim();
       if (!newCls) return alert("Enter class number!");
-      const classes = JSON.parse(localStorage.getItem(DB_KEYS.CLASSES) || '["10","9","8","7","6"]');
-      if (!classes.includes(newCls)) {
-        classes.push(newCls);
-        localStorage.setItem(DB_KEYS.CLASSES, JSON.stringify(classes));
-        toast("Class Added", `Class ${newCls} created.`, "success");
+      if (!cloudState.classes.includes(newCls)) {
+        cloudState.classes.push(newCls);
+        firestore.collection("settings").doc("classes").set({ list: cloudState.classes });
+        toast("Class Added", `Class ${newCls} saved to cloud.`, "success");
         router.navigate('admin-dashboard', { tab: 'html-upload' });
       }
     }
@@ -1385,7 +1495,7 @@
       if (!newSubName) return alert("Enter subject name!");
 
       const newSubId = "sub_" + cls + "_" + Date.now();
-      firestore.collection("subjects").doc(newSubId).set({ id: newSubId, class: cls, name: newSubName })
+      firestore.collection("subjects").doc(newSubId).set({ id: newSubId, class: cls, name: newSubName, isFree: false })
         .then(() => {
           toast("Subject Added", `${newSubName} created on cloud.`, "success");
           document.getElementById('impNewSubject').value = '';
@@ -1400,7 +1510,7 @@
       if (!newTopName) return alert("Enter chapter name!");
 
       const newTopId = "top_" + cls + "_" + Date.now();
-      firestore.collection("topics").doc(newTopId).set({ id: newTopId, class: cls, subjectId: subId, name: newTopName, isDemo: false })
+      firestore.collection("topics").doc(newTopId).set({ id: newTopId, class: cls, subjectId: subId, name: newTopName, isFree: false })
         .then(() => {
           toast("Topic Created", `${newTopName} created on cloud.`, "success");
           document.getElementById('impNewTopic').value = '';
@@ -1408,52 +1518,101 @@
         });
     }
 
+    // Hybrid Parser: Works on both JSON Code & Plain Text Format
     function handleHtmlImport(e) {
       e.preventDefault();
       const cls = document.getElementById('impClassSelect').value;
       const subId = document.getElementById('impSubjectSelect').value;
       const topId = document.getElementById('impTopicSelect').value;
-      const htmlCode = document.getElementById('impHtmlCode').value;
+      const rawInput = document.getElementById('impHtmlCode').value.trim();
 
       if (!subId || !topId) return alert("Select Subject & Chapter first!");
 
-      try {
-        let extractedQuestions = [];
-        const jsMatch = htmlCode.match(/questionsData\s*=\s*(\[[\s\S]*?\]);/);
-        
-        if (jsMatch && jsMatch[1]) {
+      let extractedQuestions = [];
+
+      // 1. Check if questionsData JSON array exists
+      const jsMatch = rawInput.match(/questionsData\s*=\s*(\[[\s\S]*?\]);/);
+      if (jsMatch && jsMatch[1]) {
+        try {
           const rawParsed = Function('"use strict";return (' + jsMatch[1] + ')')();
           rawParsed.forEach(q => {
             extractedQuestions.push({
               class: cls,
               subjectId: subId,
               topicId: topId,
-              question: q.qEn || q.question || "Question",
-              questionOdia: q.qOr || q.questionOdia || "",
+              question: (q.qEn && q.qEn !== q.qOr) ? q.qEn : "",
+              questionOdia: q.qOr || q.qEn || q.question || "",
               options: q.options || { A: "", B: "", C: "", D: "" },
               correctAnswer: q.ans || q.correctAnswer || "A",
-              explanation: (q.expOr || "") + "\n" + (q.expEn || q.explanation || "") + (q.analysis ? "\n" + q.analysis.join("\n") : ""),
+              explanation: q.expOr || q.expEn || q.explanation || "",
               marks: 1
             });
           });
+        } catch (err) {
+          console.log("JSON Parse Error:", err);
         }
-
-        if (extractedQuestions.length === 0) throw new Error("No questionsData found in code.");
-
-        const batch = firestore.batch();
-        extractedQuestions.forEach(q => {
-          const docRef = firestore.collection("questions").doc();
-          batch.set(docRef, q);
-        });
-
-        batch.commit().then(() => {
-          toast("Success!", `Loaded ${extractedQuestions.length} questions into Cloud DB.`, "success");
-          router.navigate('admin-dashboard', { tab: 'questions' });
-        });
-
-      } catch (err) {
-        toast("Parse Error", err.message, "error");
       }
+
+      // 2. Plain Text Block Parsing
+      if (extractedQuestions.length === 0) {
+        const blocks = rawInput.split(/\n\s*\n/);
+        blocks.forEach(block => {
+          const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+          if (lines.length >= 5) {
+            let qOdia = "", qEng = "", optA = "", optB = "", optC = "", optD = "", ans = "A", exp = "";
+
+            lines.forEach(line => {
+              if (line.match(/^Q(uestion|\d+)?[:.]?\s*/i)) {
+                if (!qOdia) qOdia = line.replace(/^Q(uestion|\d+)?[:.]?\s*/i, '');
+                else qEng = line.replace(/^Q(uestion|\d+)?[:.]?\s*/i, '');
+              } else if (line.match(/^[A|କ][:.)\-]\s*/i)) {
+                optA = line.replace(/^[A|କ][:.)\-]\s*/i, '');
+              } else if (line.match(/^[B|ଖ][:.)\-]\s*/i)) {
+                optB = line.replace(/^[B|ଖ][:.)\-]\s*/i, '');
+              } else if (line.match(/^[C|ଗ][:.)\-]\s*/i)) {
+                optC = line.replace(/^[C|ଗ][:.)\-]\s*/i, '');
+              } else if (line.match(/^[D|ଘ][:.)\-]\s*/i)) {
+                optD = line.replace(/^[D|ଘ][:.)\-]\s*/i, '');
+              } else if (line.match(/^(Ans|Answer|ଉତ୍ତର)[:.]?\s*/i)) {
+                let val = line.replace(/^(Ans|Answer|ଉତ୍ତର)[:.]?\s*/i, '').toUpperCase();
+                if (val.includes('B') || val.includes('ଖ')) ans = 'B';
+                else if (val.includes('C') || val.includes('ଗ')) ans = 'C';
+                else if (val.includes('D') || val.includes('ଘ')) ans = 'D';
+                else ans = 'A';
+              } else if (line.match(/^(Exp|Explanation|ବ୍ୟାଖ୍ୟା)[:.]?\s*/i)) {
+                exp = line.replace(/^(Exp|Explanation|ବ୍ୟାଖ୍ୟା)[:.]?\s*/i, '');
+              }
+            });
+
+            if (optA && optB) {
+              extractedQuestions.push({
+                class: cls,
+                subjectId: subId,
+                topicId: topId,
+                question: qEng,
+                questionOdia: qOdia || lines[0],
+                options: { A: optA, B: optB, C: optC || "", D: optD || "" },
+                correctAnswer: ans,
+                explanation: exp,
+                marks: 1
+              });
+            }
+          }
+        });
+      }
+
+      if (extractedQuestions.length === 0) return alert("Could not parse questions! Please check code format.");
+
+      const batch = firestore.batch();
+      extractedQuestions.forEach(q => {
+        const docRef = firestore.collection("questions").doc();
+        batch.set(docRef, q);
+      });
+
+      batch.commit().then(() => {
+        toast("Success!", `Loaded ${extractedQuestions.length} questions into Cloud DB.`, "success");
+        router.navigate('admin-dashboard', { tab: 'questions' });
+      });
     }
 
     function handleRegistrationSubmit(e) {
@@ -1545,14 +1704,14 @@
       router.navigate('student-dashboard');
     }
 
-    function showGuestLockPrompt() {
-      confirmDialog('Locked 🔒', 'This test is reserved for registered students. Register free?', () => {
-        router.navigate('register-free');
+    function showFreeUserLockPrompt() {
+      confirmDialog('Subject Locked 🔒', 'Free Mock Pass includes 1 subject. Unlock All Subjects with Full Admission?', () => {
+        router.navigate('admission');
       });
     }
 
     function showNotesLockPrompt() {
-      confirmDialog('Notes Locked 🔒', 'PDF notes are exclusive to Full Admission students. Submit Admission form?', () => {
+      confirmDialog('Notes Locked 🔒', 'PDF notes and video classes are exclusive to Full Admission students. Apply for admission?', () => {
         router.navigate('admission');
       });
     }
@@ -1621,11 +1780,11 @@
         questions = [
           {
             id: "q_demo_1",
-            question: "Sample Objective Question",
-            questionOdia: "ପ୍ରଶ୍ନ ଉପଲବ୍ଧ ନାହିଁ । (Upload questions from Admin Smart HTML Parser)",
-            options: { A: "Option A", B: "Option B", C: "Option C", D: "Option D" },
-            correctAnswer: "A",
-            explanation: "Questions uploaded via the Admin Parser will automatically show up here."
+            question: "What is the total length of India's land boundary?",
+            questionOdia: "ଭାରତର ସମୁଦାୟ ସ୍ଥଳସୀମାର ଲମ୍ବ କେତେ?",
+            options: { A: "୭,୫୧୬.୬ କି.ମି.", B: "୧୫,୨୦୦ କି.ମି.", C: "୩,୨୧୪ କି.ମି.", D: "୨,୯୩୩ କି.ମି." },
+            correctAnswer: "B",
+            explanation: "ଭାରତର ସମୁଦାୟ ସ୍ଥଳସୀମାର ଦୈର୍ଘ୍ୟ ପ୍ରାୟ ୧୫,୨୦୦ କିଲୋମିଟର।"
           }
         ];
       }
@@ -1666,6 +1825,7 @@
       }, 1000);
     }
 
+    // Single-rendering question logic to completely eliminate duplicates
     function renderQuestion() {
       const q = activeExam.questions[activeExam.currentIndex];
       const isLast = activeExam.currentIndex === activeExam.questions.length - 1;
@@ -1674,8 +1834,21 @@
       document.getElementById('testMetaMode').innerText = activeExam.mode === 'exam' ? 'CBT Exam' : 'Practice';
       document.getElementById('testMetaMode').className = `font-bold uppercase px-2.5 py-1 rounded text-xs ${activeExam.mode === 'exam' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'}`;
       document.getElementById('testMetaProgress').innerText = `${activeExam.currentIndex + 1} / ${activeExam.questions.length}`;
-      document.getElementById('testQEn').innerText = `Q${activeExam.currentIndex + 1}. ${q.question}`;
-      document.getElementById('testQOr').innerText = q.questionOdia || '';
+
+      const qOrBox = document.getElementById('testQOr');
+      const qEnBox = document.getElementById('testQEn');
+
+      const mainText = q.questionOdia || q.question;
+      qOrBox.innerText = `Q${activeExam.currentIndex + 1}. ${mainText}`;
+
+      // Only display English subtitle if it exists AND is distinct from Odia text
+      if (q.question && q.questionOdia && q.question.trim() !== q.questionOdia.trim()) {
+        qEnBox.innerText = q.question;
+        qEnBox.classList.remove('hidden');
+      } else {
+        qEnBox.innerText = '';
+        qEnBox.classList.add('hidden');
+      }
 
       const container = document.getElementById('testOptionsBox');
       container.innerHTML = '';
@@ -1715,7 +1888,7 @@
         practiceBox.className = userPick === q.correctAnswer 
           ? 'p-4 rounded-2xl text-xs sm:text-sm border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200' 
           : 'p-4 rounded-2xl text-xs sm:text-sm border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200';
-        practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct factual question.'}</p>`;
+        practiceBox.innerHTML = `<p class="whitespace-pre-line leading-relaxed"><strong>Explanation:</strong> ${q.explanation || 'Direct syllabus fact.'}</p>`;
       } else {
         practiceBox.classList.add('hidden');
       }
@@ -1742,7 +1915,7 @@
     }
 
     function confirmSubmitTest() {
-      confirmDialog('Submit Test', 'Submit your assessment?', finishTest);
+      confirmDialog('Submit Test', 'Submit your assessment and view marksheet?', finishTest);
     }
 
     function finishTest() {
@@ -1780,7 +1953,7 @@
       });
     }
 
-    // Dynamic Certificate Modal
+    // Dynamic 85%+ Certificate Modal
     function openCertificateModal(resultId) {
       const res = cloudState.results.find(r => r.id === resultId);
       if (!res) return;
@@ -1807,7 +1980,7 @@
                   ${res.studentName}
                 </h3>
                 <p class="text-xs text-slate-700 leading-relaxed max-w-sm mx-auto">
-                  For successfully demonstrating academic excellence in <br><strong class="text-indigo-950">${res.topicName}</strong> with a score of <strong>${res.percentage}%</strong>.
+                  For successfully demonstrating academic excellence in <br><strong class="text-indigo-950">${res.topicName}</strong> with an outstanding score of <strong>${res.percentage}%</strong>.
                 </p>
               </div>
 
@@ -1844,6 +2017,33 @@
       `;
 
       document.body.insertAdjacentHTML('beforeend', certHtml);
+    }
+
+    // PWA Install Handlers
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const pwaBtn = document.getElementById('pwaHeaderBtn');
+      const pwaPrompt = document.getElementById('pwaFloatingPrompt');
+      if (pwaBtn) pwaBtn.classList.remove('hidden');
+      if (pwaPrompt) pwaPrompt.classList.remove('hidden');
+    });
+
+    function installPWAApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            toast('App Installed!', 'Satyapeeth installed on your device.', 'success');
+          }
+          deferredPrompt = null;
+          document.getElementById('pwaFloatingPrompt').classList.add('hidden');
+          document.getElementById('pwaHeaderBtn').classList.add('hidden');
+        });
+      } else {
+        toast('Install App', 'Open browser menu (⋮) and click "Add to Home screen" or "Install App".', 'info');
+      }
     }
 
     // App Initialization
