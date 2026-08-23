@@ -124,7 +124,7 @@
           <i class="fa-solid fa-power-off"></i>
         </button>
 
-        <button id="navAdminBtn" onclick="handleAdminBtnClick()" class="text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-indigo-950 px-3 py-1.5 sm:py-2 rounded-xl font-black transition shadow flex items-center gap-1.5">
+        <button id="navAdminBtn" onclick="handleAdminBtnClick()" class="text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-indigo-950 px-3.5 py-1.5 sm:py-2 rounded-xl font-black transition shadow flex items-center gap-1.5">
           <i class="fa-solid fa-shield-halved"></i> <span>Admin Portal</span>
         </button>
       </div>
@@ -177,9 +177,9 @@
     const ADMIN_PHONE = "919556576071";
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_auth_std_live',
-      AUTH_ADMIN: 'sp_auth_adm_live',
-      AUTH_PARENT: 'sp_auth_par_live',
+      AUTH_STUDENT: 'sp_auth_std_live_v10',
+      AUTH_ADMIN: 'sp_auth_adm_live_v10',
+      AUTH_PARENT: 'sp_auth_par_live_v10',
       THEME: 'sp_theme_pref'
     };
 
@@ -200,7 +200,6 @@
       document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400 text-xs sm:text-sm' : 'fa-solid fa-moon text-amber-400 text-xs sm:text-sm';
     }
 
-    // High Speed Memory Initializer (Always Instant)
     let cloudState = {
       classes: JSON.parse(localStorage.getItem('sp_c_classes')) || ["10", "9", "8", "7", "6"],
       students: JSON.parse(localStorage.getItem('sp_c_students')) || [],
@@ -225,27 +224,26 @@
       }
     }
 
-    // Fast Single-Query Background Synchronizer
     function initRealtimeSync() {
-      const syncCollection = (colName, stateKey) => {
+      const syncItem = (colName, key) => {
         firestore.collection(colName).onSnapshot(snap => {
-          cloudState[stateKey] = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          localStorage.setItem(`sp_c_${stateKey}`, JSON.stringify(cloudState[stateKey]));
-          refreshAdminView();
+          cloudState[key] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          localStorage.setItem(`sp_c_${key}`, JSON.stringify(cloudState[key]));
+          if (router.currentRoute === 'admin-dashboard') refreshAdminView();
         }, err => console.log(colName, err));
       };
 
-      syncCollection("students", "students");
-      syncCollection("admissions", "admissions");
-      syncCollection("registrations", "registrations");
-      syncCollection("results", "results");
-      syncCollection("books", "books");
-      syncCollection("subjects", "subjects");
-      syncCollection("topics", "topics");
-      syncCollection("questions", "questions");
-      syncCollection("notes", "notes");
-      syncCollection("videos", "videos");
-      syncCollection("notices", "notices");
+      syncItem("students", "students");
+      syncItem("admissions", "admissions");
+      syncItem("registrations", "registrations");
+      syncItem("results", "results");
+      syncItem("books", "books");
+      syncItem("subjects", "subjects");
+      syncItem("topics", "topics");
+      syncItem("questions", "questions");
+      syncItem("notes", "notes");
+      syncItem("videos", "videos");
+      syncItem("notices", "notices");
 
       firestore.collection("settings").doc("security").onSnapshot(doc => {
         if (doc.exists && doc.data().password) cloudState.adminSettings.password = doc.data().password;
@@ -1271,7 +1269,7 @@
                 </div>
               </div>
 
-              <!-- High-Visibility Navigation Cards -->
+              <!-- Refined High-Visibility Navigation Cards -->
               <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 pt-1">
                 <button onclick="router.navigate('admin-dashboard', { tab: 'bulk-doc' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'bulk-doc' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
                   <i class="fa-solid fa-file-lines text-base"></i>
