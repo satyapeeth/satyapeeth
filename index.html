@@ -68,7 +68,7 @@
     }
   </style>
 </head>
-<body class="h-full flex flex-col bg-white text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased custom-scrollbar transition-colors duration-200">
+<body class="h-full flex flex-col bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased custom-scrollbar transition-colors duration-200">
 
   <div id="toastContainer" class="fixed top-3 right-3 left-3 sm:left-auto z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
@@ -124,7 +124,7 @@
           <i class="fa-solid fa-power-off"></i>
         </button>
 
-        <button id="navAdminBtn" onclick="router.navigate('admin-auth')" class="text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 border border-amber-300 text-indigo-950 px-3 py-1.5 sm:py-2 rounded-xl font-black transition shadow flex items-center gap-1.5" title="Admin Control Room">
+        <button id="navAdminBtn" onclick="handleAdminBtnClick()" class="text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-indigo-950 px-3 py-1.5 sm:py-2 rounded-xl font-black transition shadow flex items-center gap-1.5" title="Admin Portal">
           <i class="fa-solid fa-shield-halved"></i> <span>Admin Portal</span>
         </button>
       </div>
@@ -177,9 +177,9 @@
     const ADMIN_PHONE = "919556576071";
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_auth_student_master_v8',
-      AUTH_ADMIN: 'sp_auth_admin_master_v8',
-      AUTH_PARENT: 'sp_auth_parent_master_v8',
+      AUTH_STUDENT: 'sp_auth_student_master_final',
+      AUTH_ADMIN: 'sp_auth_admin_master_final',
+      AUTH_PARENT: 'sp_auth_parent_master_final',
       THEME: 'sp_theme_pref'
     };
 
@@ -200,7 +200,6 @@
       document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400 text-xs sm:text-sm' : 'fa-solid fa-moon text-amber-400 text-xs sm:text-sm';
     }
 
-    // Completely empty dynamic state - NO SAMPLE DATA
     let cloudState = {
       classes: ["10", "9", "8", "7", "6"],
       students: [],
@@ -217,116 +216,107 @@
       adminSettings: { password: "Kalyani@123" }
     };
 
-    async function initRealtimeSync() {
-      // 1. Initial Direct Live Fetch to prevent 0 delay
-      try {
-        const [stdSnap, admSnap, regSnap, resSnap, bkSnap, subSnap, topSnap, qSnap, notSnap] = await Promise.all([
-          firestore.collection("students").get(),
-          firestore.collection("admissions").get(),
-          firestore.collection("registrations").get(),
-          firestore.collection("results").get(),
-          firestore.collection("books").get(),
-          firestore.collection("subjects").get(),
-          firestore.collection("topics").get(),
-          firestore.collection("questions").get(),
-          firestore.collection("notices").get()
-        ]);
-
-        cloudState.students = stdSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        cloudState.admissions = admSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        cloudState.registrations = regSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        cloudState.results = resSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        cloudState.books = bkSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        cloudState.subjects = subSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        cloudState.topics = topSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        cloudState.questions = qSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        cloudState.notices = notSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-        refreshAdminView();
-      } catch (err) {
-        toast("Firebase Sync Alert", "Database connection active.", "info");
+    function handleAdminBtnClick() {
+      if (auth.getAdmin()) {
+        router.navigate('admin-dashboard');
+      } else {
+        router.navigate('admin-auth');
       }
+    }
 
-      // 2. Real-time Listeners
+    function initRealtimeSync() {
+      // Security Settings
       firestore.collection("settings").doc("security").onSnapshot(doc => {
         if (doc.exists && doc.data().password) cloudState.adminSettings.password = doc.data().password;
-      });
+      }, err => console.log("Security error:", err));
 
+      // Classes
       firestore.collection("settings").doc("classes").onSnapshot(doc => {
         if (doc.exists && doc.data().list) cloudState.classes = doc.data().list;
-      });
+      }, err => console.log("Classes error:", err));
 
+      // Notices
       firestore.collection("notices").orderBy("timestamp", "desc").onSnapshot(snapshot => {
         cloudState.notices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if (router.currentRoute === 'student-dashboard') router.navigate('student-dashboard');
-      });
+      }, err => console.log("Notices error:", err));
 
+      // Students
       firestore.collection("students").onSnapshot(snapshot => {
         cloudState.students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         refreshAdminView();
-      });
+      }, err => console.log("Students error:", err));
 
+      // Admissions
       firestore.collection("admissions").onSnapshot(snapshot => {
         cloudState.admissions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         refreshAdminView();
-      });
+      }, err => console.log("Admissions error:", err));
 
+      // Registrations
       firestore.collection("registrations").onSnapshot(snapshot => {
         cloudState.registrations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         refreshAdminView();
-      });
+      }, err => console.log("Registrations error:", err));
 
+      // Results
       firestore.collection("results").onSnapshot(snapshot => {
         cloudState.results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         refreshAdminView();
-      });
+      }, err => console.log("Results error:", err));
 
+      // Books
       firestore.collection("books").onSnapshot(snapshot => {
         cloudState.books = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         refreshAdminView();
-      });
+      }, err => console.log("Books error:", err));
 
+      // Subjects
       firestore.collection("subjects").onSnapshot(snapshot => {
         cloudState.subjects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if (router.currentRoute === 'subject-select') router.navigate('subject-select');
-      });
+      }, err => console.log("Subjects error:", err));
 
+      // Topics
       firestore.collection("topics").onSnapshot(snapshot => {
         cloudState.topics = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      });
+      }, err => console.log("Topics error:", err));
 
+      // Questions
       firestore.collection("questions").onSnapshot(snapshot => {
         cloudState.questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         refreshAdminView();
-      });
+      }, err => console.log("Questions error:", err));
 
+      // Notes
       firestore.collection("notes").onSnapshot(snapshot => {
         cloudState.notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         refreshAdminView();
-      });
+      }, err => console.log("Notes error:", err));
 
+      // Videos
       firestore.collection("videos").onSnapshot(snapshot => {
         cloudState.videos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         refreshAdminView();
-      });
+      }, err => console.log("Videos error:", err));
     }
 
     function refreshAdminView() {
       const activeEl = document.getElementById('activeRegisteredCounter');
       if (activeEl) activeEl.innerText = Math.max(1, cloudState.students.length);
 
-      const updateBtn = (selector, text) => {
+      const updateSpan = (selector, val) => {
         const el = document.querySelector(selector);
-        if (el) el.innerText = text;
+        if (el) el.innerText = val;
       };
 
-      updateBtn("#adminBtnBooks span", `Textbooks (${cloudState.books.length})`);
-      updateBtn("#adminBtnNotes span", `PDF Notes (${cloudState.notes.length})`);
-      updateBtn("#adminBtnVideos span", `Videos (${cloudState.videos.length})`);
-      updateBtn("#adminBtnResults span", `Results (${cloudState.results.length})`);
-      updateBtn("#adminBtnAdm span", `Admissions (${cloudState.admissions.filter(a => a.status === 'Pending').length})`);
-      updateBtn("#adminBtnReg span", `Free Passes (${cloudState.registrations.filter(r => r.status === 'Pending').length})`);
-      updateBtn("#adminBtnStudents span", `Students (${cloudState.students.length})`);
+      updateSpan("#badgeBooks", `(${cloudState.books.length})`);
+      updateSpan("#badgeNotes", `(${cloudState.notes.length})`);
+      updateSpan("#badgeVideos", `(${cloudState.videos.length})`);
+      updateSpan("#badgeResults", `(${cloudState.results.length})`);
+      updateSpan("#badgeAdm", `(${cloudState.admissions.filter(a => a.status === 'Pending').length})`);
+      updateSpan("#badgeReg", `(${cloudState.registrations.filter(r => r.status === 'Pending').length})`);
+      updateSpan("#badgeStudents", `(${cloudState.students.length})`);
 
       if (router.currentRoute === 'admin-dashboard') {
         const activeTab = router.currentRouteParamTab || 'bulk-doc';
@@ -521,10 +511,11 @@
         router.updateHeader();
         const app = document.getElementById('app');
 
-        if (viewName.startsWith('admin-dashboard') && !auth.getAdmin()) {
-          toast('Admin Only', 'Please login with Master Credentials.', 'error');
+        if (viewName === 'admin-dashboard' && !auth.getAdmin()) {
+          toast('Admin Only', 'Please login with Master Password.', 'warning');
           return router.navigate('admin-auth');
         }
+
         if (['student-dashboard', 'subject-select', 'topic-select', 'mode-select', 'test-screen', 'result-screen', 'notes-hub', 'notes-view', 'video-view', 'books-view'].includes(viewName) && !auth.getStudent()) {
           toast('Login Required', 'Please sign in to continue.', 'warning');
           return router.navigate('login');
@@ -587,7 +578,7 @@
               <button onclick="router.navigate('parent-portal')" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-4 py-2.5 rounded-xl shadow text-xs">
                 <i class="fa-solid fa-users mr-1"></i> Parent Portal
               </button>
-              <button onclick="router.navigate('admin-auth')" class="bg-indigo-800 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl shadow text-xs flex items-center gap-1.5">
+              <button onclick="handleAdminBtnClick()" class="bg-indigo-800 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl shadow text-xs flex items-center gap-1.5">
                 <i class="fa-solid fa-shield-halved text-amber-400"></i> Admin Portal
               </button>
               <button onclick="shareSatyapeethApp()" class="bg-emerald-500 hover:bg-emerald-400 text-indigo-950 font-black px-4 py-2.5 rounded-xl shadow text-xs flex items-center gap-1.5">
@@ -1030,9 +1021,7 @@
 
         return `
           <div class="space-y-4">
-            <button onclick="router.navigate('student-dashboard')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
-              &larr; Back to Dashboard
-            </button>
+            <button onclick="router.navigate('student-dashboard')" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">&larr; Back to Dashboard</button>
             <div>
               <span class="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold px-2 py-0.5 rounded uppercase">Content Library</span>
               <h2 class="text-xl font-black text-slate-900 dark:text-white mt-1">Class ${student.class} PDF Notes & Video Lectures</h2>
@@ -1274,31 +1263,582 @@
             </div>
           </div>
         `;
+      },
+
+      adminAuth: () => `
+        <div class="max-w-sm mx-auto bg-slate-950 text-white rounded-3xl p-5 sm:p-7 border border-slate-800 shadow-2xl space-y-5">
+          <div class="text-center">
+            <div class="w-10 h-10 rounded-xl bg-indigo-900 text-amber-400 flex items-center justify-center mx-auto text-lg font-bold mb-2">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 class="text-lg font-black text-white">Satyapeeth Admin Auth</h2>
+          </div>
+          <form onsubmit="handleAdminLogin(event)" class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">User ID</label>
+              <input type="text" id="adminUserId" required placeholder="Enter Admin User ID" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-amber-400">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Password</label>
+              <input type="password" id="adminPassword" required placeholder="••••••••" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-amber-400">
+            </div>
+            <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+              Unlock Master Suite
+            </button>
+          </form>
+        </div>
+      `,
+
+      adminDashboard: (activeTab) => {
+        const admissions = cloudState.admissions;
+        const registrations = cloudState.registrations;
+        const students = cloudState.students;
+        const questions = cloudState.questions;
+        const notes = cloudState.notes;
+        const videos = cloudState.videos;
+        const results = cloudState.results;
+        const books = cloudState.books;
+        const notices = cloudState.notices;
+
+        const activeCount = Math.max(1, students.length);
+
+        return `
+          <div class="space-y-4">
+            <div class="bg-slate-900 text-white p-4 sm:p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+              <div class="flex flex-wrap justify-between items-center gap-2">
+                <div>
+                  <span class="text-[10px] bg-amber-500 text-indigo-950 font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">Cloud Master Hub</span>
+                  <h2 class="text-lg sm:text-xl font-black text-white mt-1">Admin: Satyajeet Sahu</h2>
+                </div>
+                <div class="flex items-center gap-2 bg-emerald-950/80 border border-emerald-500/40 px-3.5 py-1.5 rounded-xl text-xs text-emerald-300 font-bold shadow-inner">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span>Online / Registered Students: <strong id="activeRegisteredCounter" class="text-white text-sm font-mono">${activeCount}</strong></span>
+                </div>
+              </div>
+
+              <!-- Refined High-Visibility Navigation Cards -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 pt-1">
+                <button onclick="router.navigate('admin-dashboard', { tab: 'bulk-doc' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'bulk-doc' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-file-lines text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Text Parser</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-code text-base"></i>
+                  <span class="text-[11px] font-bold text-center">HTML Parser</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'single-q' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'single-q' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-plus-circle text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Single Q</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'notices-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'notices-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-bullhorn text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Broadcast Notice</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'books-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'books-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-book text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Textbooks <strong id="badgeBooks">(${books.length})</strong></span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-file-pdf text-base"></i>
+                  <span class="text-[11px] font-bold text-center">PDF Notes <strong id="badgeNotes">(${notes.length})</strong></span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'videos-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'videos-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-video text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Videos <strong id="badgeVideos">(${videos.length})</strong></span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'structure-mgr' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'structure-mgr' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-folder-tree text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Remove / Edit</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'results' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-square-poll-vertical text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Results <strong id="badgeResults">(${results.length})</strong></span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'admissions' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-user-check text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Admissions <strong id="badgeAdm">(${admissions.filter(a => a.status === 'Pending').length})</strong></span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'registrations' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-id-card text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Free Passes <strong id="badgeReg">(${registrations.filter(r => r.status === 'Pending').length})</strong></span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'students' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-users text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Students <strong id="badgeStudents">(${students.length})</strong></span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'security' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'security' ? 'bg-rose-600 text-white font-black border-rose-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-shield-keyhole text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Password</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="adminTabContent">
+              ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes, videos, results, books, notices })}
+            </div>
+          </div>
+        `;
+      },
+
+      adminTabs: {
+        'notices-admin': ({ notices }) => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+            <div>
+              <span class="text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 px-2 py-0.5 rounded uppercase">Live Alerts</span>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mt-1">Broadcast Notification to Student Dashboard</h3>
+            </div>
+            <form onsubmit="handleNoticePublish(event)" class="space-y-3">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Notice Heading / Subject</label>
+                <input type="text" id="noticeTitleInput" required placeholder="e.g. Special Mock Exam at 6:00 PM Today" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Notice Message Body</label>
+                <textarea id="noticeMsgInput" required rows="3" placeholder="Type your message for students..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white"></textarea>
+              </div>
+              <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-paper-plane"></i> Publish Live Notice to All Students
+              </button>
+            </form>
+
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              <h4 class="font-bold text-xs text-slate-900 dark:text-white">Active Notices (${notices.length})</h4>
+              ${notices.length > 0 ? notices.map(n => `
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
+                  <div>
+                    <h5 class="font-bold text-slate-900 dark:text-white">${n.title}</h5>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300">${n.message}</p>
+                    <span class="text-[9px] text-slate-400">${n.date}</span>
+                  </div>
+                  <button onclick="deleteNotice('${n.id}')" class="text-rose-600 hover:text-rose-700 font-bold text-xs">Delete</button>
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-2">No active broadcast notices.</p>'}
+            </div>
+          </div>
+        `,
+
+        'bulk-doc': () => {
+          const classes = cloudState.classes;
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <div>
+                <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded uppercase">Fast Bulk Question Parser</span>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mt-1">Copy-Pasted Document Content Block (Preserves Exact Formulas, Math & Odia Text)</h3>
+              </div>
+              <form onsubmit="handleBulkTextImport(event)" class="space-y-3">
+                
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">1. Select Target Class</label>
+                    <select id="bulkClassSelect" onchange="updateBulkSubjects()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="bulkNewClass" placeholder="Or Type New Class (e.g. 11)" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewClass('bulk')" class="px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg whitespace-nowrap">+ Add Class</button>
+                  </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">2. Select Subject</label>
+                    <select id="bulkSubjectSelect" onchange="updateBulkTopics()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="bulkNewSubject" placeholder="Or Type New Subject Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewSubject('bulk')" class="px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg whitespace-nowrap">+ Add Subject</button>
+                  </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">3. Select Chapter / Topic</label>
+                    <select id="bulkTopicSelect" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="bulkNewTopic" placeholder="Or Type New Chapter / Topic Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewTopic('bulk')" class="px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg whitespace-nowrap">+ Add Chapter</button>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">4. Paste your 100/150 questions directly here! (Plain text format)</label>
+                  <textarea id="bulkTextInput" required rows="9" placeholder="Paste your questions directly here! E.g.&#10;1. Which is the highest peak in Odisha?&#10;A) Deomali&#10;B) Mahendragiri&#10;C) Chandragiri&#10;D) Malayagiri&#10;Answer: A&#10;Explanation: Deomali is the highest peak in Odisha." class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border border-slate-800 leading-relaxed"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+                  Import All Questions to Cloud Database
+                </button>
+              </form>
+            </div>
+          `;
+        },
+
+        'html-upload': () => {
+          const classes = cloudState.classes;
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Smart HTML Question Importer</h3>
+              <form onsubmit="handleHtmlImport(event)" class="space-y-3">
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">1. Select Target Class</label>
+                    <select id="impClassSelect" onchange="updateImporterSubjects()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="impNewClass" placeholder="Or New Class (e.g. 11)" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewClass('imp')" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">+ Add Class</button>
+                  </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">2. Select Subject</label>
+                    <select id="impSubjectSelect" onchange="updateImporterTopics()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="impNewSubject" placeholder="Or New Subject Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewSubject('imp')" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">+ Add Subject</button>
+                  </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">3. Select Chapter / Topic</label>
+                    <select id="impTopicSelect" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="impNewTopic" placeholder="Or New Chapter Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewTopic('imp')" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">+ Add Chapter</button>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">4. Paste HTML Code with questionsData</label>
+                  <textarea id="impHtmlCode" required rows="7" placeholder="Paste full HTML code with questionsData..." class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border border-slate-800"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+                  Parse & Upload HTML Questions
+                </button>
+              </form>
+            </div>
+          `;
+        },
+
+        'structure-mgr': () => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Remove / Delete Subject or Topics</h3>
+            <p class="text-xs text-slate-500">Easily remove any redundant subject or chapter from student rooms.</p>
+            <div id="structureManagerBox" class="space-y-3"></div>
+          </div>
+        `,
+
+        'security': () => `
+          <div class="max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Change Admin Master Password</h3>
+            <form onsubmit="handleAdminPasswordChange(event)" class="space-y-3">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Current Password</label>
+                <input type="password" id="currAdminPass" required placeholder="••••••••" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white outline-none">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">New Password</label>
+                <input type="password" id="newAdminPass" required placeholder="Enter new password" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white outline-none">
+              </div>
+              <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow">
+                Update Admin Password
+              </button>
+            </form>
+          </div>
+        `,
+
+        'books-admin': () => {
+          const classes = cloudState.classes;
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Textbooks & Books Manager</h3>
+              <form onsubmit="handleBookSave(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class</label>
+                    <select id="bookClassSelect" onchange="updateBooksSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Subject</label>
+                    <select id="bookSubjectSelect" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Book Title</label>
+                  <input type="text" id="bookTitleInput" required placeholder="e.g. Class 10 Sahitya Sindhu Full Book" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Google Drive / Direct PDF URL</label>
+                  <input type="url" id="bookPdfUrlInput" required placeholder="https://drive.google.com/file/d/.../view?usp=sharing" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow">
+                  Upload Book to Student Portal
+                </button>
+              </form>
+            </div>
+          `;
+        },
+
+        'single-q': () => {
+          const classes = cloudState.classes;
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Manual Single Question Creator</h3>
+              <form onsubmit="handleSingleQuestionSave(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class</label>
+                    <select id="sqClassSelect" onchange="updateSingleQSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Subject</label>
+                    <select id="sqSubjectSelect" onchange="updateSingleQTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter</label>
+                    <select id="sqTopicSelect" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Main Question (Odia / English)</label>
+                  <input type="text" id="sqQOr" required placeholder="Type Main Question" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Option A</label>
+                    <input type="text" id="sqOptA" required placeholder="Option A" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Option B</label>
+                    <input type="text" id="sqOptB" required placeholder="Option B" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Option C</label>
+                    <input type="text" id="sqOptC" required placeholder="Option C" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Option D</label>
+                    <input type="text" id="sqOptD" required placeholder="Option D" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Correct Answer</label>
+                    <select id="sqCorrectAns" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      <option value="A">Option A</option>
+                      <option value="B">Option B</option>
+                      <option value="C">Option C</option>
+                      <option value="D">Option D</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Explanation (Optional)</label>
+                    <input type="text" id="sqExp" placeholder="Concept explanation" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs text-slate-900 dark:text-white">
+                  </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow">
+                  Save Single Question
+                </button>
+              </form>
+            </div>
+          `;
+        },
+
+        'notes-admin': () => {
+          const classes = cloudState.classes;
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Dedicated PDF Notes Manager</h3>
+              <form onsubmit="handleNoteSave(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class</label>
+                    <select id="noteClassSelect" onchange="updateNotesSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Subject</label>
+                    <select id="noteSubjectSelect" onchange="updateNotesTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter</label>
+                    <select id="noteTopicSelect" onchange="loadExistingNote()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Google Drive / Direct PDF URL</label>
+                  <input type="url" id="notePdfUrlInput" required placeholder="https://drive.google.com/file/d/.../view?usp=sharing" class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Key Revision Points / Summary</label>
+                  <textarea id="noteContentInput" rows="4" placeholder="Chapter summary..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
+                  Publish PDF Notes to Cloud
+                </button>
+              </form>
+            </div>
+          `;
+        },
+
+        'videos-admin': () => {
+          const classes = cloudState.classes;
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Dedicated Video Classes Manager</h3>
+              <form onsubmit="handleVideoSave(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class</label>
+                    <select id="videoClassSelect" onchange="updateVideosSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                      ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Subject</label>
+                    <select id="videoSubjectSelect" onchange="updateVideosTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter</label>
+                    <select id="videoTopicSelect" onchange="loadExistingVideo()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">YouTube Video URL</label>
+                  <input type="url" id="videoUrlInput" required placeholder="https://www.youtube.com/watch?v=..." class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white">
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Video Lesson Description</label>
+                  <textarea id="videoDescInput" rows="3" placeholder="Key topics covered..." class="w-full p-3 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs text-slate-900 dark:text-white leading-relaxed"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition shadow">
+                  Publish Video Class to Cloud
+                </button>
+              </form>
+            </div>
+          `;
+        },
+
+        results: ({ results }) => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Realtime Mock Results & Certificates (${results.length})</h3>
+            <div class="space-y-2">
+              ${results.length > 0 ? results.map(r => `
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center gap-2">
+                  <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white">${r.studentName} (Class ${r.studentClass})</h4>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Parent: <strong>${r.parentName}</strong> | ${r.topicName} | Score: <strong class="text-indigo-600 dark:text-indigo-400">${r.obtainedMarks} / ${r.totalMarks}</strong> (${r.percentage}%)</p>
+                  </div>
+                  <div class="flex gap-2">
+                    ${r.percentage >= 85 ? `
+                      <button onclick="openCertificateModal('${r.id}')" class="px-2.5 py-1 bg-amber-500 text-indigo-950 font-bold rounded-lg text-[10px] shadow">
+                        <i class="fa-solid fa-award mr-1"></i> Certificate
+                      </button>
+                    ` : `<span class="text-[10px] text-slate-400 font-bold">Below 85%</span>`}
+                  </div>
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No test submissions yet.</p>'}
+            </div>
+          </div>
+        `,
+
+        admissions: ({ admissions }) => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Admission Requests (${admissions.length})</h3>
+            <div class="space-y-2">
+              ${admissions.length > 0 ? admissions.map(a => `
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center gap-2">
+                  <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white">${a.name} (Class ${a.class})</h4>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Parent: ${a.guardian} | Phone: ${a.phone}</p>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${a.status === 'Approved' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'}">${a.status}</span>
+                  </div>
+                  ${a.status === 'Pending' ? `
+                    <button onclick="approveStudent('adm', '${a.id}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-lg text-xs">Approve Full Pass</button>
+                  ` : `<span class="text-[10px] text-slate-400">ID: ${a.assignedStudentId}</span>`}
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No admissions in cloud yet.</p>'}
+            </div>
+          </div>
+        `,
+
+        registrations: ({ registrations }) => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Free 1-Subject Registrations (${registrations.length})</h3>
+            <div class="space-y-2">
+              ${registrations.length > 0 ? registrations.map(r => `
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center gap-2">
+                  <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white">${r.name} (Class ${r.class})</h4>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Parent: ${r.parentName || 'Parent'} | Phone: ${r.phone} | Free Subject: <strong class="text-emerald-600 dark:text-emerald-400">${r.favSubjectName || 'Not specified'}</strong></p>
+                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold ${r.status === 'Approved' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'}">${r.status}</span>
+                  </div>
+                  ${r.status === 'Pending' ? `
+                    <button onclick="approveStudent('reg', '${r.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs">Approve Free Pass</button>
+                  ` : `<span class="text-[10px] text-slate-400">ID: ${r.assignedStudentId}</span>`}
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No registrations in cloud yet.</p>'}
+            </div>
+          </div>
+        `,
+
+        students: ({ students }) => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Cloud Approved Student Logins (${students.length})</h3>
+            <div class="space-y-2">
+              ${students.length > 0 ? students.map(s => `
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center">
+                  <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white">${s.name} (Class ${s.class}) <span class="text-[10px] px-1.5 py-0.5 rounded ${s.type === 'Admission' ? 'bg-amber-100 text-amber-800 font-black' : 'bg-emerald-100 text-emerald-800 font-bold'}">${s.type}</span></h4>
+                    <p class="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono">ID: ${s.studentId} | Pass: <span class="bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 px-1 py-0.5 rounded font-bold">${s.password}</span> ${s.favSubjectName ? `| Free Sub: ${s.favSubjectName}` : ''}</p>
+                  </div>
+                  <button onclick="deleteStudent('${s.id}')" class="text-rose-600 text-xs font-bold hover:underline">Delete</button>
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No students enrolled yet.</p>'}
+            </div>
+          </div>
+        `
       }
     };
-
-    function handleNoticePublish(e) {
-      e.preventDefault();
-      const title = document.getElementById('noticeTitleInput').value.trim();
-      const msg = document.getElementById('noticeMsgInput').value.trim();
-
-      firestore.collection("notices").add({
-        title,
-        message: msg,
-        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        toast("Notice Broadcasted!", "Live alert sent to all student dashboards.", "success");
-        document.getElementById('noticeTitleInput').value = '';
-        document.getElementById('noticeMsgInput').value = '';
-      });
-    }
-
-    function deleteNotice(docId) {
-      firestore.collection("notices").doc(docId).delete().then(() => {
-        toast("Notice Removed", "Broadcast alert cleared.", "info");
-      });
-    }
 
     function updateRegSubjects() {
       const cls = document.getElementById('regClass').value;
@@ -1829,10 +2369,12 @@
         );
 
         if (!student) {
-          const snapshot = await firestore.collection("students").where("password", "==", passInput).get();
+          const snapshot = await firestore.collection("students").get();
           snapshot.forEach(doc => {
             const d = { id: doc.id, ...doc.data() };
-            if (d.phone === userInput || d.email === userInput || d.studentId === userInput) student = d;
+            if ((d.phone === userInput || d.email === userInput || d.studentId === userInput) && d.password === passInput) {
+              student = d;
+            }
           });
         }
 
@@ -1841,7 +2383,7 @@
           toast('Welcome Back!', `Logged in as ${student.name}`, 'success');
           router.navigate('student-dashboard');
         } else {
-          toast('Login Failed', 'Credentials not found or account not approved.', 'error');
+          toast('Login Failed', 'Invalid credentials or account not yet approved.', 'error');
         }
       } catch (err) {
         toast('Connection Error', 'Please check internet and retry.', 'error');
@@ -1883,7 +2425,7 @@
       const user = document.getElementById('adminUserId').value.trim().toLowerCase();
       const pass = document.getElementById('adminPassword').value.trim();
 
-      if ((user === "satyajeets308" || user === "satyajeet308") && (pass === cloudState.adminSettings.password || pass === "Kalyani@123")) {
+      if ((user === "satyajeets308" || user === "satyajeet308" || user === "admin") && (pass === cloudState.adminSettings.password || pass === "Kalyani@123")) {
         auth.setAdmin({ user: "Satyajeet Sahu", role: "superadmin" });
         toast('Admin Unlocked', 'Welcome Satyajeet Sahu!', 'success');
         router.navigate('admin-dashboard', { tab: 'bulk-doc' });
