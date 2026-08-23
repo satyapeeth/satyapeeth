@@ -177,9 +177,9 @@
     const ADMIN_PHONE = "919556576071";
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_auth_student_v4',
-      AUTH_ADMIN: 'sp_auth_admin_v4',
-      AUTH_PARENT: 'sp_auth_parent_v4',
+      AUTH_STUDENT: 'sp_auth_student_master_v5',
+      AUTH_ADMIN: 'sp_auth_admin_master_v5',
+      AUTH_PARENT: 'sp_auth_parent_master_v5',
       THEME: 'sp_theme_pref'
     };
 
@@ -301,6 +301,11 @@
     }
 
     function updateDashboardCounts() {
+      const activeEl = document.getElementById('activeRegisteredCounter');
+      if (activeEl) {
+        activeEl.innerText = Math.max(1, cloudState.students.length);
+      }
+
       if (router.currentRoute.startsWith('admin-dashboard')) {
         const activeTab = router.currentRouteParamTab || 'bulk-doc';
         const tabContentEl = document.getElementById('adminTabContent');
@@ -721,7 +726,7 @@
               <i class="fa-solid fa-lock"></i>
             </div>
             <h2 class="text-lg font-black text-slate-900 dark:text-white">Recover Password</h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">Request a secure password reset via Admin Support.</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Request an authorized password recovery directly through Admin WhatsApp.</p>
           </div>
           <form onsubmit="handleForgotPasswordRequest(event)" class="space-y-3">
             <div>
@@ -1259,32 +1264,82 @@
 
         return `
           <div class="space-y-4">
-            <div class="bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 space-y-3">
-              <div class="flex justify-between items-center">
+            <div class="bg-slate-900 text-white p-4 sm:p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+              <div class="flex flex-wrap justify-between items-center gap-2">
                 <div>
-                  <span class="text-[10px] bg-amber-500 text-indigo-950 font-black px-2 py-0.5 rounded uppercase">Firebase Cloud Master</span>
-                  <h2 class="text-base sm:text-lg font-black mt-1">Admin: Satyajeet Sahu</h2>
+                  <span class="text-[10px] bg-amber-500 text-indigo-950 font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">Cloud Master Hub</span>
+                  <h2 class="text-lg sm:text-xl font-black text-white mt-1">Admin: Satyajeet Sahu</h2>
                 </div>
-                <div class="flex items-center gap-2 bg-emerald-950/80 border border-emerald-600/60 px-3 py-1.5 rounded-xl text-xs text-emerald-300">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <strong>Online / Registered: ${activeCount}</strong>
+                <div class="flex items-center gap-2 bg-emerald-950/80 border border-emerald-500/40 px-3.5 py-1.5 rounded-xl text-xs text-emerald-300 font-bold shadow-inner">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span>Online / Registered Students: <strong id="activeRegisteredCounter" class="text-white text-sm font-mono">${activeCount}</strong></span>
                 </div>
               </div>
-              <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                <button onclick="router.navigate('admin-dashboard', { tab: 'bulk-doc' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'bulk-doc' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-lines mr-1"></i> Simple Text Parser (100+ Qs)</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-code mr-1"></i> HTML Parser</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'single-q' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'single-q' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-plus mr-1"></i> Add Single Q</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'books-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'books-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-book mr-1"></i> Textbooks (${books.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-file-pdf mr-1"></i> PDF Notes (${notes.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'videos-admin' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'videos-admin' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-video mr-1"></i> Videos (${videos.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'structure-mgr' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'structure-mgr' ? 'bg-amber-500 text-indigo-950' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-trash-can mr-1"></i> Remove Subject/Topic</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'results' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Results (${results.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'admissions' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Admissions (${admissions.filter(a => a.status === 'Pending').length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'registrations' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Free Passes (${registrations.filter(r => r.status === 'Pending').length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'students' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Students (${students.length})</button>
-                <button onclick="router.navigate('admin-dashboard', { tab: 'security' })" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${activeTab === 'security' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300'}"><i class="fa-solid fa-lock mr-1"></i> Change Password</button>
+
+              <!-- Refined High-Visibility Navigation Cards -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 pt-1">
+                <button onclick="router.navigate('admin-dashboard', { tab: 'bulk-doc' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'bulk-doc' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-file-lines text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Text Parser</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'html-upload' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'html-upload' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-code text-base"></i>
+                  <span class="text-[11px] font-bold text-center">HTML Parser</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'single-q' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'single-q' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-plus-circle text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Single Q</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'books-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'books-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-book text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Textbooks (${books.length})</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-file-pdf text-base"></i>
+                  <span class="text-[11px] font-bold text-center">PDF Notes (${notes.length})</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'videos-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'videos-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-video text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Videos (${videos.length})</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'structure-mgr' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'structure-mgr' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-folder-tree text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Remove / Edit</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'results' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-square-poll-vertical text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Results (${results.length})</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'admissions' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-user-check text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Admissions (${admissions.filter(a => a.status === 'Pending').length})</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'registrations' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-id-card text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Free Passes (${registrations.filter(r => r.status === 'Pending').length})</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'students' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-users text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Students (${students.length})</span>
+                </button>
+
+                <button onclick="router.navigate('admin-dashboard', { tab: 'security' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'security' ? 'bg-rose-600 text-white font-black border-rose-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                  <i class="fa-solid fa-shield-keyhole text-base"></i>
+                  <span class="text-[11px] font-bold text-center">Password</span>
+                </button>
               </div>
             </div>
+
             <div id="adminTabContent">
               ${views.adminTabs[activeTab]({ admissions, registrations, students, questions, notes, videos, results, books })}
             </div>
@@ -1298,30 +1353,52 @@
           return `
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
               <div>
-                <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded uppercase">Fast Question Import</span>
-                <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mt-1">Copy-Pasted Document Content Block (Preserves Exact Formulas, Math & Questions)</h3>
+                <span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded uppercase">Fast Bulk Question Parser</span>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mt-1">Copy-Pasted Document Content Block (Preserves Exact Formulas, Math & Odia Text)</h3>
               </div>
               <form onsubmit="handleBulkTextImport(event)" class="space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                
+                <!-- 1. Class with Add Option -->
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Class</label>
-                    <select id="bulkClassSelect" onchange="updateBulkSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">1. Select Target Class</label>
+                    <select id="bulkClassSelect" onchange="updateBulkSubjects()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white">
                       ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
                     </select>
                   </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Subject</label>
-                    <select id="bulkSubjectSelect" onchange="updateBulkTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  <div class="flex gap-2">
+                    <input type="text" id="bulkNewClass" placeholder="Or Type New Class (e.g. 11)" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewClass('bulk')" class="px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg whitespace-nowrap">+ Add Class</button>
                   </div>
+                </div>
+
+                <!-- 2. Subject with Add Option -->
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Chapter / Topic</label>
-                    <select id="bulkTopicSelect" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">2. Select Subject</label>
+                    <select id="bulkSubjectSelect" onchange="updateBulkTopics()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="bulkNewSubject" placeholder="Or Type New Subject Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewSubject('bulk')" class="px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg whitespace-nowrap">+ Add Subject</button>
+                  </div>
+                </div>
+
+                <!-- 3. Chapter with Add Option -->
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">3. Select Chapter / Topic</label>
+                    <select id="bulkTopicSelect" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="bulkNewTopic" placeholder="Or Type New Chapter / Topic Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewTopic('bulk')" class="px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg whitespace-nowrap">+ Add Chapter</button>
                   </div>
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Paste your 100/150 questions directly here! (Plain text format)</label>
-                  <textarea id="bulkTextInput" required rows="9" placeholder="Paste questions directly here! E.g.&#10;1. Which is the highest peak in Odisha?&#10;A) Deomali&#10;B) Mahendragiri&#10;C) Chandragiri&#10;D) Malayagiri&#10;Answer: A&#10;Explanation: Deomali is the highest peak in Odisha." class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border border-slate-800"></textarea>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">4. Paste your 100/150 questions directly here! (Plain text format)</label>
+                  <textarea id="bulkTextInput" required rows="9" placeholder="Paste your questions directly here! E.g.&#10;1. Which is the highest peak in Odisha?&#10;A) Deomali&#10;B) Mahendragiri&#10;C) Chandragiri&#10;D) Malayagiri&#10;Answer: A&#10;Explanation: Deomali is the highest peak in Odisha." class="w-full p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl border border-slate-800 leading-relaxed"></textarea>
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black rounded-xl text-xs transition shadow">
@@ -1338,20 +1415,38 @@
             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-4">
               <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Smart HTML Question Importer</h3>
               <form onsubmit="handleHtmlImport(event)" class="space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">1. Class</label>
-                    <select id="impClassSelect" onchange="updateImporterSubjects()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white">
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">1. Select Target Class</label>
+                    <select id="impClassSelect" onchange="updateImporterSubjects()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white">
                       ${classes.map(c => `<option value="${c}">Class ${c}</option>`).join('')}
                     </select>
                   </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">2. Subject</label>
-                    <select id="impSubjectSelect" onchange="updateImporterTopics()" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  <div class="flex gap-2">
+                    <input type="text" id="impNewClass" placeholder="Or New Class (e.g. 11)" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewClass('imp')" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">+ Add Class</button>
                   </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">3. Chapter</label>
-                    <select id="impTopicSelect" class="w-full p-2 bg-slate-50 dark:bg-slate-800 border rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">2. Select Subject</label>
+                    <select id="impSubjectSelect" onchange="updateImporterTopics()" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="impNewSubject" placeholder="Or New Subject Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewSubject('imp')" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">+ Add Subject</button>
+                  </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">3. Select Chapter / Topic</label>
+                    <select id="impTopicSelect" class="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white"></select>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="impNewTopic" placeholder="Or New Chapter Name" class="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white outline-none">
+                    <button type="button" onclick="addNewTopic('imp')" class="px-3 bg-indigo-600 text-white font-bold text-xs rounded-lg">+ Add Chapter</button>
                   </div>
                 </div>
 
@@ -1655,8 +1750,8 @@
               ${students.length > 0 ? students.map(s => `
                 <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center">
                   <div>
-                    <h4 class="font-bold text-slate-900 dark:text-white">${s.name} (Class ${s.class}) <span class="text-[10px] px-1.5 py-0.5 rounded ${s.type === 'Admission' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${s.type}</span></h4>
-                    <p class="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono">ID: ${s.studentId} | Pass: <span class="bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 px-1 py-0.5 rounded font-bold">${s.password}</span></p>
+                    <h4 class="font-bold text-slate-900 dark:text-white">${s.name} (Class ${s.class}) <span class="text-[10px] px-1.5 py-0.5 rounded ${s.type === 'Admission' ? 'bg-amber-100 text-amber-800 font-black' : 'bg-emerald-100 text-emerald-800 font-bold'}">${s.type}</span></h4>
+                    <p class="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono">ID: ${s.studentId} | Pass: <span class="bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 px-1 py-0.5 rounded font-bold">${s.password}</span> ${s.favSubjectName ? `| Free Sub: ${s.favSubjectName}` : ''}</p>
                   </div>
                   <button onclick="deleteStudent('${s.id}')" class="text-rose-600 text-xs font-bold hover:underline">Delete</button>
                 </div>
@@ -1864,6 +1959,56 @@
       const url = `https://api.whatsapp.com/send?phone=${ADMIN_PHONE}&text=${text}`;
       window.open(url, '_blank');
       toast('Request Sent', 'Opening official Admin WhatsApp for password recovery.', 'info');
+    }
+
+    function addNewClass(context) {
+      const inputEl = document.getElementById(context === 'bulk' ? 'bulkNewClass' : 'impNewClass');
+      const newCls = inputEl.value.trim();
+      if (!newCls) return alert("Enter class number!");
+      if (!cloudState.classes.includes(newCls)) {
+        cloudState.classes.push(newCls);
+        firestore.collection("settings").doc("classes").set({ list: cloudState.classes });
+        toast("Class Added", `Class ${newCls} saved to cloud.`, "success");
+        inputEl.value = '';
+        if (context === 'bulk') updateBulkSubjects();
+        else updateImporterSubjects();
+      }
+    }
+
+    function addNewSubject(context) {
+      const clsEl = document.getElementById(context === 'bulk' ? 'bulkClassSelect' : 'impClassSelect');
+      const inputEl = document.getElementById(context === 'bulk' ? 'bulkNewSubject' : 'impNewSubject');
+      const cls = clsEl.value;
+      const newSubName = inputEl.value.trim();
+      if (!newSubName) return alert("Enter subject name!");
+
+      const newSubId = "sub_" + cls + "_" + Date.now();
+      firestore.collection("subjects").doc(newSubId).set({ id: newSubId, class: cls, name: newSubName, isFree: false })
+        .then(() => {
+          toast("Subject Added", `${newSubName} created on cloud.`, "success");
+          inputEl.value = '';
+          if (context === 'bulk') updateBulkSubjects();
+          else updateImporterSubjects();
+        });
+    }
+
+    function addNewTopic(context) {
+      const clsEl = document.getElementById(context === 'bulk' ? 'bulkClassSelect' : 'impClassSelect');
+      const subEl = document.getElementById(context === 'bulk' ? 'bulkSubjectSelect' : 'impSubjectSelect');
+      const inputEl = document.getElementById(context === 'bulk' ? 'bulkNewTopic' : 'impNewTopic');
+      const cls = clsEl.value;
+      const subId = subEl.value;
+      const newTopName = inputEl.value.trim();
+      if (!newTopName) return alert("Enter chapter name!");
+
+      const newTopId = "top_" + cls + "_" + Date.now();
+      firestore.collection("topics").doc(newTopId).set({ id: newTopId, class: cls, subjectId: subId, name: newTopName, isFree: false })
+        .then(() => {
+          toast("Topic Created", `${newTopName} created on cloud.`, "success");
+          inputEl.value = '';
+          if (context === 'bulk') updateBulkTopics();
+          else updateImporterTopics();
+        });
     }
 
     function updateImporterSubjects() {
