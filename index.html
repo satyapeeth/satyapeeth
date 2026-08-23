@@ -124,7 +124,7 @@
           <i class="fa-solid fa-power-off"></i>
         </button>
 
-        <button id="navAdminBtn" onclick="handleAdminBtnClick()" class="text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-indigo-950 px-3 py-1.5 sm:py-2 rounded-xl font-black transition shadow flex items-center gap-1.5" title="Admin Portal">
+        <button id="navAdminBtn" onclick="handleAdminBtnClick()" class="text-xs sm:text-sm bg-amber-500 hover:bg-amber-400 text-indigo-950 px-3 py-1.5 sm:py-2 rounded-xl font-black transition shadow flex items-center gap-1.5">
           <i class="fa-solid fa-shield-halved"></i> <span>Admin Portal</span>
         </button>
       </div>
@@ -177,9 +177,9 @@
     const ADMIN_PHONE = "919556576071";
 
     const DB_KEYS = {
-      AUTH_STUDENT: 'sp_auth_student_master_final',
-      AUTH_ADMIN: 'sp_auth_admin_master_final',
-      AUTH_PARENT: 'sp_auth_parent_master_final',
+      AUTH_STUDENT: 'sp_auth_std_live',
+      AUTH_ADMIN: 'sp_auth_adm_live',
+      AUTH_PARENT: 'sp_auth_par_live',
       THEME: 'sp_theme_pref'
     };
 
@@ -200,19 +200,20 @@
       document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400 text-xs sm:text-sm' : 'fa-solid fa-moon text-amber-400 text-xs sm:text-sm';
     }
 
+    // High Speed Memory Initializer (Always Instant)
     let cloudState = {
-      classes: ["10", "9", "8", "7", "6"],
-      students: [],
-      admissions: [],
-      registrations: [],
-      results: [],
-      notices: [],
-      subjects: [],
-      topics: [],
-      books: [],
-      questions: [],
-      notes: [],
-      videos: [],
+      classes: JSON.parse(localStorage.getItem('sp_c_classes')) || ["10", "9", "8", "7", "6"],
+      students: JSON.parse(localStorage.getItem('sp_c_students')) || [],
+      admissions: JSON.parse(localStorage.getItem('sp_c_admissions')) || [],
+      registrations: JSON.parse(localStorage.getItem('sp_c_registrations')) || [],
+      results: JSON.parse(localStorage.getItem('sp_c_results')) || [],
+      notices: JSON.parse(localStorage.getItem('sp_c_notices')) || [],
+      subjects: JSON.parse(localStorage.getItem('sp_c_subjects')) || [],
+      topics: JSON.parse(localStorage.getItem('sp_c_topics')) || [],
+      books: JSON.parse(localStorage.getItem('sp_c_books')) || [],
+      questions: JSON.parse(localStorage.getItem('sp_c_questions')) || [],
+      notes: JSON.parse(localStorage.getItem('sp_c_notes')) || [],
+      videos: JSON.parse(localStorage.getItem('sp_c_videos')) || [],
       adminSettings: { password: "Kalyani@123" }
     };
 
@@ -224,87 +225,40 @@
       }
     }
 
+    // Fast Single-Query Background Synchronizer
     function initRealtimeSync() {
-      // Security Settings
+      const syncCollection = (colName, stateKey) => {
+        firestore.collection(colName).onSnapshot(snap => {
+          cloudState[stateKey] = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          localStorage.setItem(`sp_c_${stateKey}`, JSON.stringify(cloudState[stateKey]));
+          refreshAdminView();
+        }, err => console.log(colName, err));
+      };
+
+      syncCollection("students", "students");
+      syncCollection("admissions", "admissions");
+      syncCollection("registrations", "registrations");
+      syncCollection("results", "results");
+      syncCollection("books", "books");
+      syncCollection("subjects", "subjects");
+      syncCollection("topics", "topics");
+      syncCollection("questions", "questions");
+      syncCollection("notes", "notes");
+      syncCollection("videos", "videos");
+      syncCollection("notices", "notices");
+
       firestore.collection("settings").doc("security").onSnapshot(doc => {
         if (doc.exists && doc.data().password) cloudState.adminSettings.password = doc.data().password;
-      }, err => console.log("Security error:", err));
-
-      // Classes
+      });
       firestore.collection("settings").doc("classes").onSnapshot(doc => {
-        if (doc.exists && doc.data().list) cloudState.classes = doc.data().list;
-      }, err => console.log("Classes error:", err));
-
-      // Notices
-      firestore.collection("notices").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-        cloudState.notices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (router.currentRoute === 'student-dashboard') router.navigate('student-dashboard');
-      }, err => console.log("Notices error:", err));
-
-      // Students
-      firestore.collection("students").onSnapshot(snapshot => {
-        cloudState.students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        refreshAdminView();
-      }, err => console.log("Students error:", err));
-
-      // Admissions
-      firestore.collection("admissions").onSnapshot(snapshot => {
-        cloudState.admissions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        refreshAdminView();
-      }, err => console.log("Admissions error:", err));
-
-      // Registrations
-      firestore.collection("registrations").onSnapshot(snapshot => {
-        cloudState.registrations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        refreshAdminView();
-      }, err => console.log("Registrations error:", err));
-
-      // Results
-      firestore.collection("results").onSnapshot(snapshot => {
-        cloudState.results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        refreshAdminView();
-      }, err => console.log("Results error:", err));
-
-      // Books
-      firestore.collection("books").onSnapshot(snapshot => {
-        cloudState.books = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        refreshAdminView();
-      }, err => console.log("Books error:", err));
-
-      // Subjects
-      firestore.collection("subjects").onSnapshot(snapshot => {
-        cloudState.subjects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (router.currentRoute === 'subject-select') router.navigate('subject-select');
-      }, err => console.log("Subjects error:", err));
-
-      // Topics
-      firestore.collection("topics").onSnapshot(snapshot => {
-        cloudState.topics = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      }, err => console.log("Topics error:", err));
-
-      // Questions
-      firestore.collection("questions").onSnapshot(snapshot => {
-        cloudState.questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        refreshAdminView();
-      }, err => console.log("Questions error:", err));
-
-      // Notes
-      firestore.collection("notes").onSnapshot(snapshot => {
-        cloudState.notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        refreshAdminView();
-      }, err => console.log("Notes error:", err));
-
-      // Videos
-      firestore.collection("videos").onSnapshot(snapshot => {
-        cloudState.videos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        refreshAdminView();
-      }, err => console.log("Videos error:", err));
+        if (doc.exists && doc.data().list) {
+          cloudState.classes = doc.data().list;
+          localStorage.setItem('sp_c_classes', JSON.stringify(cloudState.classes));
+        }
+      });
     }
 
     function refreshAdminView() {
-      const activeEl = document.getElementById('activeRegisteredCounter');
-      if (activeEl) activeEl.innerText = Math.max(1, cloudState.students.length);
-
       const updateSpan = (selector, val) => {
         const el = document.querySelector(selector);
         if (el) el.innerText = val;
@@ -317,6 +271,7 @@
       updateSpan("#badgeAdm", `(${cloudState.admissions.filter(a => a.status === 'Pending').length})`);
       updateSpan("#badgeReg", `(${cloudState.registrations.filter(r => r.status === 'Pending').length})`);
       updateSpan("#badgeStudents", `(${cloudState.students.length})`);
+      updateSpan("#activeRegisteredCounter", Math.max(1, cloudState.students.length));
 
       if (router.currentRoute === 'admin-dashboard') {
         const activeTab = router.currentRouteParamTab || 'bulk-doc';
@@ -1316,7 +1271,7 @@
                 </div>
               </div>
 
-              <!-- Refined High-Visibility Navigation Cards -->
+              <!-- High-Visibility Navigation Cards -->
               <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 pt-1">
                 <button onclick="router.navigate('admin-dashboard', { tab: 'bulk-doc' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'bulk-doc' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
                   <i class="fa-solid fa-file-lines text-base"></i>
@@ -1338,17 +1293,17 @@
                   <span class="text-[11px] font-bold text-center">Broadcast Notice</span>
                 </button>
 
-                <button onclick="router.navigate('admin-dashboard', { tab: 'books-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'books-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                <button id="adminBtnBooks" onclick="router.navigate('admin-dashboard', { tab: 'books-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'books-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
                   <i class="fa-solid fa-book text-base"></i>
                   <span class="text-[11px] font-bold text-center">Textbooks <strong id="badgeBooks">(${books.length})</strong></span>
                 </button>
 
-                <button onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                <button id="adminBtnNotes" onclick="router.navigate('admin-dashboard', { tab: 'notes-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'notes-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
                   <i class="fa-solid fa-file-pdf text-base"></i>
                   <span class="text-[11px] font-bold text-center">PDF Notes <strong id="badgeNotes">(${notes.length})</strong></span>
                 </button>
 
-                <button onclick="router.navigate('admin-dashboard', { tab: 'videos-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'videos-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                <button id="adminBtnVideos" onclick="router.navigate('admin-dashboard', { tab: 'videos-admin' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'videos-admin' ? 'bg-amber-500 text-indigo-950 font-black border-amber-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
                   <i class="fa-solid fa-video text-base"></i>
                   <span class="text-[11px] font-bold text-center">Videos <strong id="badgeVideos">(${videos.length})</strong></span>
                 </button>
@@ -1358,22 +1313,22 @@
                   <span class="text-[11px] font-bold text-center">Remove / Edit</span>
                 </button>
 
-                <button onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'results' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                <button id="adminBtnResults" onclick="router.navigate('admin-dashboard', { tab: 'results' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'results' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
                   <i class="fa-solid fa-square-poll-vertical text-base"></i>
                   <span class="text-[11px] font-bold text-center">Results <strong id="badgeResults">(${results.length})</strong></span>
                 </button>
 
-                <button onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'admissions' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                <button id="adminBtnAdm" onclick="router.navigate('admin-dashboard', { tab: 'admissions' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'admissions' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
                   <i class="fa-solid fa-user-check text-base"></i>
                   <span class="text-[11px] font-bold text-center">Admissions <strong id="badgeAdm">(${admissions.filter(a => a.status === 'Pending').length})</strong></span>
                 </button>
 
-                <button onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'registrations' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                <button id="adminBtnReg" onclick="router.navigate('admin-dashboard', { tab: 'registrations' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'registrations' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
                   <i class="fa-solid fa-id-card text-base"></i>
                   <span class="text-[11px] font-bold text-center">Free Passes <strong id="badgeReg">(${registrations.filter(r => r.status === 'Pending').length})</strong></span>
                 </button>
 
-                <button onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'students' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
+                <button id="adminBtnStudents" onclick="router.navigate('admin-dashboard', { tab: 'students' })" class="p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition ${activeTab === 'students' ? 'bg-indigo-600 text-white font-black border-indigo-400 shadow-md' : 'bg-slate-800/80 hover:bg-slate-800 text-slate-200 border-slate-700'}">
                   <i class="fa-solid fa-users text-base"></i>
                   <span class="text-[11px] font-bold text-center">Students <strong id="badgeStudents">(${students.length})</strong></span>
                 </button>
@@ -1839,6 +1794,29 @@
         `
       }
     };
+
+    function handleNoticePublish(e) {
+      e.preventDefault();
+      const title = document.getElementById('noticeTitleInput').value.trim();
+      const msg = document.getElementById('noticeMsgInput').value.trim();
+
+      firestore.collection("notices").add({
+        title,
+        message: msg,
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        toast("Notice Broadcasted!", "Live alert sent to all student dashboards.", "success");
+        document.getElementById('noticeTitleInput').value = '';
+        document.getElementById('noticeMsgInput').value = '';
+      });
+    }
+
+    function deleteNotice(docId) {
+      firestore.collection("notices").doc(docId).delete().then(() => {
+        toast("Notice Removed", "Broadcast alert cleared.", "info");
+      });
+    }
 
     function updateRegSubjects() {
       const cls = document.getElementById('regClass').value;
